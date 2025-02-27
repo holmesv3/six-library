@@ -2,7 +2,7 @@
  * This file is part of the CSM SIX Plugin
  * =========================================================================
  *
- * (C) Copyright 2004 - 2014, MDA Information Systems LLC
+ * (C) Copyright 2004 - 2025, Arka Group, L.P.
  *
  * The CSM SIX Plugin is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,17 +23,18 @@
 #ifndef __SIX_CSM_SIX_SENSOR_MODEL_H__
 #define __SIX_CSM_SIX_SENSOR_MODEL_H__
 
-#include <memory>
-
-#include "RasterGM.h"
-#include "CorrelationModel.h"
-#include "NitfIsd.h"
-
-#include <scene/SceneGeometry.h>
-#include <scene/ProjectionModel.h>
 #include <scene/ECEFToLLATransform.h>
+#include <scene/ProjectionModel.h>
+#include <scene/SceneGeometry.h>
 #include <six/Enums.h>
 #include <six/Types.h>
+#include <six/csm/SIXSensorModelState.h>
+
+#include <memory>
+
+#include "CorrelationModel.h"
+#include "NitfIsd.h"
+#include "RasterGM.h"
 
 namespace six
 {
@@ -65,8 +66,8 @@ public: // Model methods
 
     /**
      * Returns a string representing the state of the sensor model.  The state
-     * string is made up of the sensor model name, followed by a space, then
-     * the SICD XML as a string.
+     * string is made up of the sensor model name, followed by model-specific
+     * parameters required to reinitialize the model fully from state.
      *
      * \return State of the sensor model
      */
@@ -220,22 +221,6 @@ public: // GeometricModel methods
     virtual std::vector<double>
     computeGroundPartials(const csm::EcefCoord& groundPt) const;
 
-    /**
-     * This method returns the 2x2 line and sample covariance (in pixels
-     * squared) at the given imagePt for any model error not accounted for
-     * by the model parameters.
-     *
-     * \param imagePt Currently ignored
-     *
-     * \return A vector of four elements:
-     * [0] = line variance
-     * [1] = line/sample covariance
-     * [2] = sample/line covariance
-     * [3] = sample variance
-     */
-    virtual std::vector<double>
-    getUnmodeledError(const csm::ImageCoord& imagePt) const;
-    
     /**
      * This method returns the partial derivatives of line and sample
      * in pixels per the applicable model parameter units), respectively,
@@ -677,15 +662,15 @@ protected:
     static
     DataType getDataType(const csm::Des& des);
 
+    virtual std::string getXmlString() const = 0;
+    void reinitialize(SIXSensorModelState& state);
+
 protected:
-    virtual std::vector<double> getSIXUnmodeledError() const = 0;
-    // utility routine to avoid duplicating code.
-    static std::vector<double> getSIXUnmodeledError_(const six::ErrorStatistics*);
+    virtual const six::ErrorStatistics* getErrorStatisticsBlock() const = 0;
 
     const scene::ECEFToLLATransform mECEFToLLA;
     const csm::NoCorrelationModel mCorrelationModel;
     std::vector<std::string> mSchemaDirs;
-    std::string mSensorModelState;
     std::unique_ptr<const scene::SceneGeometry> mGeometry;
     std::unique_ptr<scene::ProjectionModel> mProjection;
     csm::param::Type mAdjustableTypes[scene::AdjustableParams::NUM_PARAMS];

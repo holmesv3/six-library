@@ -2,7 +2,7 @@
  * This file is part of six-c++
  * =========================================================================
  *
- * (C) Copyright 2004 - 2014, MDA Information Systems LLC
+ * (C) Copyright 2004 - 2025, Arka Group, L.P.
  *
  * six-c++ is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -841,11 +841,12 @@ void six::getErrors(const ErrorStatistics* errorStats,
             auto&& Ycol = unmodeled.Ycol;
             auto&& XrowYcol = unmodeled.XrowYcol;
 
-            // From Bill: Here is the mapping from the UnmodeledError to the 2x2 covariance matrix:
-            //    [0][0] = Xrow; [1][1] = Ycol; 
+            // From Bill: Here is the mapping from the UnmodeledError to the 2x2
+            // covariance matrix:
+            //    [0][0] = Xrow*Xrow; [1][1] = Ycol*Ycol;
             //    [1][0] = [0][1] = XrowYcol * Xrow * Ycol
-            unmodeledErrorCovar(0, 0) = Xrow;
-            unmodeledErrorCovar(1, 1) = Ycol;
+            unmodeledErrorCovar(0, 0) = math::square(Xrow);
+            unmodeledErrorCovar(1, 1) = math::square(Ycol);
             unmodeledErrorCovar(0, 1) = unmodeledErrorCovar(1, 0) = XrowYcol * Xrow * Ycol;
         }
     }
@@ -871,7 +872,7 @@ std::filesystem::path six::testing::findRootDir(const std::filesystem::path& dir
     {
         return externals;
     }
-    
+
     const auto parent = dir.parent_path();
     return findRootDir(parent);
 }
@@ -912,7 +913,7 @@ std::filesystem::path six::testing::getNitfPath(const std::filesystem::path& fil
 }
 
 std::vector<std::filesystem::path> six::testing::getSchemaPaths()
-{ 
+{
     static const auto modulePath = std::filesystem::path("six") / "modules" / "c++" / "six.sicd" / "conf" / "schema";
     static const auto filename = getModuleFile(modulePath, "SICD_schema_V1.3.0.xsd");
     static const auto schemaPath = filename.parent_path();
@@ -938,8 +939,10 @@ std::unique_ptr<six::Data> six::DataParser::DataParser::fromXML(::io::InputStrea
     return six_parseData<std::unique_ptr<Data>>(xmlReg, xmlParser, dataType, mpSchemaPaths, mLog);
 }
 
-std::unique_ptr<six::Data> six::DataParser::DataParser::fromXML(const std::filesystem::path& pathname, 
-    const XMLControlRegistry& xmlReg, DataType dataType) const
+std::unique_ptr<six::Data> six::DataParser::DataParser::fromXML(
+        const std::filesystem::path& pathname,
+        const XMLControlRegistry& xmlReg,
+        DataType dataType) const
 {
     io::FileInputStream inStream(pathname.string());
     return fromXML(inStream, xmlReg, dataType);

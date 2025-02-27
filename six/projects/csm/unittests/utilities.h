@@ -20,11 +20,12 @@
  *
  */
 
+#include <NitfIsd.h>
+#include <six/Utilities.h>
+#include <six/sicd/Utilities.h>
+
 #include <std/filesystem>
 #include <std/string>
-
-#include <six/Utilities.h>
-#include <NitfIsd.h>
 
 /**
  * Write FileSecurity as string so CSM can use it
@@ -87,9 +88,11 @@ inline std::string toString(const nitf::DESubheader& subheader)
 inline std::string findDllPathname(const std::string& installPathname)
 {
     namespace fs = std::filesystem;
-    const auto csmPluginPathname = fs::path(installPathname) / "share" / "CSM" / "plugins";
+    const auto csmPluginPathname =
+            fs::path(installPathname) / "share" / "CSM" / "plugins";
 
-    const std::vector<std::string> csmPluginContents = sys::Path::list(csmPluginPathname.string());
+    const std::vector<std::string> csmPluginContents =
+            sys::Path::list(csmPluginPathname.string());
 
     // Get rid of contents like '.' and '..'
     std::vector<std::string> csmPlugins;
@@ -104,8 +107,8 @@ inline std::string findDllPathname(const std::string& installPathname)
 
     if (csmPlugins.size() != 1)
     {
-        throw except::Exception(Ctxt("Expected exactly one plugin in "
-                + csmPluginPathname.string()));
+        throw except::Exception(Ctxt("Expected exactly one plugin in " +
+                                     csmPluginPathname.string()));
     }
 
     return csmPlugins[0];
@@ -120,8 +123,10 @@ inline std::string findDllPathname(const std::string& installPathname)
  *
  * \return A Nitf21ISD object
  */
-inline std::unique_ptr<csm::Nitf21Isd> constructIsd(const std::string& pathname,
-        const six::NITFReadControl& loadedReadControl, const six::Data* data,
+inline std::unique_ptr<csm::Nitf21Isd> constructIsd(
+        const std::string& pathname,
+        const six::NITFReadControl& loadedReadControl,
+        const six::Data* data,
         const six::XMLControlRegistry& registry)
 {
     std::unique_ptr<csm::Nitf21Isd> nitfIsd(new csm::Nitf21Isd(pathname));
@@ -129,9 +134,11 @@ inline std::unique_ptr<csm::Nitf21Isd> constructIsd(const std::string& pathname,
 
     // NITRO parsed the subheader into a nice structure - need to grab all
     // the fields and jam them back into a string like CSM wants
-    nitf::DESegment segment = static_cast<nitf::DESegment>(
-           loadedReadControl.getRecord().getDataExtensions().
-           getFirst().getData());
+    nitf::DESegment segment =
+            static_cast<nitf::DESegment>(loadedReadControl.getRecord()
+                                                 .getDataExtensions()
+                                                 .getFirst()
+                                                 .getData());
 
     des.setSubHeader(toString(segment.getSubheader()));
 
@@ -147,7 +154,8 @@ inline std::unique_ptr<csm::Nitf21Isd> constructIsd(const std::string& pathname,
  * Return the absolute value of the difference between each element of a
  * Vector3
  */
-inline six::Vector3 absoluteDifference(const six::Vector3& lhs, const six::Vector3& rhs)
+inline six::Vector3 absoluteDifference(const six::Vector3& lhs,
+                                       const six::Vector3& rhs)
 {
     six::Vector3 difference = lhs - rhs;
     for (size_t ii = 0; ii < 3; ++ii)
@@ -163,11 +171,10 @@ inline six::Vector3 absoluteDifference(const six::Vector3& lhs, const six::Vecto
  * RowColDouble
  */
 inline six::RowColDouble absoluteDifference(const six::RowColDouble& lhs,
-        const six::RowColDouble& rhs)
+                                            const six::RowColDouble& rhs)
 {
     six::RowColDouble difference = lhs - rhs;
     difference.row = std::abs(difference.row);
     difference.col = std::abs(difference.col);
     return difference;
 }
-

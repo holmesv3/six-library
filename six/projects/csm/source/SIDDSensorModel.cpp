@@ -2,7 +2,7 @@
 * This file is part of the CSM SICD Plugin
 * =========================================================================
 *
-* (C) Copyright 2004 - 2014, MDA Information Systems LLC
+* (C) Copyright 2004 - 2025, Arka Group, L.P.
 *
 * The CSM SICD Plugin is free software; you can redistribute it and/or modify
 * it under the terms of the GNU Lesser General Public License as published by
@@ -39,7 +39,9 @@ namespace six
 {
 namespace CSM
 {
-const csm::Version SIDDSensorModel::VERSION(1, 1, 5);
+// The VERSION field should be kept in sync with that in SICDSensorModel.  The
+// SICD version is used to determine the filename for cmake builds.
+const csm::Version SIDDSensorModel::VERSION(1, 2, 0);
 const char SIDDSensorModel::NAME[] = "SIDD_SENSOR_MODEL";
 
 SIDDSensorModel::SIDDSensorModel(const csm::Isd& isd,
@@ -140,9 +142,10 @@ void SIDDSensorModel::initializeFromFile(const std::string& pathname,
         mData.reset(reinterpret_cast<six::sidd::DerivedData*>(data->clone()));
 
         // get xml as string for sensor model state
-        const auto xmlStr = six::toXMLString_(mData.get(), &xmlRegistry);
-        mSensorModelState = NAME + std::string(" ") + xmlStr;
-        reinitialize();
+        mXmlString = six::toXMLString_(mData.get(), &xmlRegistry);
+
+        SIXSensorModelState empty;
+        reinitialize(empty);
     }
     catch (const except::Exception& ex)
     {
@@ -212,7 +215,7 @@ void SIDDSensorModel::initializeFromISD(const csm::Nitf21Isd& isd,
         // get xml as string for sensor model state
         io::StringStream stringStream;
         siddXML->getRootElement()->print(stringStream);
-        mSensorModelState = NAME + std::string(" ") + stringStream.stream().str();
+        mXmlString = stringStream.stream().str();
 
         six::XMLControlRegistry xmlRegistry;
         xmlRegistry.addCreator<six::sidd::DerivedXMLControl>();
@@ -223,7 +226,9 @@ void SIDDSensorModel::initializeFromISD(const csm::Nitf21Isd& isd,
 
         mData.reset(reinterpret_cast<six::sidd::DerivedData*>(control->fromXML(
                 siddXML, mSchemaDirs)));
-        reinitialize();
+
+        SIXSensorModelState empty;
+        reinitialize(empty);
     }
     catch (const except::Exception& ex)
     {
@@ -399,12 +404,14 @@ void SIDDSensorModel::replaceModelStateImpl(const std::string& sensorModelState)
                            "SIDDSensorModel::replaceModelStateImpl");
     }
 
-    const std::string sensorModelXML = sensorModelState.substr(idx + 1);
+    const std::string stateString = sensorModelState.substr(idx + 1);
+
+    SIXSensorModelState modelState(stateString, mXmlString);
 
     try
     {
         io::StringStream stream;
-        stream.write(sensorModelXML);
+        stream.write(mXmlString);
 
         six::MinidomParser domParser;
         domParser.parse(stream);
@@ -417,11 +424,10 @@ void SIDDSensorModel::replaceModelStateImpl(const std::string& sensorModelState)
                 six::DataType::DERIVED, &logger));
 
         // get xml as string for sensor model state
-        mSensorModelState = sensorModelState;
 
         mData.reset(reinterpret_cast<six::sidd::DerivedData*>(control->fromXML(
                 &domParser.getDocument(), mSchemaDirs)));
-        reinitialize();
+        reinitialize(modelState);
     }
     catch (const except::Exception& ex)
     {
@@ -446,13 +452,12 @@ const six::sidd::MeasurableProjection* SIDDSensorModel::getProjection() const
     return projection;
 }
 
-std::vector<double>
-SIDDSensorModel::getSIXUnmodeledError() const
+const six::ErrorStatistics* SIDDSensorModel::getErrorStatisticsBlock() const
 {
-    return SIXSensorModel::getSIXUnmodeledError_(mData->errorStatistics.get());
+    return mData->errorStatistics.get();
 }
 
-void SIDDSensorModel::reinitialize()
+void SIDDSensorModel::reinitialize(SIXSensorModelState& modelState)
 {
     // This goofiness is for Sun Studio 11 which can't figure out an auto_ptr
     // assignment here
@@ -460,13 +465,13 @@ void SIDDSensorModel::reinitialize()
             six::sidd::Utilities::getSceneGeometry(mData.get()).release());
 
     mProjection = six::sidd::Utilities::getProjectionModel(mData.get());
-    std::fill_n(mAdjustableTypes,
-                static_cast<size_t>(scene::AdjustableParams::NUM_PARAMS),
-                csm::param::REAL);
 
-    // NOTE: See member variable definition in header for why we're doing this
-    mSensorCovariance = mProjection->getErrorCovariance(
-            mGeometry->getReferencePosition());
+    if (!modelState.getDatasetName().empty())
+    {
+        mData->setName(modelState.getDatasetName());
+    }
+
+    SIXSensorModel::reinitialize(modelState);
 }
 
 types::RowCol<double> SIDDSensorModel::getSampleSpacing() const

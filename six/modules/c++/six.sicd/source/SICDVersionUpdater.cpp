@@ -2,7 +2,7 @@
  * This file is part of six.sicd-c++
  * =========================================================================
  *
- * (C) Copyright 2004 - 2020, MDA Information Systems LLC
+ * (C) Copyright 2004 - 2025, Arka Group, L.P.
  *
  * six.sicd-c++ is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -179,7 +179,7 @@ void SICDVersionUpdater::updateSingleIncrement()
 
         if (mData.scpcoa)
         {
-            const auto *sceneGeometry = Utilities::getSceneGeometry(&mData);
+            std::unique_ptr<scene::SceneGeometry> sceneGeometry(Utilities::getSceneGeometry(&mData));
             mData.scpcoa->azimAngle = sceneGeometry->getAzimuthAngle();
             mData.scpcoa->layoverAngle = sceneGeometry->getETPLayoverAngle();
         }

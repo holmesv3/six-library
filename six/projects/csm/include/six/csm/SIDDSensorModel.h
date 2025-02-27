@@ -2,7 +2,7 @@
  * This file is part of the CSM SICD Plugin
  * =========================================================================
  *
- * (C) Copyright 2004 - 2014, MDA Information Systems LLC
+ * (C) Copyright 2004 - 2025, Arka Group, L.P.
  *
  * The CSM SICD Plugin is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -161,12 +161,17 @@ public: // RasterGM methods
     virtual csm::ImageVector getImageSize() const;
 
     /**
-     * Returns ErrorStatistics::Unmodeled values, if any.
+     * Returns ErrorStatistics, if any.
      */
-    std::vector<double> getSIXUnmodeledError() const override;
+    const six::ErrorStatistics* getErrorStatisticsBlock() const override;
 
 protected:
     virtual six::DateTime getReferenceDateAndTimeImpl() const;
+
+    virtual std::string getXmlString() const
+    {
+        return mXmlString;
+    }
 
 private:
     virtual types::RowCol<double> fromPixel(const csm::ImageCoord& pos) const;
@@ -181,12 +186,14 @@ private:
 
     void initializeFromISD(const csm::Nitf21Isd& isd, size_t imageIndex);
 
-    void reinitialize();
+    void reinitialize(SIXSensorModelState& modelState);
 
     virtual types::RowCol<double> getSampleSpacing() const;
 
 private:
     std::unique_ptr<six::sidd::DerivedData> mData;
+
+    std::string mXmlString;
 };
 }
 }

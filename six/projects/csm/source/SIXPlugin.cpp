@@ -2,7 +2,7 @@
 * This file is part of the CSM SICD Plugin
 * =========================================================================
 *
-* (C) Copyright 2004 - 2014, MDA Information Systems LLC
+* (C) Copyright 2004 - 2025, Arka Group, L.P.
 *
 * The CSM SICD Plugin is free software; you can redistribute it and/or modify
 * it under the terms of the GNU Lesser General Public License as published by
@@ -38,8 +38,8 @@ namespace six
 namespace CSM
 {
 const char SIXPlugin::PLUGIN_NAME[] = "SIX";
-const char SIXPlugin::MANUFACTURER[] = "Maxar";
-const char SIXPlugin::RELEASE_DATE[] = "20190916";
+const char SIXPlugin::MANUFACTURER[] = "Arka";
+const char SIXPlugin::RELEASE_DATE[] = "20250301";
 const size_t SIXPlugin::SICD_MODEL_INDEX;
 const size_t SIXPlugin::SIDD_MODEL_INDEX;
 

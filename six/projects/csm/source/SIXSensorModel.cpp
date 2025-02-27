@@ -2,7 +2,7 @@
  * This file is part of the CSM SIX Plugin
  * =========================================================================
  *
- * (C) Copyright 2004 - 2014, MDA Information Systems LLC
+ * (C) Copyright 2004 - 2025, Arka Group, L.P.
  *
  * The CSM SIX Plugin is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -131,6 +131,20 @@ math::linear::Matrix2D<T> matrixSqrt(const math::linear::Matrix2D<T>& m)
     const math::linear::Matrix2D<T> eigenVec = eig.getV();
     return (eigenVec * diag * eigenVec.transpose());
 }
+
+template <long unsigned int N>
+void matrixCondition(const math::linear::MatrixMxN<N, N>& m,
+                     double& cond,
+                     bool& posDefinite)
+{
+    const math::linear::Eigenvalue<double> Veig(m);
+    const math::linear::Vector<double> eigs = Veig.getRealEigenvalues();
+    std::vector<double> eigsVec(eigs.get(), eigs.get() + eigs.size());
+    std::sort(eigsVec.begin(), eigsVec.end());
+
+    cond = std::abs(eigsVec[eigsVec.size() - 1] / eigsVec[0]);
+    posDefinite = eigsVec[eigsVec.size() - 1] > 0;
+}
 }
 
 namespace six
@@ -145,7 +159,31 @@ SIXSensorModel::SIXSensorModel()
 
 std::string SIXSensorModel::getModelState() const
 {
-    return mSensorModelState;
+    SIXSensorModelState modelState;
+
+    for (size_t index = 0; index < scene::AdjustableParams::NUM_PARAMS; index++)
+    {
+        modelState.setAdjustableType(index, mAdjustableTypes[index]);
+        modelState.setAdjustableValue(
+                index, mProjection->getAdjustableParams().mParams[index]);
+    }
+
+    modelState.setDatasetName(getImageIdentifier());
+
+    modelState.setOverrideSensorCovariance(true);
+    for (size_t idx1 = 0; idx1 < getNumSensorModelParameters(); idx1++)
+    {
+        for (size_t idx2 = 0; idx2 < getNumSensorModelParameters(); idx2++)
+        {
+            modelState.setSensorCovariance(idx1,
+                                           idx2,
+                                           mSensorCovariance(idx1, idx2));
+        }
+    }
+
+    // get xml as string for sensor model state
+    return getModelName() + modelState.toString() + std::string(" ") +
+            getXmlString();
 }
 
 void SIXSensorModel::replaceModelState(const std::string& argState)
@@ -381,39 +419,6 @@ SIXSensorModel::computeGroundPartials(const csm::EcefCoord& groundPt) const
     }
 }
 
-std::vector<double> SIXSensorModel::getUnmodeledError(
-        const csm::ImageCoord& imagePt ) const
-{
-    try
-    {
-        auto sixUnmodeledError = getSIXUnmodeledError();
-        if (!sixUnmodeledError.empty())
-        {
-            return sixUnmodeledError;
-        }
-
-        types::RowCol<double> pixelPt = fromPixel(imagePt);
-        const math::linear::MatrixMxN<2, 2, double> unmodeledError =
-                mProjection->getUnmodeledErrorCovariance( pixelPt );
-
-        // Get in the right units
-        const types::RowCol<double> ss = getSampleSpacing();
-
-        std::vector<double> unmodeledErrorVec(4);
-        unmodeledErrorVec[0] = unmodeledError[0][0] / (ss.row * ss.row);
-        unmodeledErrorVec[1] = unmodeledError[0][1] / (ss.row * ss.col);
-        unmodeledErrorVec[2] = unmodeledError[1][0] / (ss.row * ss.col);
-        unmodeledErrorVec[3] = unmodeledError[1][1] / (ss.col * ss.col);
-        return unmodeledErrorVec;
-    }
-    catch (const except::Exception& ex)
-    {
-        throw csm::Error(csm::Error::UNKNOWN_ERROR,
-                           ex.getMessage(),
-                           "SIXSensorModel::getUnmodeledError");
-    }
-}
-
 csm::RasterGM::SensorPartials SIXSensorModel::computeSensorPartials(
         int index,
         const csm::EcefCoord& groundPt,
@@ -618,11 +623,79 @@ const csm::CorrelationModel& SIXSensorModel::getCorrelationModel() const
 }
 
 std::vector<double> SIXSensorModel::getUnmodeledCrossCovariance(
-    const csm::ImageCoord&,
-    const csm::ImageCoord&) const
+        const csm::ImageCoord& pt1, const csm::ImageCoord& pt2) const
 {
-    auto sixUnmodeledError = getSIXUnmodeledError();
-    return !sixUnmodeledError.empty() ? sixUnmodeledError : std::vector<double>(4, 0.0);
+    // returns line and sample covariance in pixels squared
+    try
+    {
+        types::RowCol<double> pixelPt1 = fromPixel(pt1);
+        const math::linear::MatrixMxN<2, 2, double> unmodeledError1 =
+                mProjection->getUnmodeledErrorCovariance(pixelPt1);
+
+        types::RowCol<double> pixelPt2 = fromPixel(pt2);
+        const math::linear::MatrixMxN<2, 2, double> unmodeledError2 =
+                mProjection->getUnmodeledErrorCovariance(pixelPt2);
+
+        // Get in the right units
+        const types::RowCol<double> ss = getSampleSpacing();
+
+        std::vector<double> unmodeledErrorVec(4);
+        unmodeledErrorVec[0] =
+                ::sqrt(unmodeledError1[0][0] * unmodeledError2[0][0]) /
+                (ss.row * ss.row);
+        unmodeledErrorVec[1] =
+                ::sqrt(unmodeledError1[0][1] * unmodeledError2[0][1]) /
+                (ss.row * ss.col);
+        unmodeledErrorVec[2] =
+                ::sqrt(unmodeledError1[1][0] * unmodeledError2[1][0]) /
+                (ss.row * ss.col);
+        unmodeledErrorVec[3] =
+                ::sqrt(unmodeledError1[1][1] * unmodeledError2[1][1]) /
+                (ss.col * ss.col);
+
+        const six::ErrorStatistics* errorStatistics = getErrorStatisticsBlock();
+        if (errorStatistics)
+        {
+            types::RowCol<double> diff{std::abs(pixelPt1.row - pixelPt2.row),
+                                       std::abs(pixelPt1.col - pixelPt2.col)};
+            if (has_value(errorStatistics->unmodeled))
+            {
+                auto& unmodeled = value(errorStatistics->unmodeled);
+                if (has_value(unmodeled.unmodeledDecorr))
+                {
+                    double zeroRow =
+                            value(value(unmodeled.unmodeledDecorr).Xrow)
+                                    .corrCoefZero;
+                    double rateRow =
+                            value(value(unmodeled.unmodeledDecorr).Xrow)
+                                    .decorrRate;
+                    double coeffRow = std::min(
+                            1.0, std::max(0.0, zeroRow - rateRow * diff.row));
+                    double zeroCol =
+                            value(value(unmodeled.unmodeledDecorr).Ycol)
+                                    .corrCoefZero;
+                    double rateCol =
+                            value(value(unmodeled.unmodeledDecorr).Ycol)
+                                    .decorrRate;
+                    double coeffCol = std::min(
+                            1.0, std::max(0.0, zeroCol - rateCol * diff.col));
+
+                    unmodeledErrorVec[0] *= coeffRow;
+                    unmodeledErrorVec[1] *= ::sqrt(coeffRow * coeffCol);
+                    unmodeledErrorVec[2] *= ::sqrt(coeffRow * coeffCol);
+                    unmodeledErrorVec[3] *= coeffCol;
+                }
+            }
+        }
+
+        return unmodeledErrorVec;
+    }
+    catch (const except::Exception& ex)
+    {
+        throw csm::Error(csm::Error::UNKNOWN_ERROR,
+                         ex.getMessage(),
+                         "SIXSensorModel::getUnmodeledCrossCovariance");
+    }
 }
 
 void SIXSensorModel::setReferencePoint(const csm::EcefCoord& )
@@ -994,15 +1067,31 @@ void SIXSensorModel::setSchemaDir(const std::string& dataDir)
     else
     {
         const auto schemaDir = fs::path(dataDir) / "schema" / "six";
-        if (!fs::exists(schemaDir))
+        if (fs::exists(schemaDir))
         {
-            throw csm::Error(csm::Error::SENSOR_MODEL_NOT_CONSTRUCTIBLE,
-                    "Schema directory '" + schemaDir.string() + "' does not exist",
-                    "SIXSensorModel::setSchemaDir");
+            mSchemaDirs.resize(1);
+            mSchemaDirs[0] = schemaDir.string();
+            return;
         }
 
-        mSchemaDirs.resize(1);
-        mSchemaDirs[0] = schemaDir.string();
+        // We will also allow pointing directly to a schema directory for a
+        // particular module (SICD or SIDD) to allow the CSM plugin unit tests
+        // to function properly.
+        const auto schemaFile1 =
+                fs::path(dataDir) / "SICD_schema_V0.5.0_2011_01_12.xsd";
+        const auto schemaFile2 =
+                fs::path(dataDir) / "SIDD_schema_V2.0.0_2020_06_02.xsd";
+        if (fs::exists(schemaFile1) || fs::exists(schemaFile2))
+        {
+            mSchemaDirs.resize(1);
+            mSchemaDirs[0] = dataDir;
+            return;
+        }
+
+        throw csm::Error(csm::Error::SENSOR_MODEL_NOT_CONSTRUCTIBLE,
+                         "Schema directory '" + schemaDir.string() +
+                                 "' does not exist",
+                         "SIXSensorModel::setSchemaDir");
     }
 }
 
@@ -1172,30 +1261,57 @@ DataType SIXSensorModel::getDataType(const csm::Des& des)
     return NITFReadControl::getDataType(desid, desshl, desshsi, desid);
 }
 
-std::vector<double> SIXSensorModel::getSIXUnmodeledError_(const six::ErrorStatistics* pErrorStatistics)
+void SIXSensorModel::reinitialize(SIXSensorModelState& state)
 {
-    if (pErrorStatistics != nullptr)
+    for (size_t idx = 0; idx < getNumSensorModelParameters(); idx++)
     {
-        if (has_value(pErrorStatistics->unmodeled))
+        mProjection->getAdjustableParams().mParams[idx] =
+                state.getAdjustableValue(idx);
+        mAdjustableTypes[idx] = state.getAdjustableType(idx);
+    }
+
+    if (state.getOverrideSensorCovariance())
+    {
+        for (size_t idx1 = 0; idx1 < getNumSensorModelParameters(); idx1++)
         {
-            const auto& unmodeled = value(pErrorStatistics->unmodeled);
-
-            auto&& Xrow = unmodeled.Xrow;
-            auto&& Ycol = unmodeled.Ycol;
-            auto&& XrowYcol = unmodeled.XrowYcol;
-
-            // From Bill: Here is the mapping from the UnmodeledError to the 2x2 covariance matrix:
-            //    [0][0] = Xrow; [1][1] = Ycol; 
-            //    [1][0] = [0][1] = XrowYcol * Xrow * Ycol
-            const auto line_variance = Xrow;
-            const auto sample_variance = Ycol;
-            const auto linesample_covariance = XrowYcol * line_variance * sample_variance;
-            const auto sampleline_covariance = linesample_covariance;
-            return { line_variance, linesample_covariance, sampleline_covariance, sample_variance };
+            for (size_t idx2 = 0; idx2 < getNumSensorModelParameters(); idx2++)
+            {
+                mSensorCovariance(idx1, idx2) =
+                        state.getSensorCovariance(idx1, idx2);
+            }
         }
     }
-    return {};
-}
+    else
+    {
+        // NOTE: See member variable definition in header for why we're doing
+        // this
+        mSensorCovariance = mProjection->getErrorCovariance(
+                mGeometry->getReferencePosition());
 
+        // If no covariance matrix is available due to lack of error statistics,
+        // or if any diagonal values are 0, use nominal values.  This will allow
+        // the adjustable parameters to still be set and used.
+        if (mSensorCovariance[0][0] <= 0.0)
+            mSensorCovariance[0][0] = 10.0;
+
+        if (mSensorCovariance[1][1] <= 0.0)
+            mSensorCovariance[1][1] = 10.0;
+
+        if (mSensorCovariance[2][2] <= 0.0)
+            mSensorCovariance[2][2] = 10.0;
+
+        if (mSensorCovariance[3][3] <= 0.0)
+            mSensorCovariance[3][3] = 0.1;
+
+        if (mSensorCovariance[4][4] <= 0.0)
+            mSensorCovariance[4][4] = 0.1;
+
+        if (mSensorCovariance[5][5] <= 0.0)
+            mSensorCovariance[5][5] = 0.1;
+
+        if (mSensorCovariance[6][6] <= 0.0)
+            mSensorCovariance[6][6] = 0.1;
+    }
+}
 }
 }

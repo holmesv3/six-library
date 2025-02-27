@@ -2,7 +2,7 @@
 * This file is part of the CSM SICD Plugin
 * =========================================================================
 *
-* (C) Copyright 2004 - 2014, MDA Information Systems LLC
+* (C) Copyright 2004 - 2025, Arka Group, L.P.
 *
 * The CSM SICD Plugin is free software; you can redistribute it and/or modify
 * it under the terms of the GNU Lesser General Public License as published by
@@ -40,7 +40,7 @@ namespace six
 {
 namespace CSM
 {
-const csm::Version SICDSensorModel::VERSION(1, 1, 5);
+const csm::Version SICDSensorModel::VERSION(1, 2, 0);
 const char SICDSensorModel::NAME[] = "SICD_SENSOR_MODEL";
 
 SICDSensorModel::SICDSensorModel(const csm::Isd& isd,
@@ -108,9 +108,10 @@ void SICDSensorModel::initializeFromFile(const std::string& pathname)
                 container->getData(0)->clone()));
 
         // get xml as string for sensor model state
-        const auto xmlStr = six::toXMLString_(mData.get(), &xmlRegistry);
-        mSensorModelState = NAME + std::string(" ") + xmlStr;
-        reinitialize();
+        mXmlString = six::toXMLString_(mData.get(), &xmlRegistry);
+
+        SIXSensorModelState empty;
+        reinitialize(empty);
     }
     catch (const except::Exception& ex)
     {
@@ -187,7 +188,7 @@ void SICDSensorModel::initializeFromISD(const csm::Nitf21Isd& isd)
         // get xml as string for sensor model state
         io::StringStream stringStream;
         sicdXML->getRootElement()->print(stringStream);
-        mSensorModelState = NAME + std::string(" ") + stringStream.stream().str();
+        mXmlString = stringStream.stream().str();
 
         six::XMLControlRegistry xmlRegistry;
         xmlRegistry.addCreator<six::sicd::ComplexXMLControl>();
@@ -198,7 +199,9 @@ void SICDSensorModel::initializeFromISD(const csm::Nitf21Isd& isd)
 
         mData.reset(reinterpret_cast<six::sicd::ComplexData*>(control->fromXML(
                 sicdXML, mSchemaDirs)));
-        reinitialize();
+
+        SIXSensorModelState empty;
+        reinitialize(empty);
     }
     catch (const except::Exception& ex)
     {
@@ -397,10 +400,9 @@ csm::ImageCoord SICDSensorModel::getImageStart() const
                            mData->imageData->firstCol);
 }
 
-std::vector<double>
-SICDSensorModel::getSIXUnmodeledError() const
+const six::ErrorStatistics* SICDSensorModel::getErrorStatisticsBlock() const
 {
-    return SIXSensorModel::getSIXUnmodeledError_(mData->errorStatistics.get());
+    return mData->errorStatistics.get();
 }
 
 void SICDSensorModel::replaceModelStateImpl(const std::string& sensorModelState)
@@ -421,39 +423,25 @@ void SICDSensorModel::replaceModelStateImpl(const std::string& sensorModelState)
                            "SICDSensorModel::replaceModelStateImpl");
     }
 
-    const std::string sensorModelXML = sensorModelState.substr(idx + 1);
+    std::string stateString = sensorModelState.substr(idx + 1);
 
-    try
-    {
-        io::StringStream stream;
-        stream.write(sensorModelXML);
+    SIXSensorModelState modelState(stateString, mXmlString);
 
-        six::MinidomParser domParser;
-        domParser.parse(stream);
+    io::StringStream ss;
+    ss.write(mXmlString);
 
-        six::XMLControlRegistry xmlRegistry;
-        xmlRegistry.addCreator<six::sicd::ComplexXMLControl>();
+    six::XMLControlRegistry xmlRegistry;
+    xmlRegistry.addCreator<six::sicd::ComplexXMLControl>();
 
-        logging::NullLogger logger;
-        std::unique_ptr<six::XMLControl> control(
-                xmlRegistry.newXMLControl(six::DataType::COMPLEX, &logger));
+    logging::NullLogger logger;
+    auto data = six::parseData(
+            xmlRegistry, ss, six::DataType::COMPLEX, mSchemaDirs, logger);
+    mData.reset(reinterpret_cast<six::sicd::ComplexData*>(data.release()));
 
-        // get xml as string for sensor model state
-        mSensorModelState = sensorModelState;
-
-        mData.reset(reinterpret_cast<six::sicd::ComplexData*>(control->fromXML(
-                &domParser.getDocument(), mSchemaDirs)));
-        reinitialize();
-    }
-    catch (const except::Exception& ex)
-    {
-        throw csm::Error(csm::Error::INVALID_SENSOR_MODEL_STATE,
-                           ex.getMessage(),
-                           "SICDSensorModel::replaceModelStateImpl");
-    }
+    reinitialize(modelState);
 }
 
-void SICDSensorModel::reinitialize()
+void SICDSensorModel::reinitialize(SIXSensorModelState& modelState)
 {
     mGeometry.reset(six::sicd::Utilities::getSceneGeometry(mData.get()));
 
@@ -461,13 +449,12 @@ void SICDSensorModel::reinitialize()
             mData.get(),
             mGeometry.get()));
 
-    std::fill_n(mAdjustableTypes,
-                static_cast<size_t>(scene::AdjustableParams::NUM_PARAMS),
-                csm::param::REAL);
+    if (!modelState.getDatasetName().empty())
+    {
+        mData->setName(modelState.getDatasetName());
+    }
 
-    // NOTE: See member variable definition in header for why we're doing this
-    mSensorCovariance = mProjection->getErrorCovariance(
-            mGeometry->getReferencePosition());
+    SIXSensorModel::reinitialize(modelState);
 }
 }
 }
