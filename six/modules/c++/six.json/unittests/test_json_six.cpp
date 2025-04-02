@@ -121,31 +121,22 @@ TEST_CASE(TestDualPolarizationTypeJson)
     // Not going to test every case of this...
     json serialized;
     PolT deserialized;
-    PolT polO = PolT::OTHER;
-    PolT polX_RHC = PolT::X_RHC;
-    PolT polV_V = PolT::V_V;
-    PolT polH_H = PolT::H_H;
-    PolT polUNKNOWN = PolT::UNKNOWN;
-
-    serialized = polO;
-    deserialized = serialized.template get<PolT>();
-    TEST_ASSERT(deserialized == polO)
-
-    serialized = polX_RHC;
-    deserialized = serialized.template get<PolT>();
-    TEST_ASSERT(deserialized == polX_RHC)
-
-    serialized = polV_V;
-    deserialized = serialized.template get<PolT>();
-    TEST_ASSERT(deserialized == polV_V)
-
-    serialized = polH_H;
-    deserialized = serialized.template get<PolT>();
-    TEST_ASSERT(deserialized == polH_H)
-
-    serialized = polUNKNOWN;
-    deserialized = serialized.template get<PolT>();
-    TEST_ASSERT(deserialized == polUNKNOWN)
+    std::vector<PolT> polsToTest = {
+        PolT::OTHER,
+        PolT::X_RHC,
+        PolT::V_V,
+        PolT::V_X,
+        PolT::V_Y,
+        PolT::H_H,
+        PolT::UNKNOWN
+    };
+    
+    for (const auto& pol: polsToTest)
+    {
+        serialized = pol;
+        deserialized = serialized.template get<PolT>();
+        TEST_ASSERT(deserialized == pol)
+    }
 }
 TEST_CASE(TestLatLonJson)
 {
