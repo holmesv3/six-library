@@ -25,8 +25,8 @@
 
 #include <string>
 #include <string>
-#include <std/filesystem>
-#include <std/span>
+#include <filesystem>
+#include <span>
 
 #include <io/FileInputStream.h>
 #include <logging/NullLogger.h>
@@ -35,7 +35,12 @@
 #include <six/Utilities.h>
 #include <import/six/sidd.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+#define TEST_ASSERT_ALMOST_EQ_EPS(X, Y, Z) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, Z));
 
 #if _MSC_VER
 #pragma warning(disable: 4459) //  declaration of '...' hides global declaration
@@ -68,14 +73,13 @@ static std::vector<std::filesystem::path> getSchemaPaths()
     return std::vector<std::filesystem::path> { rootSchemaDir };
 }
 
-static std::unique_ptr<six::sidd::DerivedData> test_assert_round_trip(const std::string& testName,
-    const six::sidd::DerivedData& derivedData, const std::vector<std::filesystem::path>* pSchemaPaths)
+static std::unique_ptr<six::sidd::DerivedData> test_assert_round_trip(const six::sidd::DerivedData& derivedData, const std::vector<std::filesystem::path>* pSchemaPaths)
 {
     const auto strXML = six::sidd::Utilities::toXMLString(derivedData, pSchemaPaths);
-    TEST_ASSERT_FALSE(strXML.empty());
+    CHECK_FALSE(strXML.empty());
 
     const auto xml_ = str::to_native(strXML); // for debugging
-    TEST_ASSERT_FALSE(xml_.empty());
+    CHECK_FALSE(xml_.empty());
 
     return six::sidd::Utilities::parseDataFromString(strXML, pSchemaPaths);
 }
@@ -95,36 +99,34 @@ inline static const six::Unmodeled* get_Unmodeled(const six::sidd::DerivedData& 
     return nullptr;
 }
 
-static void test_createFakeDerivedData_(const std::string& testName, bool validate,
+static void test_createFakeDerivedData_(bool validate,
     six::sidd::Version siddVersion, six::sidd300::ISMVersion ismVersion)
 {
     const auto pFakeDerivedData = six::sidd::Utilities::createFakeDerivedData(siddVersion, ismVersion);
     auto Unmodeled = get_Unmodeled(*pFakeDerivedData, siddVersion);
-    TEST_ASSERT_NULL(Unmodeled); // not part of the fake data, only added in SIDD 3.0
+    CHECK(Unmodeled == nullptr); // not part of the fake data, only added in SIDD 3.0
 
     const auto schemaPaths = getSchemaPaths();
     const std::vector<std::filesystem::path>* pSchemaPaths = validate ? & schemaPaths: nullptr; // NULL schemaPaths, no validation
 
-    auto pDerivedData = test_assert_round_trip(testName, *pFakeDerivedData, pSchemaPaths);
+    auto pDerivedData = test_assert_round_trip(*pFakeDerivedData, pSchemaPaths);
     Unmodeled = get_Unmodeled(*pDerivedData, siddVersion);
-    TEST_ASSERT_NULL(Unmodeled);  // not part of the fake data, only added in SIDD 3.0
+    CHECK(Unmodeled == nullptr);  // not part of the fake data, only added in SIDD 3.0
 }
-TEST_CASE(test_createFakeDerivedData)
+TEST_CASE("test_createFakeDerivedData")
 {
-    test_createFakeDerivedData_(testName, false /*validate*/, six::sidd::Version::v2_0_0, six::sidd300::get(six::sidd300::ISMVersion::current));
-
-    test_createFakeDerivedData_(testName, false /*validate*/, six::sidd::Version::v3_0_0, six::sidd300::ISMVersion::v13);
-    test_createFakeDerivedData_(testName, false /*validate*/, six::sidd::Version::v3_0_0, six::sidd300::ISMVersion::v201609);
+    test_createFakeDerivedData_(false /*validate*/, six::sidd::Version::v2_0_0, six::sidd300::get(six::sidd300::ISMVersion::current));
+    test_createFakeDerivedData_(false /*validate*/, six::sidd::Version::v3_0_0, six::sidd300::ISMVersion::v13);
+    test_createFakeDerivedData_(false /*validate*/, six::sidd::Version::v3_0_0, six::sidd300::ISMVersion::v201609);
 }
-TEST_CASE(test_createFakeDerivedData_validate)
+TEST_CASE("test_createFakeDerivedData_validate")
 {
-    test_createFakeDerivedData_(testName, true /*validate*/, six::sidd::Version::v2_0_0, six::sidd300::get(six::sidd300::ISMVersion::current));
-
-    test_createFakeDerivedData_(testName, true /*validate*/, six::sidd::Version::v3_0_0, six::sidd300::ISMVersion::v13);
-    test_createFakeDerivedData_(testName, true /*validate*/, six::sidd::Version::v3_0_0, six::sidd300::ISMVersion::v201609);
+    test_createFakeDerivedData_(true /*validate*/, six::sidd::Version::v2_0_0, six::sidd300::get(six::sidd300::ISMVersion::current));
+    test_createFakeDerivedData_(true /*validate*/, six::sidd::Version::v3_0_0, six::sidd300::ISMVersion::v13);
+    test_createFakeDerivedData_(true /*validate*/, six::sidd::Version::v3_0_0, six::sidd300::ISMVersion::v201609);
 }
 
-TEST_CASE(test_read_sidd200_no_LUT)
+TEST_CASE("test_read_sidd200_no_LUT")
 {
     static const auto pathname = get_sample_nitf_path("2023-07-26-11-37-27_UMBRA-04_SIDD.nitf");
 
@@ -137,116 +139,103 @@ TEST_CASE(test_read_sidd200_no_LUT)
     reader.load(pathname.string());
 }
 
-static void test_assert_unmodeled_(const std::string& testName, const six::Unmodeled& unmodeled)
+static void test_assert_unmodeled_(const six::Unmodeled& unmodeled)
 {
     TEST_ASSERT_EQ(1.23, unmodeled.Xrow);
     TEST_ASSERT_EQ(4.56, unmodeled.Ycol);
     TEST_ASSERT_EQ(7.89, unmodeled.XrowYcol);
 
-    TEST_ASSERT_TRUE(has_value(unmodeled.unmodeledDecorr));
+    CHECK(has_value(unmodeled.unmodeledDecorr));
     auto&& unmodeledDecor = value(unmodeled.unmodeledDecorr);
     TEST_ASSERT_EQ(12.34, value(unmodeledDecor.Xrow).corrCoefZero);
     TEST_ASSERT_EQ(56.78, value(unmodeledDecor.Xrow).decorrRate);
     TEST_ASSERT_EQ(123.4, value(unmodeledDecor.Ycol).corrCoefZero);
     TEST_ASSERT_EQ(567.8, value(unmodeledDecor.Ycol).decorrRate);
 }
-static void test_assert_unmodeled(const std::string& testName, const six::sidd::DerivedData& derivedData)
+static void test_assert_unmodeled(const six::sidd::DerivedData& derivedData)
 {
     auto&& errorStatistics = derivedData.errorStatistics;
-    TEST_ASSERT(errorStatistics.get() != nullptr);
+    CHECK(errorStatistics.get() != nullptr);
     if (derivedData.getVersion() != "3.0.0")
     {
         return;
     }
 
     auto unmodeled = errorStatistics->unmodeled;
-    TEST_ASSERT(has_value(unmodeled));
-    test_assert_unmodeled_(testName, value(unmodeled));
+    CHECK(has_value(unmodeled));
+    test_assert_unmodeled_(value(unmodeled));
 }
 
-static void test_read_sidd_xml(const std::string& testName, const std::filesystem::path& path,
+static void test_read_sidd_xml(const std::filesystem::path& path,
     const std::vector<std::filesystem::path>* pSchemaPaths)
 {
     const auto pathname = get_sample_xml_path(path);
 
     auto pDerivedData = six::sidd::Utilities::parseDataFromFile(pathname, pSchemaPaths);
-    test_assert_unmodeled(testName, *pDerivedData);
+    test_assert_unmodeled(*pDerivedData);
 
-    pDerivedData = test_assert_round_trip(testName, *pDerivedData, pSchemaPaths);
-    test_assert_unmodeled(testName, *pDerivedData);
+    pDerivedData = test_assert_round_trip(*pDerivedData, pSchemaPaths);
+    test_assert_unmodeled(*pDerivedData);
 }
-static void test_read_sidd_xml(const std::string& testName, const std::filesystem::path& path)
+static void test_read_sidd_xml(const std::filesystem::path& path)
 {
     const std::vector<std::filesystem::path>* pSchemaPaths = nullptr; // NULL schemaPaths, no validation
-    test_read_sidd_xml(testName, path, pSchemaPaths);
+    test_read_sidd_xml(path, pSchemaPaths);
 
     // validate XML against schema
     const auto schemaPaths = getSchemaPaths();
-    test_read_sidd_xml(testName, path, &schemaPaths);
+    test_read_sidd_xml(path, &schemaPaths);
 }
-TEST_CASE(test_read_sidd200_xml)
+TEST_CASE("test_read_sidd200_xml")
 {
-    test_read_sidd_xml(testName, "sidd200.xml");
+    test_read_sidd_xml("sidd200.xml");
 }
-TEST_CASE(test_read_sidd300_xml)
+TEST_CASE("test_read_sidd300_xml")
 {
-    test_read_sidd_xml(testName, "sidd300.xml");
+    test_read_sidd_xml("sidd300.xml");
 }
 
-TEST_CASE(test_read_sidd300_v13_xml)
+TEST_CASE("test_read_sidd300_v13_xml")
 {
-    test_read_sidd_xml(testName, "sidd300_ISM-v13.xml");
+    test_read_sidd_xml("sidd300_ISM-v13.xml");
 }
 
 // Set SIX_PROFILE_PARSING=N when running the test to profile the tests by
 // re-running N-times
 #define PROFILE(X)                                                         \
-    six::testing::EnvProfiler("SIX_PROFILE_PARSING", testName, std::cerr)( \
+    six::testing::EnvProfiler("SIX_PROFILE_PARSING", std::cerr)( \
             [&]() { X; });
 
 // Set SIX_PROFILE_STACKSIZE=1 when running to log the size of the stacktrace
 #define SSPROFILE(X, Y)                                                 \
-    TEST_SPECIFIC_EXCEPTION(six::testing::StackTraceSizeEnvProfiler<Y>( \
+    CHECK_THROWS_AS(six::testing::StackTraceSizeEnvProfiler<Y>( \
                                     "SIX_PROFILE_STACKSIZE",            \
-                                    testName,                           \
                                     std::cerr)([&]() { X; }),           \
                             Y)
 
 #define TEST_BAD_XML(X) PROFILE(SSPROFILE(X, six::DESValidationException));
 
-TEST_CASE(test_read_sidd100_bad_xml)
+TEST_CASE("test_read_sidd100_bad_xml")
 {
     const auto schemaPaths = getSchemaPaths();
-    TEST_BAD_XML(test_read_sidd_xml(testName, "sidd100-bad.xml", &schemaPaths));
+    TEST_BAD_XML(test_read_sidd_xml("sidd100-bad.xml", &schemaPaths));
 }
 
-TEST_CASE(test_read_sidd200_bad_xml)
+TEST_CASE("test_read_sidd200_bad_xml")
 {
     const auto schemaPaths = getSchemaPaths();
-    TEST_BAD_XML(test_read_sidd_xml(testName, "sidd200-bad.xml", &schemaPaths));
+    TEST_BAD_XML(test_read_sidd_xml("sidd200-bad.xml", &schemaPaths));
 }
 
-TEST_CASE(test_read_sidd300_bad_xml)
+TEST_CASE("test_read_sidd300_bad_xml")
 {
     const auto schemaPaths = getSchemaPaths();
-    TEST_BAD_XML(test_read_sidd_xml(testName, "sidd300-bad.xml", &schemaPaths));
+    TEST_BAD_XML(test_read_sidd_xml("sidd300-bad.xml", &schemaPaths));
 }
 
-TEST_CASE(test_read_sidd300_v13_bad_xml)
+TEST_CASE("test_read_sidd300_v13_bad_xml")
 {
     const auto schemaPaths = getSchemaPaths();
-    TEST_BAD_XML(test_read_sidd_xml(testName,
-                                    "sidd300_ISM-v13-bad.xml",
+    TEST_BAD_XML(test_read_sidd_xml("sidd300_ISM-v13-bad.xml",
                                     &schemaPaths));
 }
-
-TEST_MAIN(TEST_CHECK(test_createFakeDerivedData);
-          TEST_CHECK(test_createFakeDerivedData_validate);
-          TEST_CHECK(test_read_sidd200_no_LUT);
-          TEST_CHECK(test_read_sidd200_xml);
-          TEST_CHECK(test_read_sidd300_xml);
-          TEST_CHECK(test_read_sidd300_v13_xml);
-          TEST_CHECK(test_read_sidd100_bad_xml);
-          TEST_CHECK(test_read_sidd200_bad_xml);
-          TEST_CHECK(test_read_sidd300_bad_xml);
-          TEST_CHECK(test_read_sidd300_v13_bad_xml);)

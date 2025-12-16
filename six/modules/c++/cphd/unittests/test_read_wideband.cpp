@@ -23,9 +23,11 @@
 
 #include <cphd/Metadata.h>
 #include <io/ByteStream.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
 
-TEST_CASE(testReadCompressedChannel)
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+
+TEST_CASE("testReadCompressedChannel")
 {
     auto input = std::make_shared<io::ByteStream>();
     input->write("1234");
@@ -52,7 +54,7 @@ TEST_CASE(testReadCompressedChannel)
     TEST_ASSERT_EQ(readData[3], static_cast<std::byte>('4'));
 }
 
-TEST_CASE(testReadUncompressedChannel)
+TEST_CASE("testReadUncompressedChannel")
 {
     auto input = std::make_shared<io::ByteStream>();
     input->write("12345678");
@@ -78,7 +80,7 @@ TEST_CASE(testReadUncompressedChannel)
     TEST_ASSERT_EQ(readData[3], static_cast<std::byte>('4'));
 }
 
-TEST_CASE(testReadChannelSubset)
+TEST_CASE("testReadChannelSubset")
 {
     cphd::Data data;
     data.channels.resize(1);
@@ -143,7 +145,7 @@ TEST_CASE(testReadChannelSubset)
     TEST_ASSERT_EQ(readData[7], static_cast<std::byte>('G'));
 }
 
-TEST_CASE(testCannotDoPartialReadOfCompressedChannel)
+TEST_CASE("testCannotDoPartialReadOfCompressedChannel")
 {
     auto input = std::make_shared<io::ByteStream>();
     input->write("1234");
@@ -160,13 +162,6 @@ TEST_CASE(testCannotDoPartialReadOfCompressedChannel)
 
     cphd::Wideband wideband(input, metadata, 0, 4);
 
-    TEST_EXCEPTION(wideband.read(0, 0, 0, 1, 1, 1));
-    TEST_EXCEPTION(wideband.getBytesRequiredForRead(0, 0, 0, 1, 1));
+    CHECK_THROWS(wideband.read(0, 0, 0, 1, 1, 1));
+    CHECK_THROWS(wideband.getBytesRequiredForRead(0, 0, 0, 1, 1));
 }
-
-TEST_MAIN(
-    TEST_CHECK(testReadCompressedChannel);
-    TEST_CHECK(testReadUncompressedChannel);
-    TEST_CHECK(testReadChannelSubset);
-    TEST_CHECK(testCannotDoPartialReadOfCompressedChannel);
-    )

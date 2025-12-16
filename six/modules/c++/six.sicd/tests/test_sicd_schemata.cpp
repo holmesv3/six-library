@@ -31,7 +31,12 @@
 #include <import/six.h>
 #include <import/io.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+#define TEST_ASSERT_GREATER_EQ(X, Y) CHECK(X >= Y);
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
 
 #define  MYTEST_ASSERT_EQ(X1, X2) \
 {\
@@ -2502,57 +2507,57 @@ bool cmpRoundTripXMLs(std::string xmlText, std::string xmlPath = "",
 MYTEST_CASE_PARAMS(RoundTrip_XML_0_4_0_PFA)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_0, "PFA"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_0, "PFA"), params[0], params[1]=="true"));
 }
 MYTEST_CASE_PARAMS(RoundTrip_XML_0_4_0_RMA_INCA)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_0, "RMA", "INCA"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_0, "RMA", "INCA"), params[0], params[1]=="true"));
 }
 MYTEST_CASE_PARAMS(RoundTrip_XML_0_4_0_RMA_RMAT)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_0, "RMA", "RMAT"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_0, "RMA", "RMAT"), params[0], params[1]=="true"));
 }
 MYTEST_CASE_PARAMS(RoundTrip_XML_0_4_1_PFA)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_1, "PFA"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_1, "PFA"), params[0], params[1]=="true"));
 }
 MYTEST_CASE_PARAMS(RoundTrip_XML_0_4_1_RMA_INCA)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_1, "RMA", "INCA"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_1, "RMA", "INCA"), params[0], params[1]=="true"));
 }
 MYTEST_CASE_PARAMS(RoundTrip_XML_0_4_1_RMA_RMAT)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_1, "RMA", "RMAT"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_0_4_1, "RMA", "RMAT"), params[0], params[1]=="true"));
 }
 MYTEST_CASE_PARAMS(RoundTrip_XML_1_0_0_PFA)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_1_0_0, "PFA"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_1_0_0, "PFA"), params[0], params[1]=="true"));
 }
 MYTEST_CASE_PARAMS(RoundTrip_XML_1_0_0_RMA_INCA)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_1_0_0, "RMA", "INCA"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_1_0_0, "RMA", "INCA"), params[0], params[1]=="true"));
 }
 MYTEST_CASE_PARAMS(RoundTrip_XML_1_0_0_RMA_RMAT)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_1_0_0, "RMA", "RMAT"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_1_0_0, "RMA", "RMAT"), params[0], params[1]=="true"));
 }
 MYTEST_CASE_PARAMS(RoundTrip_XML_1_0_0_RMA_RMCR)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_1_0_0, "RMA", "RMCR"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_1_0_0, "RMA", "RMCR"), params[0], params[1]=="true"));
 }
 MYTEST_CASE_PARAMS(RoundTrip_XML_1_0_0_RgAzComp)
 {
     TEST_ASSERT_GREATER_EQ(params.size(), 2);
-    TEST_ASSERT(cmpRoundTripXMLs(initComplexDataXML(FRMT_1_0_0, "RgAzComp"), params[0], params[1]=="true"));
+    CHECK(cmpRoundTripXMLs(initComplexDataXML(FRMT_1_0_0, "RgAzComp"), params[0], params[1]=="true"));
 }
 
 

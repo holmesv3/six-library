@@ -22,10 +22,14 @@
 
 #include <stdexcept>
 #include <iostream>
-#include <std/memory>
-#include <std/filesystem>
+#include <memory>
+#include <filesystem>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
+#define TEST_ASSERT_NULL(X) CHECK(X == nullptr);
 
 #include <except/Exception.h>
 #include <mem/ScopedArray.h>
@@ -263,7 +267,7 @@ struct TestHelper
 };
 
 
-TEST_CASE(testRead)
+TEST_CASE("testRead")
 {
     TestHelper testHelper;
     six::NITFReadControl reader;
@@ -291,7 +295,7 @@ TEST_CASE(testRead)
                    testHelper.mMonoLegend.mLocation.col);
     TEST_ASSERT_EQ(legend->mDims.row, testHelper.mMonoLegend.mDims.row);
     TEST_ASSERT_EQ(legend->mDims.col, testHelper.mMonoLegend.mDims.col);
-    TEST_ASSERT(legend->mImage == testHelper.mMonoLegend.mImage);
+    CHECK(legend->mImage == testHelper.mMonoLegend.mImage);
     TEST_ASSERT_NULL(legend->mLUT.get());
 
     // Third image shouldn't have a legend
@@ -307,37 +311,31 @@ TEST_CASE(testRead)
                    testHelper.mRgbLegend.mLocation.col);
     TEST_ASSERT_EQ(legend->mDims.row, testHelper.mRgbLegend.mDims.row);
     TEST_ASSERT_EQ(legend->mDims.col, testHelper.mRgbLegend.mDims.col);
-    TEST_ASSERT(legend->mImage == testHelper.mRgbLegend.mImage);
+    CHECK(legend->mImage == testHelper.mRgbLegend.mImage);
     TEST_ASSERT_NOT_EQ(legend->mLUT.get(), nullptr);
-    TEST_ASSERT(*legend->mLUT == *testHelper.mRgbLegend.mLUT);
+    CHECK(*legend->mLUT == *testHelper.mRgbLegend.mLUT);
 }
 
-TEST_CASE(test_getParser)
+TEST_CASE("test_getParser")
 {
     auto pParser = six::sidd::DerivedXMLControl::getParser_("1.0.0");
-    TEST_ASSERT(pParser.get() != nullptr);
+    CHECK(pParser.get() != nullptr);
 
     pParser = six::sidd::DerivedXMLControl::getParser_("2.0.0");
-    TEST_ASSERT(pParser.get() != nullptr);
+    CHECK(pParser.get() != nullptr);
 
     pParser = six::sidd::DerivedXMLControl::getParser_("3.0.0");
-    TEST_ASSERT(pParser.get() != nullptr);
+    CHECK(pParser.get() != nullptr);
     
-    TEST_EXCEPTION(six::sidd::DerivedXMLControl::getParser_("1.1.0"));
+    CHECK_THROWS(six::sidd::DerivedXMLControl::getParser_("1.1.0"));
 
     try
     {
         pParser = six::sidd::DerivedXMLControl::getParser_("1.2.3");
-        TEST_ASSERT_FALSE(true); // should never get here
+        CHECK_FALSE(true); // should never get here
     }
     catch (const except::Exception& ex)
     {
         TEST_ASSERT_EQ(ex.getMessage(), "Unsupported SIDD Version: 1.2.3");
     }
 }
-
-
-TEST_MAIN(
-    TEST_CHECK(testRead);
-    TEST_CHECK(test_getParser);
-    )

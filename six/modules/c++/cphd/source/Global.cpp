@@ -19,7 +19,7 @@
  * see <http://www.gnu.org/licenses/>.
  *
  */
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 #include <six/Init.h>
 #include <six/Utilities.h>
 #include <cphd/Global.h>

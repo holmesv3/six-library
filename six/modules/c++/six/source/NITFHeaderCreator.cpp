@@ -21,14 +21,14 @@
  */
 #include <iomanip>
 #include <sstream>
-#include <std/optional>
+#include <optional>
 #include <string>
 #include <functional>
 
 #include <io/ByteStream.h>
 #include <math/Round.h>
 #include <mem/ScopedArray.h>
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 #include <six/NITFHeaderCreator.h>
 #include <six/WriteControl.h>
 #include <six/XMLControlFactory.h>

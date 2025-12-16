@@ -21,9 +21,13 @@
 */
 
 #include <import/six/sicd.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-TEST_CASE(DerivedSCPCOA)
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+
+TEST_CASE("DerivedSCPCOA")
 {
     six::sicd::SCPCOA scpcoa;
     scpcoa.scpTime = 123;
@@ -67,7 +71,7 @@ TEST_CASE(DerivedSCPCOA)
     TEST_ASSERT_EQ(scpcoa.arpAcc[1], 2958);
     TEST_ASSERT_EQ(scpcoa.arpAcc[2], 3698);
 
-    TEST_ASSERT(scpcoa.sideOfTrack.toString() == "RIGHT");
+    CHECK(scpcoa.sideOfTrack.toString() == "RIGHT");
     TEST_ASSERT_EQ(scpcoa.sideOfTrack, six::SideOfTrackType::RIGHT);
     TEST_ASSERT_ALMOST_EQ(scpcoa.slantRange, 1.015372838920571e7);
     TEST_ASSERT_ALMOST_EQ(scpcoa.groundRange, 5.327326157987932e6);
@@ -79,7 +83,3 @@ TEST_CASE(DerivedSCPCOA)
     TEST_ASSERT_ALMOST_EQ(scpcoa.azimAngle, 291.9837145);
     TEST_ASSERT_ALMOST_EQ(scpcoa.layoverAngle, 201.9977459);
 }
-
-TEST_MAIN(
-    TEST_CHECK(DerivedSCPCOA);
-)

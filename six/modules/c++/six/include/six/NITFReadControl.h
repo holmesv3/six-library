@@ -25,7 +25,7 @@
 
 #include <map>
 #include <memory>
-#include <std/filesystem>
+#include <filesystem>
 
 #include "six/NITFImageInfo.h"
 #include "six/ReadControl.h"

@@ -2,7 +2,7 @@ coda_add_module(
     six
     DEPS XML_DATA_CONTENT-static-c nitf-c++
          scene-c++ logging-c++ xml.lite-c++ mem-c++ sys-c++ str-c++
-         except-c++ types-c++ config-c++ gsl-c++ std-c++
+         except-c++ types-c++ config-c++ mdspan
          ${CMAKE_DL_LIBS}
     SOURCES
         source/Adapters.cpp
@@ -64,7 +64,7 @@ coda_add_tests(
         test_serialize.cpp
         test_xml_control.cpp)
 
-if(CODA_BUILD_TESTS)
+if(BUILD_TESTING)
     target_compile_definitions(six_test_xml_control PRIVATE
                                DEFAULT_SCHEMA_PATH="${DEFAULT_SCHEMA_PATH}")
 endif()

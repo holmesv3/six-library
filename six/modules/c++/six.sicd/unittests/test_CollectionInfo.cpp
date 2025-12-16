@@ -21,7 +21,7 @@
 
 #include <string>
 #include <vector>
-#include <std/optional>
+#include <optional>
 
 #include <xml/lite/MinidomParser.h>
 #include <xml/lite/Document.h>
@@ -124,11 +124,11 @@ TEST_CASE(Classification)
 TEST_CASE(ClassificationCanada)
 {
 #ifdef _WIN32
-    const std::string classificationText("NON CLASSIFI\xc9 / UNCLASSIFIED"); // ISO8859-1 "NON CLASSIFIÉ / UNCLASSIFIED"
-    const auto E_ = str::u8FromNative("\xc9"); // ISO8859-1  "É"
+    const std::string classificationText("NON CLASSIFI\xc9 / UNCLASSIFIED"); // ISO8859-1 "NON CLASSIFIï¿½ / UNCLASSIFIED"
+    const auto E_ = str::u8FromNative("\xc9"); // ISO8859-1  "ï¿½"
 #else
-    const std::string classificationText("NON CLASSIFI\xc3\x89 / UNCLASSIFIED"); // UTF-8 "NON CLASSIFIÉ / UNCLASSIFIED"
-    const auto E_ = str::u8FromNative("\xc3\x89"); // UTF-8  "É"
+    const std::string classificationText("NON CLASSIFI\xc3\x89 / UNCLASSIFIED"); // UTF-8 "NON CLASSIFIï¿½ / UNCLASSIFIED"
+    const auto E_ = str::u8FromNative("\xc3\x89"); // UTF-8  "ï¿½"
 #endif
 
     auto data = createData<six::zfloat>(types::RowCol<size_t>(10, 10));
@@ -142,7 +142,7 @@ TEST_CASE(ClassificationCanada)
     const auto UNCLASSIFIED = strXml.find(str::u8FromNative(" / UNCLASSIFIED"));
     TEST_ASSERT(UNCLASSIFIED != std::string::npos);
     const auto utf8 = strXml.substr(NON_CLASSIFI, UNCLASSIFIED - NON_CLASSIFI);
-    TEST_ASSERT_EQ(utf8.size(), std::string("NON CLASSIFI\xc3\x89").size()); // UTF-8, "NON CLASSIFIÉ"
+    TEST_ASSERT_EQ(utf8.size(), std::string("NON CLASSIFI\xc3\x89").size()); // UTF-8, "NON CLASSIFIï¿½"
     const auto posE_ = utf8.find(E_);
     TEST_ASSERT(posE_ != std::string::npos);
 

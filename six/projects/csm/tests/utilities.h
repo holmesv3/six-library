@@ -20,8 +20,8 @@
  *
  */
 
-#include <std/filesystem>
-#include <std/string>
+#include <filesystem>
+#include <string>
 
 #include <six/Utilities.h>
 #include <NitfIsd.h>

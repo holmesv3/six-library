@@ -29,9 +29,9 @@
 #include <cphd/Enums.h>
 #include <cphd/Types.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
 
-TEST_CASE(testEquality)
+TEST_CASE("testEquality")
 {
     cphd::ReferenceGeometry refGeo;
     cphd::ReferenceGeometry refGeoOther;
@@ -55,9 +55,5 @@ TEST_CASE(testEquality)
     refGeoOther.monostatic->sideOfTrack = six::SideOfTrackType::LEFT;
     refGeoOther.monostatic->slantRange = 20.0;
 
-    TEST_ASSERT_NOT_EQ(refGeo, refGeoOther);
+    CHECK(refGeo != refGeoOther);
 }
-
-TEST_MAIN(
-        TEST_CHECK(testEquality);
-)

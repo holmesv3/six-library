@@ -25,9 +25,9 @@
 
 #include <memory>
 #include <vector>
-#include <std/span>
+#include <span>
 
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 
 #include "six/CollectionInformation.h"
 #include "six/Data.h"

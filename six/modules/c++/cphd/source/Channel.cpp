@@ -21,7 +21,7 @@
  */
 #include <cphd/Channel.h>
 
-#include <std/string>
+#include <string>
 
 #include <str/Encoding.h>
 

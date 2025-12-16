@@ -25,10 +25,10 @@
 
 #include <vector>
 #include <memory>
-#include <std/span>
-#include <std/cstddef>
-#include <std/filesystem>
-#include <std/string>
+#include <span>
+#include <cstddef>
+#include <filesystem>
+#include <string>
 
 #include <import/io.h>
 #include <import/xml/lite.h>
@@ -389,9 +389,8 @@ namespace testing
     struct SIX_SIX_API BaseEnvProfiler
     {
         BaseEnvProfiler(const char* envVar,
-                        const std::string& testName,
                         std::ostream& stream) :
-            mEnvVar(envVar), mTestName(testName), mStream(stream)
+            mEnvVar(envVar), mStream(stream)
         {
             sys::OS os;
             mEnabled = os.isEnvSet(mEnvVar);
@@ -413,7 +412,6 @@ namespace testing
         }
 
         const std::string mEnvVar;
-        const std::string& mTestName;
         std::ostream& mStream;
         int mNumIters;
         int mEnabled;
@@ -423,9 +421,8 @@ namespace testing
     struct SIX_SIX_API EnvProfiler : BaseEnvProfiler<EnvProfiler>
     {
         EnvProfiler(const char* envVar,
-                    const std::string& testName,
                     std::ostream& stream) :
-            BaseEnvProfiler(envVar, testName, stream)
+            BaseEnvProfiler(envVar, stream)
         {
         }
         ~EnvProfiler() = default;
@@ -451,7 +448,7 @@ namespace testing
             }
 
             mean /= mNumIters;
-            mStream << mTestName << " runtime (mean/min/max)ms: " << mean << "/"
+            mStream << " runtime (mean/min/max)ms: " << mean << "/"
                     << mn << "/" << mx << std::endl;
         }
     };
@@ -463,10 +460,8 @@ namespace testing
         : BaseEnvProfiler<StackTraceSizeEnvProfiler<TExcept>>
     {
         StackTraceSizeEnvProfiler(const char* envVar,
-                                  const std::string& testName,
                                   std::ostream& stream) :
             BaseEnvProfiler<StackTraceSizeEnvProfiler<TExcept>>(envVar,
-                                                                testName,
                                                                 stream)
         {
         }
@@ -482,7 +477,7 @@ namespace testing
             catch (const TExcept& ex)
             {
                 // log size of the exception message
-                this->mStream << this->mTestName
+                this->mStream
                               << ": exception size (bytes): " << strlen(ex.what())
                               << std::endl;
 

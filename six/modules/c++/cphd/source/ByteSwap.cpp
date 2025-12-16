@@ -26,8 +26,8 @@
 #include <string>
 #include <memory>
 #include <type_traits>
-#include <std/span>
-#include <std/cstddef>
+#include <span>
+#include <cstddef>
 #include <tuple>
 #include <type_traits>
 

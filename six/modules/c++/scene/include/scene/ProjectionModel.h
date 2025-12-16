@@ -23,7 +23,7 @@
 #ifndef __SCENE_PROJECTION_MODEL_H__
 #define __SCENE_PROJECTION_MODEL_H__
 
-#include <std/optional>
+#include <optional>
 
 #include <math/poly/OneD.h>
 #include <math/poly/TwoD.h>

@@ -21,32 +21,28 @@
 */
 
 #include <import/six/sicd.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
 
-TEST_CASE(testClockwiseBox)
+TEST_CASE("testClockwiseBox")
 {
     std::vector<six::RowColInt> vertices(4);
     vertices[0] = six::RowColInt(0, 0); // these are (row, col), not (x, y)!
     vertices[1] = six::RowColInt(1, 0);
     vertices[2] = six::RowColInt(1, 1);
     vertices[3] = six::RowColInt(0, 1);
-    TEST_ASSERT(!six::sicd::Utilities::isClockwise(vertices));
-    TEST_ASSERT(six::sicd::Utilities::isClockwise(vertices, true));
+    CHECK(!six::sicd::Utilities::isClockwise(vertices));
+    CHECK(six::sicd::Utilities::isClockwise(vertices, true));
 
 }
 
-TEST_CASE(testCounterClockwiseTriangle)
+TEST_CASE("testCounterClockwiseTriangle")
 {
     std::vector<six::RowColInt> vertices(3);
     vertices[0] = six::RowColInt(0, 0);
     vertices[1] = six::RowColInt(0, 1);
     vertices[2] = six::RowColInt(1, 0);
-    TEST_ASSERT(!six::sicd::Utilities::isClockwise(vertices, true));
-    TEST_ASSERT(six::sicd::Utilities::isClockwise(vertices));
+    CHECK(!six::sicd::Utilities::isClockwise(vertices, true));
+    CHECK(six::sicd::Utilities::isClockwise(vertices));
 }
 
-TEST_MAIN(
-    TEST_CHECK(testClockwiseBox);
-    TEST_CHECK(testCounterClockwiseTriangle);
-)
 

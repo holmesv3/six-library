@@ -33,7 +33,7 @@
 #include <utility>
 #include <stdexcept>
 #include <numeric>
-#include <std/numbers>
+#include <numbers>
 #include <tuple>
 
 #include <except/Exception.h>
@@ -41,7 +41,7 @@
 #include <math/Utilities.h>
 #include <math/poly/Fit.h>
 #include <mem/ScopedAlignedArray.h>
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 #include <str/Manip.h>
 #include <str/Encoding.h>
 #include <sys/Conf.h>

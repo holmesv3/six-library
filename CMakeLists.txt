@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
-project(six-library)
+project(six-library VERSION 4.0.0)
 
 if (${CMAKE_PROJECT_NAME} STREQUAL six-library)
     # we are the top-level project and are responsible for configuration
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 23)
     set(CXX_STANDARD_REQUIRED true)
 
     # Always turn on "warnings as errors" to avoid lots of (meaningless?) build output;
@@ -24,9 +24,8 @@ if (${CMAKE_PROJECT_NAME} STREQUAL six-library)
         coda_initialize_build()
     else()
         # build dependencies ourselves
-        set(CODA_OSS_DIR "coda-oss")
         list(APPEND CMAKE_MODULE_PATH
-             "${CMAKE_CURRENT_SOURCE_DIR}/externals/${CODA_OSS_DIR}/cmake")
+             "${CMAKE_CURRENT_SOURCE_DIR}/externals/coda-oss/cmake")
         include(CodaBuild)
         coda_initialize_build()
         add_subdirectory("externals" EXCLUDE_FROM_ALL)
@@ -34,8 +33,7 @@ if (${CMAKE_PROJECT_NAME} STREQUAL six-library)
 endif()
 
 # needed to run some unit tests from the build directory
-file(COPY "croppedNitfs"
-     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "croppedNitfs" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_subdirectory(six)
 

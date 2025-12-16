@@ -29,7 +29,10 @@
 #include <cphd/SceneCoordinates.h>
 #include <io/StringStream.h>
 #include <xml/lite/MinidomParser.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+
 
 static std::string testCPHDXMLBody()
 {
@@ -937,10 +940,10 @@ void runTest(const std::string& testName, cphd::Version version)
     TEST_ASSERT_EQ(global.fxBand.fxMax, 1.7);
     TEST_ASSERT_EQ(global.toaSwath.toaMin, 3.4);
     TEST_ASSERT_EQ(global.toaSwath.toaMax, 6.1);
-    TEST_ASSERT_TRUE(global.tropoParameters.get() != nullptr);
+    CHECK(global.tropoParameters.get() != nullptr);
     TEST_ASSERT_EQ(global.tropoParameters->n0, 65.2);
     TEST_ASSERT_EQ(global.tropoParameters->refHeight, cphd::RefHeight::IARP);
-    TEST_ASSERT_TRUE(global.ionoParameters.get() != nullptr);
+    CHECK(global.ionoParameters.get() != nullptr);
     TEST_ASSERT_EQ(global.ionoParameters->tecv, 5.8);
     TEST_ASSERT_EQ(global.ionoParameters->f2Height, 3);
 
@@ -955,7 +958,7 @@ void runTest(const std::string& testName, cphd::Version version)
     TEST_ASSERT_EQ(scene.iarp.llh.getLon(), -102);
     TEST_ASSERT_EQ(scene.iarp.llh.getAlt(), 3.4);
 
-    TEST_ASSERT_TRUE(scene.referenceSurface.hae.get() != nullptr);
+    CHECK(scene.referenceSurface.hae.get() != nullptr);
     TEST_ASSERT_EQ(scene.referenceSurface.hae->uIax.getLat(), 12);
     TEST_ASSERT_EQ(scene.referenceSurface.hae->uIax.getLon(), 24);
     TEST_ASSERT_EQ(scene.referenceSurface.hae->uIay.getLat(), 36);
@@ -985,7 +988,7 @@ void runTest(const std::string& testName, cphd::Version version)
     TEST_ASSERT_EQ(scene.imageAreaCorners.lowerLeft.getLat(), 40);
     TEST_ASSERT_EQ(scene.imageAreaCorners.lowerLeft.getLon(), 41);
 
-    TEST_ASSERT_TRUE(scene.imageGrid.get() != nullptr);
+    CHECK(scene.imageGrid.get() != nullptr);
     TEST_ASSERT_EQ(scene.imageGrid->identifier, "Grid");
     TEST_ASSERT_EQ(scene.imageGrid->iarpLocation.line, 1.23);
     TEST_ASSERT_EQ(scene.imageGrid->iarpLocation.sample, 3.21);
@@ -1052,12 +1055,12 @@ void runTest(const std::string& testName, cphd::Version version)
                    cphd::PolarizationType::RHC);
 
     // these are new in CPHD 1.1.0
-    TEST_ASSERT_TRUE(has_value(channel.parameters[0].polarization.txPolRef));
+    CHECK(has_value(channel.parameters[0].polarization.txPolRef));
     const auto& txPolRef = value(channel.parameters[0].polarization.txPolRef);
     TEST_ASSERT_EQ(txPolRef.ampH, 0.1);
     TEST_ASSERT_EQ(txPolRef.ampV, 0.2);
     TEST_ASSERT_EQ(txPolRef.phaseV, 0.3);
-    TEST_ASSERT_FALSE(has_value(channel.parameters[0].polarization.rcvPolRef));
+    CHECK_FALSE(has_value(channel.parameters[0].polarization.rcvPolRef));
 
     TEST_ASSERT_EQ(channel.parameters[0].fxC, 1.3);
     TEST_ASSERT_EQ(channel.parameters[0].fxBW, 0.8);
@@ -1153,7 +1156,7 @@ void runTest(const std::string& testName, cphd::Version version)
     TEST_ASSERT_EQ(ref.monostatic->arpVel[0], 10);
     TEST_ASSERT_EQ(ref.monostatic->arpVel[1], 10);
     TEST_ASSERT_EQ(ref.monostatic->arpVel[2], 10);
-    TEST_ASSERT(ref.monostatic->sideOfTrack.toString() == "LEFT");
+    CHECK(ref.monostatic->sideOfTrack.toString() == "LEFT");
     TEST_ASSERT_EQ(ref.monostatic->sideOfTrack, six::SideOfTrackType::LEFT);
     TEST_ASSERT_EQ(ref.monostatic->azimuthAngle, 30.0);
     TEST_ASSERT_EQ(ref.monostatic->grazeAngle, 30.0);
@@ -1163,18 +1166,18 @@ void runTest(const std::string& testName, cphd::Version version)
     TEST_ASSERT_EQ(ref.monostatic->dopplerConeAngle, 30.0);
 }
 
-TEST_CASE(testVersions)
+TEST_CASE("testVersions")
 {
     const auto versionUriMap = cphd::CPHDXMLControl::getVersionUriMap();
 
     for (auto version : {cphd::Version::v1_0_0, cphd::Version::v1_0_1, cphd::Version::v1_1_0 })
     {
-        TEST_ASSERT_TRUE(
+        CHECK(
             versionUriMap.find(version) != versionUriMap.end());
     }
 }
 
-TEST_CASE(testReadXML)
+TEST_CASE("testReadXML")
 {
     const auto map = cphd::CPHDXMLControl::getVersionUriMap();
     for (auto pair : map)
@@ -1184,7 +1187,7 @@ TEST_CASE(testReadXML)
     }
 }
 
-TEST_CASE(testPhaseSGN)
+TEST_CASE("testPhaseSGN")
 {
     auto v = cphd::PhaseSGN::toType("-1");
     TEST_ASSERT_EQ(v, -1);
@@ -1202,8 +1205,3 @@ TEST_CASE(testPhaseSGN)
     TEST_ASSERT_EQ("1", s);
 }
 
-TEST_MAIN(
-    TEST_CHECK(testVersions);
-    TEST_CHECK(testReadXML);
-    TEST_CHECK(testPhaseSGN);
-)

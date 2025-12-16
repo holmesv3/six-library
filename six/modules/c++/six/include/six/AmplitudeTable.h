@@ -31,10 +31,10 @@
 #include <string>
 #include <memory>
 #include <array>
-#include <std/mdspan>
+#include <experimental/mdspan>
 
 #include <import/except.h>
-#include <coda_oss/CPlusPlus.h>
+
 #include <sys/Dbg.h>
 
 #include <nitf/LookupTable.hpp>
@@ -163,7 +163,7 @@ struct SIX_SIX_API LUT
  // Store the computed `six::zfloat` for every possible 
  // amp/phs pair, a total of 256*256 values.
 static constexpr size_t AmplitudeTableSize = 256; // "This is a fixed size (256-element) LUT"
-using Amp8iPhs8iLookup_t = std::mdspan<const six::zfloat, std::dextents<size_t, 2>>;
+using Amp8iPhs8iLookup_t = std::experimental::mdspan<const six::zfloat, std::experimental::dextents<size_t, 2>>;
  
  // More descriptive than std::pair<uint8_t, uint8_t>
 struct SIX_SIX_API AMP8I_PHS8I_t final
@@ -175,22 +175,18 @@ struct SIX_SIX_API AMP8I_PHS8I_t final
 // Control a few details of the ComplexToAMP8IPHS8I implementation, especially "unseq" (i.e., SIMD).
 #ifndef SIX_sicd_has_VCL
     // Do we have the "vectorclass" library? https://github.com/vectorclass/version2
-    #if !CODA_OSS_cpp17 // VCL needs C++17
-        #define SIX_sicd_has_VCL 0
-    #else
-        // __has_include is part of C++17
-        #if __has_include("../../../six.sicd/include/six/sicd/vectorclass/version2/vectorclass.h") || \
-            __has_include("six/sicd/vectorclass/version2/vectorclass.h")
-            #if _MSC_VER
-            // Compiler error: bug in MSVC or VCL?
-            #define SIX_sicd_has_VCL !CODA_OSS_cpp20 // TODO: enable for C++20
-            #else
-            #define SIX_sicd_has_VCL 1
-            #endif
+    // __has_include is part of C++17
+    #if __has_include("../../../six.sicd/include/six/sicd/vectorclass/version2/vectorclass.h") || \
+        __has_include("six/sicd/vectorclass/version2/vectorclass.h")
+        #if _MSC_VER
+        // Compiler error: bug in MSVC or VCL?
+        #define SIX_sicd_has_VCL !CODA_OSS_cpp20 // TODO: enable for C++20
         #else
-            #define SIX_sicd_has_VCL 0
-        #endif // __has_include
-    #endif // C++17
+        #define SIX_sicd_has_VCL 1
+        #endif
+    #else
+        #define SIX_sicd_has_VCL 0
+    #endif // __has_include
 #endif
 
 #ifndef SIX_sicd_has_simd

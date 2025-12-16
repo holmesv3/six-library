@@ -39,8 +39,10 @@
 #include <cphd/PVPBlock.h>
 #include <cphd/ReferenceGeometry.h>
 #include <cphd/TestDataGenerator.h>
-#include <TestCase.h>
+#include <catch2/catch_test_macros.hpp>
 
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
 /*!
  * Tests write and read of Signal Block
  * Fails if values don't match
@@ -165,59 +167,50 @@ bool runTest(bool scale, const TCxVector& writeData)
     return true;
 }
 
-TEST_CASE(testUnscaledInt8)
+TEST_CASE("testUnscaledInt8")
 {
     const types::RowCol<size_t> dims(128, 128);
     const auto writeData = generateData<cphd::zint8_t>(dims.area());
     const bool scale = false;
-    TEST_ASSERT_TRUE(runTest(scale, writeData));
+    CHECK(runTest(scale, writeData));
 }
 
-TEST_CASE(testScaledInt8)
+TEST_CASE("testScaledInt8")
 {
     const types::RowCol<size_t> dims(128, 128);
     const auto writeData = generateData<cphd::zint8_t>(dims.area());
     const bool scale = true;
-    TEST_ASSERT_TRUE(runTest(scale, writeData));
+    CHECK(runTest(scale, writeData));
 }
 
-TEST_CASE(testUnscaledInt16)
+TEST_CASE("testUnscaledInt16")
 {
     const types::RowCol<size_t> dims(128, 128);
     const auto writeData = generateData<cphd::zint16_t>(dims.area());
     const bool scale = false;
-    TEST_ASSERT_TRUE(runTest(scale, writeData));
+    CHECK(runTest(scale, writeData));
 }
 
-TEST_CASE(testScaledInt16)
+TEST_CASE("testScaledInt16")
 {
     const types::RowCol<size_t> dims(128, 128);
     const auto writeData =  generateData<cphd::zint16_t>(dims.area());
     const bool scale = true;
-    TEST_ASSERT_TRUE(runTest(scale, writeData));
+    CHECK(runTest(scale, writeData));
 }
 
-TEST_CASE(testUnscaledFloat)
+TEST_CASE("testUnscaledFloat")
 {
     const types::RowCol<size_t> dims(128, 128);
     const auto writeData = generateData<cphd::zfloat>(dims.area());
     const bool scale = false;
-    TEST_ASSERT_TRUE(runTest(scale, writeData));
+    CHECK(runTest(scale, writeData));
 }
 
-TEST_CASE(testScaledFloat)
+TEST_CASE("testScaledFloat")
 {
     const types::RowCol<size_t> dims(128, 128);
     const auto writeData = generateData<cphd::zfloat>(dims.area());
     const bool scale = true;
-    TEST_ASSERT_TRUE(runTest(scale, writeData));
+    CHECK(runTest(scale, writeData));
 }
-
-TEST_MAIN(
-        TEST_CHECK(testUnscaledInt8);
-        TEST_CHECK(testScaledInt8);
-        TEST_CHECK(testUnscaledInt16);
-        TEST_CHECK(testScaledInt16);
-        TEST_CHECK(testUnscaledFloat);
-        TEST_CHECK(testScaledFloat);
-        )

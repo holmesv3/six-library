@@ -29,9 +29,13 @@
 #include <string>
 #include <iostream>
 #include <limits>
-#include <std/cstddef>
+#include <cstddef>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
 
 #include <six/sidd/SIDDByteProvider.h>
 
@@ -731,18 +735,18 @@ bool doTestsBothDataTypes(const std::vector<std::string>& schemaPaths,
     return success;
 }
 
-TEST_CASE(no_funky_segmentation)
+TEST_CASE("no_funky_segmentation")
 {
     const std::vector<std::string> schemaPaths;
     if (!schemaPaths.empty()) // TODO: this is too slow for a "unit test"
     {
         // Run tests with no funky segmentation
         const auto success = doTestsBothDataTypes(schemaPaths, false);
-        TEST_ASSERT_TRUE(success);
+        CHECK(success);
     }
 }
 
-TEST_CASE(forcing_various_numbers_of_segments)
+TEST_CASE("forcing_various_numbers_of_segments")
 {
     const std::vector<std::string> schemaPaths;
     if (!schemaPaths.empty()) // TODO: this is too slow for a "unit test"
@@ -753,13 +757,7 @@ TEST_CASE(forcing_various_numbers_of_segments)
         for (const auto& row : numRows)
         {
             const auto success = doTestsBothDataTypes(schemaPaths, true, row);
-            TEST_ASSERT_TRUE(success);
+            CHECK(success);
         }
     }
 }
-
-TEST_MAIN(
-    TEST_CHECK(no_funky_segmentation);
-    TEST_CHECK(forcing_various_numbers_of_segments);
-)
-

@@ -25,9 +25,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <std/memory>
+#include <memory>
 
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 
 #include <six/NITFReadControl.h>
 #include <six/XMLControlFactory.h>

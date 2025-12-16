@@ -23,8 +23,8 @@
 #ifndef SIX_six_CollectionInformation_h_INCLUDED_
 #define SIX_six_CollectionInformation_h_INCLUDED_
 
-#include <std/string>
-#include <std/optional>
+#include <string>
+#include <optional>
 
 #include <str/Encoding.h>
 

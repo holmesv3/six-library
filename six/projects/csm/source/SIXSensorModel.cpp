@@ -24,7 +24,7 @@
 
 #include <cmath>
 #include <limits>
-#include <std/filesystem>
+#include <filesystem>
 
 #include "Error.h"
 #include <six/NITFReadControl.h>

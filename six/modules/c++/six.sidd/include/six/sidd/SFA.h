@@ -23,7 +23,7 @@
 #ifndef __SIX_SIDD_SFA_H__
 #define __SIX_SIDD_SFA_H__
 
-#include <std/optional>
+#include <optional>
 
 #include <import/six.h>
 

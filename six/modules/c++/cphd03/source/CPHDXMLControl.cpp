@@ -21,8 +21,8 @@
  */
 #include <cphd03/CPHDXMLControl.h>
 
-#include <std/string>
-#include <std/memory>
+#include <string>
+#include <memory>
 
 #include <io/StringStream.h>
 #include <logging/NullLogger.h>

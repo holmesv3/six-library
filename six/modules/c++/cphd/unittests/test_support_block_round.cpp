@@ -41,7 +41,10 @@
 #include <cphd/SupportBlock.h>
 #include <cphd/ReferenceGeometry.h>
 #include <cphd/TestDataGenerator.h>
-#include <TestCase.h>
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
 
 static constexpr size_t NUM_ROWS = 3;
 static constexpr size_t NUM_COLS = 4;
@@ -183,23 +186,18 @@ bool runTest(const std::vector<T>& writeData)
     return compareVectors(readData, writeData.data(), writeData.size());
 }
 
-TEST_CASE(testSupportsInt)
+TEST_CASE("testSupportsInt")
 {
     const types::RowCol<size_t> dims(NUM_ROWS, NUM_COLS);
     const std::vector<int> writeData =
             generateSupportData<int>(11*dims.area());
-    TEST_ASSERT_TRUE(runTest(writeData));
+    CHECK(runTest(writeData));
 }
 
-TEST_CASE(testSupportsDouble)
+TEST_CASE("testSupportsDouble")
 {
     const types::RowCol<size_t> dims(NUM_ROWS, NUM_COLS);
     const std::vector<double> writeData =
             generateSupportData<double>(11*dims.area());
-    TEST_ASSERT_TRUE(runTest(writeData));
+    CHECK(runTest(writeData));
 }
-
-TEST_MAIN(
-        TEST_CHECK(testSupportsInt);
-        TEST_CHECK(testSupportsDouble);
-        )

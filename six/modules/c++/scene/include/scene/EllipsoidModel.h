@@ -23,7 +23,7 @@
 #ifndef __SCENE_ELLIPSOID_MODEL_H__
 #define __SCENE_ELLIPSOID_MODEL_H__
 
-#include <std/optional>
+#include <optional>
 
 #include "scene/Types.h"
 #include "scene/Exports.h"

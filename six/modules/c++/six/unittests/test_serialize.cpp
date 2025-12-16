@@ -23,8 +23,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "TestCase.h"
 #include <six/Serialize.h>
+#include <catch2/catch_test_macros.hpp>
 
 template<typename T> T getRandomScalar()
 {
@@ -91,54 +91,48 @@ bool testString(const std::string& str, bool byteSwap)
     return str == strCopy;
 }
 
-TEST_CASE(ScalarSerialize)
+TEST_CASE("ScalarSerialize")
 {
     // Test with no byte swapping
-    TEST_ASSERT_TRUE(testScalar<int>(false));
-    TEST_ASSERT_TRUE(testScalar<size_t>(false));
-    TEST_ASSERT_TRUE(testScalar<sys::byte>(false));
-    TEST_ASSERT_TRUE(testScalar<float>(false));
-    TEST_ASSERT_TRUE(testScalar<double>(false));
+    CHECK(testScalar<int>(false));
+    CHECK(testScalar<size_t>(false));
+    CHECK(testScalar<sys::byte>(false));
+    CHECK(testScalar<float>(false));
+    CHECK(testScalar<double>(false));
 
     // Test with byte swapping (do not test sys::byte)
-    TEST_ASSERT_TRUE(testScalar<int>(true));
-    TEST_ASSERT_TRUE(testScalar<size_t>(true));
-    TEST_ASSERT_TRUE(testScalar<float>(true));
-    TEST_ASSERT_TRUE(testScalar<double>(true));
+    CHECK(testScalar<int>(true));
+    CHECK(testScalar<size_t>(true));
+    CHECK(testScalar<float>(true));
+    CHECK(testScalar<double>(true));
 }
 
-TEST_CASE(StringSerialize)
+TEST_CASE("StringSerialize")
 {
     const std::string strNonEmpty = "TEST_STRING";
-    TEST_ASSERT_TRUE(testString(strNonEmpty, false));
-    TEST_ASSERT_TRUE(testString(strNonEmpty, true));
+    CHECK(testString(strNonEmpty, false));
+    CHECK(testString(strNonEmpty, true));
 
     const std::string strEmpty = "";
-    TEST_ASSERT_TRUE(testString(strEmpty, false));
-    TEST_ASSERT_TRUE(testString(strEmpty, true));
+    CHECK(testString(strEmpty, false));
+    CHECK(testString(strEmpty, true));
 }
 
-TEST_CASE(VectorSerialize)
+TEST_CASE("VectorSerialize")
 {
     const size_t length = 213;
 
     // Test with no byte swapping
-    TEST_ASSERT_TRUE(testVector<int>(length, false));
-    TEST_ASSERT_TRUE(testVector<size_t>(length, false));
-    TEST_ASSERT_TRUE(testVector<float>(length, false));
-    TEST_ASSERT_TRUE(testVector<double>(length, false));
-    TEST_ASSERT_TRUE(testVector<sys::byte>(length, false));
+    CHECK(testVector<int>(length, false));
+    CHECK(testVector<size_t>(length, false));
+    CHECK(testVector<float>(length, false));
+    CHECK(testVector<double>(length, false));
+    CHECK(testVector<sys::byte>(length, false));
 
     // Test with byte swapping (do not test sys::byte)
-    TEST_ASSERT_TRUE(testVector<int>(length, true));
-    TEST_ASSERT_TRUE(testVector<size_t>(length, true));
-    TEST_ASSERT_TRUE(testVector<float>(length, true));
-    TEST_ASSERT_TRUE(testVector<double>(length, true));
+    CHECK(testVector<int>(length, true));
+    CHECK(testVector<size_t>(length, true));
+    CHECK(testVector<float>(length, true));
+    CHECK(testVector<double>(length, true));
 }
 
-TEST_MAIN(
-    srand(static_cast<unsigned int>(time(NULL)));
-    TEST_CHECK(ScalarSerialize);
-    TEST_CHECK(VectorSerialize);
-    TEST_CHECK(StringSerialize);
-    )

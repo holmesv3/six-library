@@ -25,8 +25,8 @@
 
 #include <memory>
 #include <vector>
-#include <std/filesystem>
-#include <std/string>
+#include <filesystem>
+#include <string>
 
 #ifdef SWIGPYTHON
 #include <mem/AutoPtr.h>

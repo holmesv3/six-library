@@ -24,8 +24,8 @@
 #include <six/Utilities.h>
 #include <six/sicd/Utilities.h>
 
-#include <std/filesystem>
-#include <std/string>
+#include <filesystem>
+#include <string>
 
 /**
  * Write FileSecurity as string so CSM can use it

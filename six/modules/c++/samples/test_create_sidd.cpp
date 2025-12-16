@@ -21,7 +21,7 @@
  */
 #include <iostream>
 
-#include <std/filesystem>
+#include <filesystem>
 
 #include <import/six.h>
 #include <import/six/sidd.h>
@@ -29,7 +29,7 @@
 #include <import/sio/lite.h>
 #include <import/io.h>
 #include <import/xml/lite.h>
-#include <std/bit>
+#include <bit>
 #include "utils.h"
 
 namespace fs = std::filesystem;

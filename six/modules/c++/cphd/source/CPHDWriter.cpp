@@ -22,7 +22,7 @@
 #include <cphd/CPHDWriter.h>
 
 #include <thread>
-#include <std/bit>
+#include <bit>
 #include <algorithm>
 
 #include <except/Exception.h>

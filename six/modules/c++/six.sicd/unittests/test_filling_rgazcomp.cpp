@@ -21,9 +21,12 @@
 */
 
 #include <import/six/sicd.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-TEST_CASE(DerivedRgAzComp)
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+
+TEST_CASE("DerivedRgAzComp")
 {
     six::sicd::Timeline timeline;
     timeline.interPulsePeriod.reset(new six::sicd::InterPulsePeriod());
@@ -76,8 +79,3 @@ TEST_CASE(DerivedRgAzComp)
     TEST_ASSERT_ALMOST_EQ(rgAzComp.kazPoly[2], 3.42980830e-05);
     TEST_ASSERT_ALMOST_EQ(rgAzComp.kazPoly[3], 4.04227407e-05);
 }
-
-TEST_MAIN(
-    TEST_CHECK(DerivedRgAzComp);
-)
-

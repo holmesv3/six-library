@@ -1,7 +1,12 @@
 #include <math/Utilities.h>
 #include <six/sicd/AreaPlaneUtility.h>
 #include <six/sicd/Utilities.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
+#define TEST_ASSERT_ALMOST_EQ_EPS(X, Y, Z) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, Z));
 
 void setupData(six::sicd::ComplexData& data)
 {
@@ -13,7 +18,7 @@ void setupData(six::sicd::ComplexData& data)
     data.setNumCols(100);
 }
 
-TEST_CASE(testAreaPlane)
+TEST_CASE("testAreaPlane")
 {
     std::unique_ptr<six::sicd::ComplexData> data =
             six::sicd::Utilities::createFakeComplexData();
@@ -24,11 +29,11 @@ TEST_CASE(testAreaPlane)
     TEST_ASSERT_EQ(areaPlane.segmentList[0]->getNumLines(), static_cast<size_t>(1));
     TEST_ASSERT_EQ(areaPlane.segmentList[0]->getNumSamples(), static_cast<size_t>(1));
 
-    TEST_ASSERT(math::isNaN(areaPlane.xDirection->spacing));
-    TEST_ASSERT(math::isNaN(areaPlane.yDirection->spacing));
+    CHECK(math::isNaN(areaPlane.xDirection->spacing));
+    CHECK(math::isNaN(areaPlane.yDirection->spacing));
 
-    TEST_ASSERT(math::isNaN(areaPlane.getAdjustedReferencePoint().row));
-    TEST_ASSERT(math::isNaN(areaPlane.getAdjustedReferencePoint().col));
+    CHECK(math::isNaN(areaPlane.getAdjustedReferencePoint().row));
+    CHECK(math::isNaN(areaPlane.getAdjustedReferencePoint().col));
 
     TEST_ASSERT_ALMOST_EQ_EPS(areaPlane.referencePoint.ecef[0],
             4191860, 1);
@@ -52,7 +57,7 @@ TEST_CASE(testAreaPlane)
             1e-5);
 }
 
-TEST_CASE(testBothMethodsGiveSamePlane)
+TEST_CASE("testBothMethodsGiveSamePlane")
 {
     std::unique_ptr<six::sicd::ComplexData> data =
             six::sicd::Utilities::createFakeComplexData();
@@ -71,10 +76,10 @@ TEST_CASE(testBothMethodsGiveSamePlane)
     const six::sicd::AreaPlane& secondAreaPlane =
             *secondData->radarCollection->area->plane;
 
-    TEST_ASSERT(math::isNaN(areaPlane.referencePoint.rowCol.row));
-    TEST_ASSERT(math::isNaN(secondAreaPlane.referencePoint.rowCol.row));
-    TEST_ASSERT(math::isNaN(areaPlane.referencePoint.rowCol.col));
-    TEST_ASSERT(math::isNaN(secondAreaPlane.referencePoint.rowCol.col));
+    CHECK(math::isNaN(areaPlane.referencePoint.rowCol.row));
+    CHECK(math::isNaN(secondAreaPlane.referencePoint.rowCol.row));
+    CHECK(math::isNaN(areaPlane.referencePoint.rowCol.col));
+    CHECK(math::isNaN(secondAreaPlane.referencePoint.rowCol.col));
 
     TEST_ASSERT_ALMOST_EQ_EPS(areaPlane.referencePoint.ecef[0],
             secondAreaPlane.referencePoint.ecef[0], 1e-5);
@@ -92,8 +97,8 @@ TEST_CASE(testBothMethodsGiveSamePlane)
     TEST_ASSERT_ALMOST_EQ_EPS(areaPlane.xDirection->unitVector[2],
             secondAreaPlane.xDirection->unitVector[2], 1e-5);
 
-    TEST_ASSERT(math::isNaN(areaPlane.xDirection->spacing));
-    TEST_ASSERT(math::isNaN(secondAreaPlane.xDirection->spacing));
+    CHECK(math::isNaN(areaPlane.xDirection->spacing));
+    CHECK(math::isNaN(secondAreaPlane.xDirection->spacing));
 
     TEST_ASSERT_EQ(areaPlane.xDirection->elements,
             secondAreaPlane.xDirection->elements);
@@ -108,8 +113,8 @@ TEST_CASE(testBothMethodsGiveSamePlane)
             secondAreaPlane.yDirection->unitVector[2], 1e-5);
 
 
-    TEST_ASSERT(math::isNaN(areaPlane.yDirection->spacing));
-    TEST_ASSERT(math::isNaN(secondAreaPlane.yDirection->spacing));
+    CHECK(math::isNaN(areaPlane.yDirection->spacing));
+    CHECK(math::isNaN(secondAreaPlane.yDirection->spacing));
 
     TEST_ASSERT_EQ(areaPlane.yDirection->elements,
             secondAreaPlane.yDirection->elements);
@@ -118,11 +123,11 @@ TEST_CASE(testBothMethodsGiveSamePlane)
 
     TEST_ASSERT_EQ(areaPlane.segmentList.size(),
             secondAreaPlane.segmentList.size());
-    TEST_ASSERT(areaPlane.segmentList.empty());
+    CHECK(areaPlane.segmentList.empty());
     TEST_ASSERT_EQ(areaPlane.orientation, secondAreaPlane.orientation);
 }
 
-TEST_CASE(testRotatePlane)
+TEST_CASE("testRotatePlane")
 {
     six::sicd::AreaPlane plane;
     plane.orientation = six::OrientationType::LEFT;
@@ -153,7 +158,7 @@ TEST_CASE(testRotatePlane)
     const size_t originalNumSamples = plane.segmentList[0]->getNumSamples();
 
     plane.rotateCCW();
-    TEST_ASSERT(plane.orientation ==
+    CHECK(plane.orientation ==
             six::OrientationType(six::OrientationType::DOWN));
     TEST_ASSERT_EQ(plane.referencePoint.rowCol.row, 8);
     TEST_ASSERT_EQ(plane.referencePoint.rowCol.col, 1);
@@ -183,7 +188,7 @@ TEST_CASE(testRotatePlane)
 }
 
 
-TEST_CASE(testCanRotateFourTimes)
+TEST_CASE("testCanRotateFourTimes")
 {
     six::sicd::AreaPlane plane;
     plane.orientation = six::OrientationType::LEFT;
@@ -214,13 +219,5 @@ TEST_CASE(testCanRotateFourTimes)
     plane.rotateCCW();
     plane.rotateCCW();
     plane.rotateCCW();
-    TEST_ASSERT(plane == *originalPlane);
+    CHECK(plane == *originalPlane);
 }
-
-TEST_MAIN(
-    TEST_CHECK(testAreaPlane);
-    TEST_CHECK(testBothMethodsGiveSamePlane);
-    TEST_CHECK(testRotatePlane);
-    TEST_CHECK(testCanRotateFourTimes);
-    )
-

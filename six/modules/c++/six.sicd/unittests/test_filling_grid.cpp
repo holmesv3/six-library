@@ -20,9 +20,14 @@
 */
 
 #include <import/six/sicd.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-TEST_CASE(DerivedDeltaKsNoImageData)
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
+
+TEST_CASE("DerivedDeltaKsNoImageData")
 {
     six::sicd::ImageData imageData;
     six::sicd::DirectionParameters row;
@@ -41,7 +46,7 @@ TEST_CASE(DerivedDeltaKsNoImageData)
     TEST_ASSERT_ALMOST_EQ(row.deltaK2, 0.1);
 }
 
-TEST_CASE(DerivedDeltaKsWithImageData)
+TEST_CASE("DerivedDeltaKsWithImageData")
 {
     six::sicd::ImageData imageData;
     imageData.validData.push_back(six::RowColInt(10, 20));
@@ -64,7 +69,7 @@ TEST_CASE(DerivedDeltaKsWithImageData)
     TEST_ASSERT_ALMOST_EQ(row.deltaK2, 0.1);
 }
 
-TEST_CASE(IdentityWeightFunction)
+TEST_CASE("IdentityWeightFunction")
 {
     six::sicd::DirectionParameters row;
     row.weightType.reset(new six::sicd::WeightType());
@@ -73,10 +78,10 @@ TEST_CASE(IdentityWeightFunction)
     // This shouldn't affect anything, but it's a required argument
     six::sicd::ImageData imageData;
     row.fillDerivedFields(imageData);
-    TEST_ASSERT(row.weights.empty());
+    CHECK(row.weights.empty());
 }
 
-TEST_CASE(HammingWindow)
+TEST_CASE("HammingWindow")
 {
     six::sicd::DirectionParameters row;
     row.weightType.reset(new six::sicd::WeightType());
@@ -91,7 +96,7 @@ TEST_CASE(HammingWindow)
     TEST_ASSERT_ALMOST_EQ(row.weights[0], row.weights[511]);
 }
 
-TEST_CASE(KaiserWindow)
+TEST_CASE("KaiserWindow")
 {
     six::sicd::DirectionParameters row;
     row.weightType.reset(new six::sicd::WeightType());
@@ -108,7 +113,7 @@ TEST_CASE(KaiserWindow)
     TEST_ASSERT_ALMOST_EQ(row.weights[460], .023764757);
 }
 
-TEST_CASE(FillUnitVectorsFromRMAT)
+TEST_CASE("FillUnitVectorsFromRMAT")
 {
     six::sicd::Grid grid;
     six::PolyXYZ poly;
@@ -133,7 +138,7 @@ TEST_CASE(FillUnitVectorsFromRMAT)
     TEST_ASSERT_ALMOST_EQ(grid.col->unitVector[2], -0.80178372);
 }
 
-TEST_CASE(FillUnitVectorsFromRMCR)
+TEST_CASE("FillUnitVectorsFromRMCR")
 {
     six::sicd::Grid grid;
     six::PolyXYZ poly;
@@ -159,7 +164,7 @@ TEST_CASE(FillUnitVectorsFromRMCR)
 }
 
 
-TEST_CASE(FillUnitVectorsFromINCA)
+TEST_CASE("FillUnitVectorsFromINCA")
 {
     six::sicd::Grid grid;
     six::sicd::RgAzComp rgAzComp;
@@ -206,7 +211,7 @@ TEST_CASE(FillUnitVectorsFromINCA)
     TEST_ASSERT_ALMOST_EQ(grid.col->unitVector[2], -.43784599);
 }
 
-TEST_CASE(FillUnitVectorsFromRgAzComp)
+TEST_CASE("FillUnitVectorsFromRgAzComp")
 {
     six::sicd::Grid grid;
     six::sicd::RgAzComp rgAzComp;
@@ -231,7 +236,7 @@ TEST_CASE(FillUnitVectorsFromRgAzComp)
 }
 
 
-TEST_CASE(FillDirectionParamsKCenterFromKCOAPoly)
+TEST_CASE("FillDirectionParamsKCenterFromKCOAPoly")
 {
     six::sicd::DirectionParameters col;
     col.deltaKCOAPoly = six::Poly2D(3, 3);
@@ -253,7 +258,7 @@ TEST_CASE(FillDirectionParamsKCenterFromKCOAPoly)
     TEST_ASSERT_EQ(col.kCenter, 0);
 }
 
-TEST_CASE(DefaultFromRMAT)
+TEST_CASE("DefaultFromRMAT")
 {
     six::sicd::Grid grid;
     grid.type = six::ComplexImageGridType::NOT_SET; //defaults to RGAZIM
@@ -263,15 +268,15 @@ TEST_CASE(DefaultFromRMAT)
 
     grid.fillDefaultFields(rma, 950);
 
-    TEST_ASSERT(grid.imagePlane.toString() == "SLANT");
+    CHECK(grid.imagePlane.toString() == "SLANT");
     TEST_ASSERT_EQ(grid.imagePlane, six::ComplexImagePlaneType::SLANT);
-    TEST_ASSERT(grid.type.toString() == "XCTYAT");
+    CHECK(grid.type.toString() == "XCTYAT");
     TEST_ASSERT_EQ(grid.type, six::ComplexImageGridType::XCTYAT);
     TEST_ASSERT_ALMOST_EQ(grid.row->kCenter, 5.52368502e-7);
     TEST_ASSERT_ALMOST_EQ(grid.col->kCenter, 6.31360087e-6);
 }
 
-TEST_CASE(DefaultFromRMCR)
+TEST_CASE("DefaultFromRMCR")
 {
     six::sicd::Grid grid;
     grid.type = six::ComplexImageGridType::NOT_SET; //defaults to RGAZIM
@@ -280,15 +285,15 @@ TEST_CASE(DefaultFromRMCR)
 
     grid.fillDefaultFields(rma, 950);
 
-    TEST_ASSERT(grid.imagePlane.toString() == "SLANT");
+    CHECK(grid.imagePlane.toString() == "SLANT");
     TEST_ASSERT_EQ(grid.imagePlane, six::ComplexImagePlaneType::SLANT);
-    TEST_ASSERT(grid.type.toString() == "XRGYCR");
+    CHECK(grid.type.toString() == "XRGYCR");
     TEST_ASSERT_EQ(grid.type, six::ComplexImageGridType::XRGYCR);
     TEST_ASSERT_ALMOST_EQ(grid.row->kCenter, 6.33771780e-6);
     TEST_ASSERT_ALMOST_EQ(grid.col->kCenter, 0);
 }
 
-TEST_CASE(DefaultFromPFA)
+TEST_CASE("DefaultFromPFA")
 {
     six::sicd::Grid grid;
     grid.type = six::ComplexImageGridType::NOT_SET; //defaults to RGAZIM
@@ -299,7 +304,7 @@ TEST_CASE(DefaultFromPFA)
 
     grid.fillDefaultFields(pfa, fc);
 
-    TEST_ASSERT(grid.type.toString() == "RGAZIM");
+    CHECK(grid.type.toString() == "RGAZIM");
     TEST_ASSERT_EQ(grid.type, six::ComplexImageGridType::RGAZIM);
     TEST_ASSERT_ALMOST_EQ(grid.row->kCenter, 1160);
     TEST_ASSERT_ALMOST_EQ(grid.col->kCenter, 0);
@@ -323,20 +328,3 @@ TEST_CASE(DefaultFromPFA)
     TEST_ASSERT_ALMOST_EQ(grid.row->kCenter, 0);
     TEST_ASSERT_ALMOST_EQ(grid.col->kCenter, 0);
 }
-
-TEST_MAIN(
-    TEST_CHECK(DerivedDeltaKsNoImageData);
-    TEST_CHECK(DerivedDeltaKsWithImageData);
-    TEST_CHECK(IdentityWeightFunction);
-    TEST_CHECK(HammingWindow);
-    TEST_CHECK(KaiserWindow);
-    TEST_CHECK(FillUnitVectorsFromRMAT);
-    TEST_CHECK(FillUnitVectorsFromRMCR);
-    TEST_CHECK(FillUnitVectorsFromINCA);
-    TEST_CHECK(FillUnitVectorsFromRgAzComp);
-    TEST_CHECK(FillDirectionParamsKCenterFromKCOAPoly);
-    TEST_CHECK(DefaultFromRMAT);
-    TEST_CHECK(DefaultFromRMCR);
-    TEST_CHECK(DefaultFromPFA);
-    )
-

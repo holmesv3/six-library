@@ -34,7 +34,7 @@
 
 #include <io/ReadUtils.h>
 #include <math/Round.h>
-#include <std/bit>
+#include <bit>
 
 #include <six/NITFWriteControl.h>
 #include <six/XMLControlFactory.h>

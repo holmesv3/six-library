@@ -28,9 +28,12 @@
 #include <cphd/Enums.h>
 #include <cphd/Types.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
 
-TEST_CASE(testDerivativeCODValid)
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
+
+TEST_CASE("testDerivativeCODValid")
 {
     cphd::Dwell dwell;
     cphd::COD cod1;
@@ -52,7 +55,7 @@ TEST_CASE(testDerivativeCODValid)
     TEST_ASSERT_EQ(dwell.cod[0].codTimePoly.derivativeX(),derivativeX2D);
 }
 
-TEST_CASE(testDerivativeDwellValid)
+TEST_CASE("testDerivativeDwellValid")
 {
     cphd::Dwell dwell;
     cphd::DwellTime dtime1;
@@ -75,7 +78,7 @@ TEST_CASE(testDerivativeDwellValid)
 }
 
 
-TEST_CASE(testEquality)
+TEST_CASE("testEquality")
 {
     cphd::Dwell dwell;
     cphd::DwellTime dtime1, dtime2;
@@ -104,17 +107,11 @@ TEST_CASE(testEquality)
 
     // Test identical polynomial vectors
     TEST_ASSERT_EQ(dwell.dtime[0].dwellTimePoly.derivativeX(), derivX);
-    TEST_ASSERT_TRUE((dwell.dtime[0] == dwell.dtime[1]));
+    CHECK((dwell.dtime[0] == dwell.dtime[1]));
 
     dwell.dtime[1].dwellTimePoly = dwell.dtime[1].dwellTimePoly.flipXY();
 
     // Test different polynomial vectors
     TEST_ASSERT_NOT_EQ(dwell.dtime[0].dwellTimePoly.derivativeX(), dwell.dtime[1].dwellTimePoly.derivativeX());
-    TEST_ASSERT_TRUE((dwell.dtime[0] != dwell.dtime[1]));
+    CHECK((dwell.dtime[0] != dwell.dtime[1]));
 }
-
-TEST_MAIN(
-        TEST_CHECK(testDerivativeCODValid);
-        TEST_CHECK(testDerivativeDwellValid);
-        TEST_CHECK(testEquality);
-        )

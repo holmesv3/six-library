@@ -26,12 +26,12 @@
 
 #include <assert.h>
 
-#include <std/string>
+#include <string>
 #include <type_traits>
-#include <std/optional>
+#include <optional>
 #include <memory>
 
-#include <import/gsl.h>
+
 #include <xml/lite/Element.h>
 #include <xml/lite/QName.h>
 

@@ -22,7 +22,7 @@
 #include <cphd/DataWriter.h>
 
 #include <thread>
-#include <std/memory>
+#include <memory>
 
 #include <except/Exception.h>
 #include <sys/Span.h>

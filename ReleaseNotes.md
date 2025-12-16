@@ -2,6 +2,10 @@
 
 # SIX [Release](https://github.com/ngageoint/six-library/releases) Notes
 
+## [Version 4.0]() WIP
+* [coda-oss](https://github.com/mdaus/coda-oss) version [2.0]()
+* [nitro](https://github.com/mdaus/nitro) version [3.0]()
+
 ## [Version 3.3.0](https://github.com/ngageoint/six-library/releases/tag/SIX-3.3.0); March 18, 2024
 * [coda-oss](https://github.com/mdaus/coda-oss) version [2024-03-18](https://github.com/mdaus/coda-oss/releases/tag/2024-03-18)
 * [nitro](https://github.com/mdaus/nitro) version [2.11.6](https://github.com/mdaus/nitro/releases/tag/NITRO-2.11.6)

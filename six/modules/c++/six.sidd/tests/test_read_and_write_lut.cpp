@@ -21,9 +21,9 @@
 */
 
 #include <vector>
-#include <std/filesystem>
-#include <std/span>
-#include <std/cstddef>
+#include <filesystem>
+#include <span>
+#include <cstddef>
 
 #include <import/six.h>
 #include <import/six/sidd.h>

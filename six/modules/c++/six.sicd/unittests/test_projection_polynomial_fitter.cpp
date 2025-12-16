@@ -1,11 +1,17 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <std/filesystem>
+#include <filesystem>
 
 #include <import/sys.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+#define TEST_ASSERT_ALMOST_EQ_EPS(X, Y, Z) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, Z));
+
 #include "scene/ProjectionPolynomialFitter.h"
 #include "scene/ProjectionModel.h"
 #include "six/sicd/ComplexData.h"
@@ -63,7 +69,7 @@ inline const double* output_plane_points(size_t i)
     return OUTPUT_PLANE_POINTS[i];
 }
 
-TEST_CASE(testProjectOutputToSlant)
+TEST_CASE("testProjectOutputToSlant")
 {
     if (globalFitter == nullptr)
     {
@@ -94,7 +100,7 @@ TEST_CASE(testProjectOutputToSlant)
     }
 }
 
-TEST_CASE(testProjectSlantToOutput)
+TEST_CASE("testProjectSlantToOutput")
 {
     if (globalFitter == nullptr)
     {
@@ -124,8 +130,3 @@ TEST_CASE(testProjectSlantToOutput)
                 10e-3);
     }
 }
-
-TEST_MAIN(
-    TEST_CHECK(testProjectOutputToSlant);
-    TEST_CHECK(testProjectSlantToOutput);
-    )

@@ -24,8 +24,8 @@
 #include <memory>
 #include <algorithm>
 #include <string>
-#include <std/span>
-#include <std/cstddef>
+#include <span>
+#include <cstddef>
 
 #include <nitf/coda-oss.hpp>
 #include <except/Exception.h>

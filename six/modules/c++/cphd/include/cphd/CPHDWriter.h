@@ -26,11 +26,11 @@
 
 #include <string>
 #include <vector>
-#include <std/span>
-#include <std/cstddef>
+#include <span>
+#include <cstddef>
 #include <functional>
 #include <memory>
-#include <std/filesystem>
+#include <filesystem>
 
 #include <types/RowCol.h>
 #include <io/FileOutputStream.h>

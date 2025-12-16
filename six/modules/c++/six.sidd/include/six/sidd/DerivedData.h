@@ -23,7 +23,7 @@
 #ifndef SIX_six_sidd_DerivedData_h_INCLUDED_
 #define SIX_six_sidd_DerivedData_h_INCLUDED_
 
-#include <std/filesystem>
+#include <filesystem>
 
 #include <mem/ScopedCopyablePtr.h>
 #include <six/Data.h>

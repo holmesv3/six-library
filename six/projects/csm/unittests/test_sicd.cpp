@@ -25,7 +25,7 @@
 #include <six/sicd/ComplexXMLControl.h>
 #include <str/Encoding.h>
 
-#include <std/filesystem>
+#include <filesystem>
 
 #include "utilities.h"
 
@@ -34,7 +34,11 @@
 #include <Plugin.h>
 #include <RasterGM.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
+#define TEST_ASSERT_LESSER(X, Y) CHECK(X < Y);
 
 namespace fs = std::filesystem;
 
@@ -220,7 +224,7 @@ void matrixCondition(const math::linear::MatrixMxN<N, N>& m,
 
 std::unique_ptr<TestHarness> TestHarness::mInstance;
 
-TEST_CASE(testPluginParams)
+TEST_CASE("testPluginParams")
 {
     TestHarness& harness = TestHarness::getInstance();
     const csm::Plugin& plugin = harness.plugin();
@@ -237,7 +241,7 @@ TEST_CASE(testPluginParams)
     TEST_ASSERT_EQ(plugin.getModelFamily(1), "GeometricRaster");
 }
 
-void testCommon(std::string& testName, csm::RasterGM& model)
+void testCommon(csm::RasterGM& model)
 {
     // TODO: add checks for getValidImageRange() if we can identify what the
     // return should look like
@@ -256,7 +260,7 @@ void testCommon(std::string& testName, csm::RasterGM& model)
     csm::ImageCoord ic = model->groundToImage(refpt);*/
 }
 
-TEST_CASE(testFromFilenameISD)
+TEST_CASE("testFromFilenameISD")
 {
     TestHarness& harness = TestHarness::getInstance();
     const auto sicd = harness.find("cropped_sicd_120.nitf");
@@ -264,15 +268,15 @@ TEST_CASE(testFromFilenameISD)
 
     csm::Isd isd(sicd.string());
 
-    TEST_ASSERT(plugin.canModelBeConstructedFromISD(isd, "SICD_SENSOR_MODEL"));
+    CHECK(plugin.canModelBeConstructedFromISD(isd, "SICD_SENSOR_MODEL"));
 
     std::unique_ptr<csm::RasterGM> model(reinterpret_cast<csm::RasterGM*>(
             plugin.constructModelFromISD(isd, "SICD_SENSOR_MODEL")));
 
-    testCommon(testName, *model);
+    testCommon(*model);
 }
 
-TEST_CASE(testFromNitf21ISD)
+TEST_CASE("testFromNitf21ISD")
 {
     TestHarness& harness = TestHarness::getInstance();
     const auto sicd = harness.find("cropped_sicd_120.nitf");
@@ -294,15 +298,15 @@ TEST_CASE(testFromNitf21ISD)
     auto isd =
             constructIsd(sicd.string(), reader, complexData.get(), xmlRegistry);
 
-    TEST_ASSERT(plugin.canModelBeConstructedFromISD(*isd, "SICD_SENSOR_MODEL"));
+    CHECK(plugin.canModelBeConstructedFromISD(*isd, "SICD_SENSOR_MODEL"));
 
     std::unique_ptr<csm::RasterGM> model(reinterpret_cast<csm::RasterGM*>(
             plugin.constructModelFromISD(*isd, "SICD_SENSOR_MODEL")));
 
-    testCommon(testName, *model);
+    testCommon(*model);
 }
 
-TEST_CASE(testFromState)
+TEST_CASE("testFromState")
 {
     TestHarness& harness = TestHarness::getInstance();
     const auto sicd = harness.find("cropped_sicd_120.nitf");
@@ -310,19 +314,19 @@ TEST_CASE(testFromState)
 
     csm::Isd isd = csm::Isd(sicd.string());
 
-    TEST_ASSERT(plugin.canISDBeConvertedToModelState(isd, "SICD_SENSOR_MODEL"));
+    CHECK(plugin.canISDBeConvertedToModelState(isd, "SICD_SENSOR_MODEL"));
     std::string state = plugin.convertISDToModelState(isd, "SICD_SENSOR_MODEL");
 
     TEST_ASSERT_EQ(plugin.getModelNameFromModelState(state),
                    "SICD_SENSOR_MODEL");
-    TEST_ASSERT(
+    CHECK(
             plugin.canModelBeConstructedFromState("SICD_SENSOR_MODEL", state));
 
     std::unique_ptr<csm::RasterGM> model(reinterpret_cast<csm::RasterGM*>(
             plugin.constructModelFromState(state)));
 }
 
-void checkCovarianceMatrix(std::string& testName, csm::RasterGM& model)
+void checkCovarianceMatrix(csm::RasterGM& model)
 {
     for (int i = 0; i < 7; i++)
         TEST_ASSERT_NOT_EQ(model.getParameterCovariance(i, i), 0.);
@@ -335,7 +339,7 @@ void checkCovarianceMatrix(std::string& testName, csm::RasterGM& model)
     double cond;
     bool posDefinite;
     matrixCondition(covar, cond, posDefinite);
-    TEST_ASSERT(posDefinite);
+    CHECK(posDefinite);
 }
 
 void addCompositeSCP(six::sicd::ComplexData& complexData)
@@ -416,7 +420,7 @@ void addUnmodeled(six::sicd::ComplexData& complexData, bool includeDecorr)
     }
 }
 
-TEST_CASE(testErrorStatistics1)
+TEST_CASE("testErrorStatistics1")
 {
     TestHarness& harness = TestHarness::getInstance();
 
@@ -424,11 +428,13 @@ TEST_CASE(testErrorStatistics1)
 
     auto model = harness.modelFromComplex(complexData);
 
-    checkCovarianceMatrix(testName, *model);
+    checkCovarianceMatrix(*model);
     for (int i = 0; i < 7; i++)
-        TEST_ASSERT_EQ(model->getParameterCovariance(i, i),
-                       (i < 3) ? 10.0 : 0.1);
-
+    {
+        const auto val = model->getParameterCovariance(i, i);
+        if (i < 3) CHECK(val == 10.0);
+        else CHECK(val == 0.1);
+    }
     complexData->errorStatistics.reset(new six::ErrorStatistics());
 
     // TODO: this test should be augmented with the many possible permutations
@@ -438,7 +444,7 @@ TEST_CASE(testErrorStatistics1)
     addUnmodeled(*complexData, true);
 
     model = harness.modelFromComplex(complexData);
-    checkCovarianceMatrix(testName, *model);
+    checkCovarianceMatrix(*model);
 
     for (int i = 0; i < 7; i++)
         std::cout << "parameter " << i << ": "
@@ -457,7 +463,7 @@ TEST_CASE(testErrorStatistics1)
         TEST_ASSERT_LESSER(cue[i], ue[i]);
 }
 
-TEST_CASE(testErrorStatistics2)
+TEST_CASE("testErrorStatistics2")
 {
     TestHarness& harness = TestHarness::getInstance();
 
@@ -465,15 +471,15 @@ TEST_CASE(testErrorStatistics2)
 
     addComponents(*complexData, six::FrameType::ECF, true);
     auto model_ecf = harness.modelFromComplex(complexData);
-    checkCovarianceMatrix(testName, *model_ecf);
+    checkCovarianceMatrix(*model_ecf);
 
     addComponents(*complexData, six::FrameType::RIC_ECF, true);
     auto model_ric_ecf = harness.modelFromComplex(complexData);
-    checkCovarianceMatrix(testName, *model_ric_ecf);
+    checkCovarianceMatrix(*model_ric_ecf);
 
     addComponents(*complexData, six::FrameType::RIC_ECI, true);
     auto model_ric_eci = harness.modelFromComplex(complexData);
-    checkCovarianceMatrix(testName, *model_ric_eci);
+    checkCovarianceMatrix(*model_ric_eci);
 
     for (int i = 0; i < 7; i++)
         for (int j = 0; j < 7; j++)
@@ -487,7 +493,7 @@ TEST_CASE(testErrorStatistics2)
         }
 }
 
-TEST_CASE(testModelState)
+TEST_CASE("testModelState")
 {
     TestHarness& harness = TestHarness::getInstance();
     const auto sicd = harness.find("cropped_sicd_120.nitf");
@@ -495,12 +501,12 @@ TEST_CASE(testModelState)
 
     csm::Isd isd = csm::Isd(sicd.string());
 
-    TEST_ASSERT(plugin.canISDBeConvertedToModelState(isd, "SICD_SENSOR_MODEL"));
+    CHECK(plugin.canISDBeConvertedToModelState(isd, "SICD_SENSOR_MODEL"));
     std::string state = plugin.convertISDToModelState(isd, "SICD_SENSOR_MODEL");
 
     TEST_ASSERT_EQ(plugin.getModelNameFromModelState(state),
                    "SICD_SENSOR_MODEL");
-    TEST_ASSERT(
+    CHECK(
             plugin.canModelBeConstructedFromState("SICD_SENSOR_MODEL", state));
 
     std::unique_ptr<csm::RasterGM> model(reinterpret_cast<csm::RasterGM*>(
@@ -516,7 +522,7 @@ TEST_CASE(testModelState)
     TEST_ASSERT_EQ(model2->getModelState(), state);
 }
 
-TEST_CASE(testAdjParamsState)
+TEST_CASE("testAdjParamsState")
 {
     TestHarness& harness = TestHarness::getInstance();
     const auto sicd = harness.find("cropped_sicd_120.nitf");
@@ -576,7 +582,7 @@ TEST_CASE(testAdjParamsState)
 }
 
 // Test imageToGround projections using modified adjustable parameters
-TEST_CASE(testAdjParams1)
+TEST_CASE("testAdjParams1")
 {
     TestHarness& harness = TestHarness::getInstance();
     const auto sicd = harness.find("cropped_sicd_120.nitf");
@@ -618,7 +624,7 @@ TEST_CASE(testAdjParams1)
 }
 
 // Test groundToImage projections using modified adjustable parameters
-TEST_CASE(testAdjParams2)
+TEST_CASE("testAdjParams2")
 {
     TestHarness& harness = TestHarness::getInstance();
     const auto sicd = harness.find("cropped_sicd_120.nitf");
@@ -654,7 +660,7 @@ TEST_CASE(testAdjParams2)
     }
 }
 
-TEST_CASE(testImageIdentifier)
+TEST_CASE("testImageIdentifier")
 {
     TestHarness& harness = TestHarness::getInstance();
     const auto sicd = harness.find("cropped_sicd_120.nitf");
@@ -672,14 +678,3 @@ TEST_CASE(testImageIdentifier)
             plugin.constructModelFromState(model->getModelState())));
     TEST_ASSERT_EQ(model2->getImageIdentifier(), "test identifier");
 }
-
-TEST_MAIN(TEST_CHECK(testPluginParams); TEST_CHECK(testFromFilenameISD);
-          TEST_CHECK(testFromNitf21ISD);
-          TEST_CHECK(testFromState);
-          TEST_CHECK(testErrorStatistics1);
-          TEST_CHECK(testErrorStatistics2);
-          TEST_CHECK(testModelState);
-          TEST_CHECK(testAdjParamsState);
-          TEST_CHECK(testAdjParams1);
-          TEST_CHECK(testAdjParams2);
-          TEST_CHECK(testImageIdentifier);)

@@ -28,7 +28,7 @@
 #include <complex>
 #include <unordered_map>
 #include <vector>
-#include <std/cstddef>
+#include <cstddef>
 
 #include <scene/sys_Conf.h>
 #include <io/SeekableStreams.h>

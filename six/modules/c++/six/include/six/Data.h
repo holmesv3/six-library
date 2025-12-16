@@ -27,8 +27,8 @@
 
 #include <vector>
 #include <memory>
-#include <std/span>
-#include <std/cstddef>
+#include <span>
+#include <cstddef>
 
 #include "six/Types.h"
 #include "six/Classification.h"

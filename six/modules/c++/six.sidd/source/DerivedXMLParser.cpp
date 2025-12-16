@@ -25,10 +25,10 @@
 #include <sstream>
 
 #include <nitf/coda-oss.hpp>
-#include <std/memory>
+#include <memory>
 #include <str/Manip.h>
 #include <except/Exception.h>
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 #include <six/sidd/DerivedDataBuilder.h>
 
 namespace

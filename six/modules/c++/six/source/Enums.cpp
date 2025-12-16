@@ -22,7 +22,7 @@
  */
 #include "six/Enums.h"
 
-#include <std/optional>
+#include <optional>
 
 #include "six/Utilities.h"
 
@@ -31,7 +31,7 @@ static bool is_OTHER_(const std::string& v)
     // OTHER.* for  SIDD 3.0/SICD 1.3, not "OTHER"
     if (str::starts_with(v, "OTHER") && (v != "OTHER")) // i.e., "OTHER_foo"
     {
-        // "where * = 0 or more characters that does not contain “:” (0x3A)."
+        // "where * = 0 or more characters that does not contain ï¿½:ï¿½ (0x3A)."
         return v.find(':') == std::string::npos; // "OTHER:foo" is invalid
     }
     return false; // "OTHER" or "<something else>"

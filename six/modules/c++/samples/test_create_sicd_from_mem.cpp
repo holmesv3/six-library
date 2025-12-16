@@ -22,7 +22,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
-#include <std/filesystem>
+#include <filesystem>
 #include <algorithm>
 
 #include <six/NITFHeaderCreator.h>

@@ -23,14 +23,13 @@
 
 #include <stdexcept>
 #include <array>
-#include <std/memory>
+#include <memory>
 #include <tuple> // std::ignore
 #include <algorithm>
 #include <iterator>
 #include <future>
-#include <std/mdspan>
 
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 #include <mt/Algorithm.h>
 #include <sys/Span.h>
 
@@ -140,7 +139,7 @@ template<typename TToComplexFunc>
 static auto createLookup(TToComplexFunc toComplex)
 {
     std::vector<six::zfloat> retval(lookupDims[0] * lookupDims[1]); 
-    std::mdspan<six::zfloat, std::dextents<size_t, 2>> values(retval.data(), lookupDims);
+    std::experimental::mdspan<six::zfloat, std::experimental::dextents<size_t, 2>> values(retval.data(), lookupDims);
 
     // For all possible amp/phase values (there are "only" 256*256=65536), get and save the
     // complex<float> value.
@@ -148,7 +147,7 @@ static auto createLookup(TToComplexFunc toComplex)
     {
         for (const auto phase : Utilities::iota_0_256())
         {
-            values(amplitude, phase) = toComplex(amplitude, phase);
+            values[amplitude, phase] = toComplex(amplitude, phase);
         }
     }
 
@@ -200,7 +199,7 @@ void ImageData::toComplex(six::Amp8iPhs8iLookup_t values, std::span<const AMP8I_
 {
     const auto toComplex_ = [&values](const auto& v)
     {
-        return values(v.amplitude, v.phase);
+        return values[v.amplitude, v.phase];
     };
     std::ignore = mt::Transform_par(inputs.begin(), inputs.end(), results.begin(), toComplex_);
 }

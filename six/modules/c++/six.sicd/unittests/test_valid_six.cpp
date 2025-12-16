@@ -22,14 +22,14 @@
 
 #include <stdlib.h>
 
-#include <std/string>
+#include <string>
 #include <iostream>
 #include <string>
 #include <utility>
-#include <std/filesystem>
-#include <std/optional>
+#include <filesystem>
+#include <optional>
 #include <cmath>
-#include <std/span>
+#include <span>
 #include <algorithm>
 
 #include <io/FileInputStream.h>
@@ -49,7 +49,10 @@
 #include <six/XmlLite.h>
 
 #include "../tests/TestUtilities.h"
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
 
 #if _MSC_VER
 #pragma warning(disable: 4459) //  declaration of '...' hides global declaration
@@ -57,7 +60,6 @@
 
 static std::shared_ptr<six::Container> getContainer(six::sicd::NITFReadComplexXMLControl& reader)
 {
-    static const std::string testName = "test_valid_six";
     auto container = reader.getContainer();
     TEST_ASSERT_EQ(six::DataType::COMPLEX, container->getDataType());
     TEST_ASSERT_EQ(static_cast<size_t>(1), container->size());
@@ -66,7 +68,6 @@ static std::shared_ptr<six::Container> getContainer(six::sicd::NITFReadComplexXM
 
 static std::unique_ptr<six::sicd::ComplexData> getComplexData(const six::Container& container, size_t jj)
 {
-    static const std::string testName = "test_valid_six";
     std::unique_ptr<six::Data> data_;
     data_.reset(container.getData(jj)->clone());
 
@@ -74,14 +75,14 @@ static std::unique_ptr<six::sicd::ComplexData> getComplexData(const six::Contain
     std::unique_ptr<six::sicd::ComplexData> retval(dynamic_cast<six::sicd::ComplexData*>(data_.release()));
 
     logging::NullLogger nullLogger;
-    //TEST_ASSERT_TRUE(retval->validate(nullLogger));
+    //CHECK(retval->validate(nullLogger));
     const auto& geoData = *(retval->geoData);
-    TEST_ASSERT_TRUE(geoData.validate(nullLogger));
+    CHECK(geoData.validate(nullLogger));
     const auto& imageData = *(retval->imageData);
-    TEST_ASSERT_TRUE(imageData.validate(geoData, nullLogger));
+    CHECK(imageData.validate(geoData, nullLogger));
 
     const auto& classification = retval->getClassification();
-    TEST_ASSERT_TRUE(classification.isUnclassified());
+    CHECK(classification.isUnclassified());
 
     return retval;
 }
@@ -89,7 +90,6 @@ static std::unique_ptr<six::sicd::ComplexData> getComplexData(const six::Contain
 static void test_nitf_image_info(six::sicd::ComplexData& complexData, const std::filesystem::path& inputPathname,
     nitf::PixelValueType expectedPixelValueType)
 {
-    static const std::string testName = "test_valid_six";
 
     constexpr auto expectedBlockingMode = nitf::BlockingMode::Pixel;
     constexpr auto expectedImageRepresentation = nitf::ImageRepresentation::NODISPLY;
@@ -124,7 +124,7 @@ static void test_nitf_image_info(six::sicd::ComplexData& complexData, const std:
     }
 }
 
-static void valid_six_50x50_(const std::string& testName, const std::vector<std::filesystem::path>* pSchemaPaths)
+static void valid_six_50x50_(const std::vector<std::filesystem::path>* pSchemaPaths)
 {
     static const auto inputPathname = six::testing::getNitfPath("sicd_50x50.nitf");
     std::unique_ptr<six::sicd::ComplexData> pComplexData;
@@ -141,27 +141,27 @@ static void valid_six_50x50_(const std::string& testName, const std::vector<std:
 
     test_nitf_image_info(*pComplexData, inputPathname, nitf::PixelValueType::Floating);
 }
-TEST_CASE(valid_six_50x50)
+TEST_CASE("valid_six_50x50")
 {
-    valid_six_50x50_(testName, nullptr /*pSchemaPaths*/); // no XML validiaton
+    valid_six_50x50_(nullptr /*pSchemaPaths*/); // no XML validiaton
   
     auto schemaPaths_ = six::testing::getSchemaPaths();
-    valid_six_50x50_(testName, &schemaPaths_); // validate against schema (actual path)
+    valid_six_50x50_(&schemaPaths_); // validate against schema (actual path)
 
     schemaPaths_.clear();
-    valid_six_50x50_(testName, &schemaPaths_); // "validate" against schema (use a default path)
+    valid_six_50x50_(&schemaPaths_); // "validate" against schema (use a default path)
 }
 
 inline static std::string classificationText_asIso8859_1()
 {
-    return "NON CLASSIFI\xc9 / UNCLASSIFIED";  // ISO8859-1 "NON CLASSIFIÉ / UNCLASSIFIED"
+    return "NON CLASSIFI\xc9 / UNCLASSIFIED";  // ISO8859-1 "NON CLASSIFIï¿½ / UNCLASSIFIED"
 }
 inline static std::string classificationText_asUtf8()
 {
-    return "NON CLASSIFI\xc3\x89 / UNCLASSIFIED";  // UTF-8 "NON CLASSIFIÉ / UNCLASSIFIED"
+    return "NON CLASSIFI\xc3\x89 / UNCLASSIFIED";  // UTF-8 "NON CLASSIFIï¿½ / UNCLASSIFIED"
 }
 
-TEST_CASE(sicd_French_xml)
+TEST_CASE("sicd_French_xml")
 {
     const auto inputPathname = six::testing::getNitfPath("sicd_French_xml.nitf");
     std::unique_ptr<six::sicd::ComplexData> pComplexData;
@@ -177,7 +177,7 @@ TEST_CASE(sicd_French_xml)
     test_nitf_image_info(*pComplexData, inputPathname, nitf::PixelValueType::Floating);
 }
 
-//TEST_CASE(sicd_French_legacy_xml)
+//TEST_CASE("sicd_French_legacy_xml")
 //{
 //    const auto inputPathname = six::testing::getNitfExternalsPath("sicd_French_xml.nitf");
 //    const auto pathname = inputPathname.string();
@@ -191,7 +191,7 @@ TEST_CASE(sicd_French_xml)
 //    reader.load(pathname, schemaPaths_);
 //
 //    // For SICD, there's only one image (container->size() == 1)
-//    TEST_ASSERT(reader.getContainer()->size() == 1);
+//    CHECK(reader.getContainer()->size() == 1);
 //}
 
 static bool find_string(io::FileInputStream& stream, const std::string& s)
@@ -216,14 +216,14 @@ static bool find_string(io::FileInputStream& stream, const std::string& s)
     stream.seek(pos, io::Seekable::START);
     return false;
 }
-TEST_CASE(sicd_French_xml_raw)
+TEST_CASE("sicd_French_xml_raw")
 {
     // This is a binary file with XML burried in it somewhere
     const auto path = six::testing::getNitfPath("sicd_French_xml.nitf");
 
     io::FileInputStream input(path.string());
     const auto result = find_string(input, "<SICD ");
-    TEST_ASSERT_TRUE(result);
+    CHECK(result);
 
     six::MinidomParser xmlParser;
     xmlParser.parse(input);
@@ -243,17 +243,16 @@ TEST_CASE(sicd_French_xml_raw)
     std::u8string u8_characterData;
     classificationXML.getCharacterData(u8_characterData);
     TEST_ASSERT_EQ(u8_characterData.length(), expectedLength);
-    TEST_ASSERT(u8_characterData == u8_expectedCharData8);
+    CHECK(u8_characterData == u8_expectedCharData8);
 }
 
 static void test_assert(const six::sicd::ComplexData& complexData,
     six::PixelType expectedPixelType, size_t expectedNumBytesPerPixel)
 {
-    static const std::string testName("test_valid_six");
     TEST_ASSERT_EQ(expectedPixelType, complexData.getPixelType());
 
     const auto& classification = complexData.getClassification();
-    TEST_ASSERT_TRUE(classification.isUnclassified());
+    CHECK(classification.isUnclassified());
 
     const auto numBytesPerPixel = complexData.getNumBytesPerPixel();
     TEST_ASSERT_EQ(expectedNumBytesPerPixel, numBytesPerPixel);
@@ -278,7 +277,7 @@ static std::vector<std::byte> readFromNITF(const std::filesystem::path& inputPat
     throw std::invalid_argument("Unknown pixelType");
 }
 
-TEST_CASE(test_readFromNITF_sicd_50x50)
+TEST_CASE("test_readFromNITF_sicd_50x50")
 {
     auto inputPathname = six::testing::getNitfPath("sicd_50x50.nitf");
     auto buffer = readFromNITF(inputPathname);
@@ -295,7 +294,7 @@ static std::vector<six::zfloat> readSicd(const std::filesystem::path& inputPathn
 {
     return readSicd_(inputPathname, six::PixelType::RE32F_IM32F, sizeof(six::zfloat)).widebandData;
 }
-TEST_CASE(test_read_sicd_50x50)
+TEST_CASE("test_read_sicd_50x50")
 {
     auto inputPathname = six::testing::getNitfPath("sicd_50x50.nitf");
     auto widebandData = readSicd(inputPathname);
@@ -313,7 +312,6 @@ static std::vector<six::zfloat> make_complex_image(const six::sicd::ComplexData&
 template<typename T>
 static void test_assert_eq(std::span<const std::byte> bytes, const std::vector<T>& rawData)
 {
-    static const std::string testName("test_valid_six");
     const auto rawDataSizeInBytes = rawData.size() * sizeof(rawData[0]);
     TEST_ASSERT_EQ(bytes.size(), rawDataSizeInBytes);
 
@@ -360,12 +358,11 @@ static void read_raw_data(const std::filesystem::path& path, six::PixelType pixe
     }
 }
 
-static void read_nitf(const std::string& testName,
-    const std::filesystem::path& path, six::PixelType pixelType, const std::vector<six::zfloat>& image)
+static void read_nitf(const std::filesystem::path& path, six::PixelType pixelType, const std::vector<six::zfloat>& image)
 {
     const auto expectedNumBytesPerPixel = pixelType == six::PixelType::RE32F_IM32F ? 8 : (pixelType == six::PixelType::AMP8I_PHS8I ? 2 : -1);
     const auto result = readSicd_(path, pixelType, expectedNumBytesPerPixel);
-    TEST_ASSERT(result.widebandData == image);
+    CHECK(result.widebandData == image);
 
     const auto bytes = six::sicd::testing::toBytes(result);
     read_raw_data(path, pixelType, std::span<const std::byte>(bytes.data(), bytes.size()));
@@ -389,8 +386,7 @@ static void save(const std::filesystem::path& outputName, const std::vector<six:
 }
 
 template<typename TSave>
-static void test_create_sicd_from_mem_(const std::string& testName,
-    const std::filesystem::path& outputName, six::PixelType pixelType, bool makeAmplitudeTable,
+static void test_create_sicd_from_mem_(const std::filesystem::path& outputName, six::PixelType pixelType, bool makeAmplitudeTable,
     TSave save)
 {
     const types::RowCol<size_t> dims(2, 2);
@@ -404,25 +400,15 @@ static void test_create_sicd_from_mem_(const std::string& testName,
 
     const auto image = make_complex_image(*pComplexData, dims);
     save(outputName, image, std::move(pComplexData));
-    read_nitf(testName, outputName, pixelType, image);
+    read_nitf(outputName, pixelType, image);
 }
-static void test_create_sicd_from_mem(const std::string& testName, const std::filesystem::path& outputName, six::PixelType pixelType, bool makeAmplitudeTable = false)
+static void test_create_sicd_from_mem(const std::filesystem::path& outputName, six::PixelType pixelType, bool makeAmplitudeTable = false)
 {
-    test_create_sicd_from_mem_(testName, outputName, pixelType, makeAmplitudeTable, save);
-    test_create_sicd_from_mem_(testName, outputName, pixelType, makeAmplitudeTable, buffer_list_save);
+    test_create_sicd_from_mem_(outputName, pixelType, makeAmplitudeTable, save);
+    test_create_sicd_from_mem_(outputName, pixelType, makeAmplitudeTable, buffer_list_save);
 }
 
-TEST_CASE(test_create_sicd_from_mem_32f)
+TEST_CASE("test_create_sicd_from_mem_32f")
 {
-    test_create_sicd_from_mem(testName, "test_create_sicd_from_mem_32f.sicd", six::PixelType::RE32F_IM32F);
+    test_create_sicd_from_mem("test_create_sicd_from_mem_32f.sicd", six::PixelType::RE32F_IM32F);
 }
-
-TEST_MAIN(
-    TEST_CHECK(valid_six_50x50);
-    TEST_CHECK(sicd_French_xml_raw);
-    TEST_CHECK(sicd_French_xml);
-    //TEST_CHECK(sicd_French_legacy_xml);    
-    TEST_CHECK(test_readFromNITF_sicd_50x50);
-    TEST_CHECK(test_read_sicd_50x50);
-    TEST_CHECK(test_create_sicd_from_mem_32f);
-    )

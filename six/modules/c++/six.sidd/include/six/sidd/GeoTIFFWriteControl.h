@@ -25,7 +25,7 @@
 
 #if !defined(SIX_TIFF_DISABLED)
 
-#include <std/filesystem>
+#include <filesystem>
 
 #include "six/Types.h"
 #include "six/Container.h"

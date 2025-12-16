@@ -28,7 +28,7 @@
 
 #include <ostream>
 #include <vector>
-#include <std/optional>
+#include <optional>
 
 #include <six/sicd/Antenna.h>
 #include <six/XsElement.h>

@@ -24,11 +24,11 @@
 #define SIX_six_sicd_Utilities_h_INCLUDED_
 
 #include <memory>
-#include <std/string>
+#include <string>
 #include <vector>
 #include <utility>
-#include <std/span>
-#include <std/filesystem>
+#include <span>
+#include <filesystem>
 
 #include <scene/SceneGeometry.h>
 #include <scene/ProjectionModel.h>

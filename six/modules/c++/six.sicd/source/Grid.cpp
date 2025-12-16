@@ -21,7 +21,7 @@
  */
 #include "six/sicd/Grid.h"
 
-#include <std/memory>
+#include <memory>
 
 #include "six/sicd/GeoData.h"
 #include "six/sicd/ImageData.h"

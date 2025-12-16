@@ -22,9 +22,10 @@
 
 #include <assert.h>
 
-#include <std/filesystem>
+#include <filesystem>
 #include <algorithm>
 #include <iterator>
+#include <set>
 
 #include <logging/NullLogger.h>
 #include <sys/Path.h>
@@ -185,7 +186,7 @@ static void validate_(
         const xml::lite::Element& rootElement,
         const std::string& spec,
         const std::string& version,
-        const std::vector<coda_oss::filesystem::path>& foundSchemas,
+        const std::vector<std::filesystem::path>& foundSchemas,
         logging::Logger& log)
 {
     if (foundSchemas.size() < 1)
@@ -202,19 +203,19 @@ static void validate_(
     const auto strPrettyXml = xmlStream.stream().str();
 
     // deduplicate the schema list
-    auto comp = [](const coda_oss::filesystem::path& x,
-                   const coda_oss::filesystem::path& y) {
+    auto comp = [](const std::filesystem::path& x,
+                   const std::filesystem::path& y) {
         return x.string() < y.string();
     };
-    std::set<coda_oss::filesystem::path, decltype(comp)> uniq(
+    std::set<std::filesystem::path, decltype(comp)> uniq(
             foundSchemas.begin(), foundSchemas.end(), comp);
-    std::vector<coda_oss::filesystem::path> uniq_schemas(uniq.begin(),
+    std::vector<std::filesystem::path> uniq_schemas(uniq.begin(),
                                                          uniq.end());
 
     // Remove schema paths whose filename component do not match the spec or
     // version
     auto spec_version_filter = [spec,
-                                version](const coda_oss::filesystem::path& x) {
+                                version](const std::filesystem::path& x) {
         auto x2 = x.filename().string();
         return x2.find(spec) == std::string::npos ||
                 x2.find(version) == std::string::npos;
@@ -233,14 +234,14 @@ static void validate_(
         decltype(strPrettyXml) needle8(str::u8FromNative(needle));
 
         typename decltype(uniq_schemas)::iterator hitlist;
-        auto has_needle = [needle](const coda_oss::filesystem::path& x) {
+        auto has_needle = [needle](const std::filesystem::path& x) {
             return x.string().find(needle) != std::string::npos;
         };
         if (strPrettyXml.find(needle8) != std::string::npos)
         {
             // Doc is 201609, remove competing schemas
             auto not_has_needle = std::not1(
-                    std::function<bool(const coda_oss::filesystem::path& x)>(
+                    std::function<bool(const std::filesystem::path& x)>(
                             has_needle));
             hitlist = std::remove_if(uniq_schemas.begin(),
                                      uniq_schemas.end(),
@@ -275,7 +276,7 @@ static void validate_(
 
 static void validate_(const xml::lite::Document& doc,
     const std::string& spec, const std::string& version,
-    const std::vector<coda_oss::filesystem::path>& foundSchemas, logging::Logger& log)
+    const std::vector<std::filesystem::path>& foundSchemas, logging::Logger& log)
 {
     auto rootElement = doc.getRootElement();
     if (rootElement->getUri().empty())
@@ -287,8 +288,8 @@ static void validate_(const xml::lite::Document& doc,
     validate_(*rootElement, spec, version, foundSchemas, log);
 }
 
-static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::vector<std::string>&, logging::Logger*);
-static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::vector<std::filesystem::path>*, logging::Logger*);
+static std::vector<std::filesystem::path> findValidSchemaPaths(const std::vector<std::string>&, logging::Logger*);
+static std::vector<std::filesystem::path> findValidSchemaPaths(const std::vector<std::filesystem::path>*, logging::Logger*);
 
 void XMLControl::validate(const xml::lite::Document* doc,
                           const std::vector<std::string>& schemaPaths,
@@ -335,7 +336,7 @@ static auto findValidSchemas(const std::vector<std::filesystem::path>& paths_)
     const auto paths = check_whether_paths_exist(paths_);
     return xml::lite::ValidatorXerces::loadSchemas(paths, true /*recursive*/);
 }
-static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::vector<std::string>& schemaPaths,
+static std::vector<std::filesystem::path> findValidSchemaPaths(const std::vector<std::string>& schemaPaths,
     logging::Logger* log)
 {
     // attempt to get the schema location from the
@@ -355,7 +356,7 @@ static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::v
 
     return findValidSchemas(sys::convertPaths(paths)); // If the paths we have don't exist, throw
 }
-static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::vector<std::filesystem::path>* pSchemaPaths,
+static std::vector<std::filesystem::path> findValidSchemaPaths(const std::vector<std::filesystem::path>* pSchemaPaths,
     logging::Logger* log)
 {
     // attempt to get the schema location from the environment if nothing is specified

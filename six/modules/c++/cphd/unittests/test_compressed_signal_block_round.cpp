@@ -27,7 +27,7 @@
 #include <string>
 #include <memory>
 #include <thread>
-#include <std/span>
+#include <span>
 
 #include <nitf/coda-oss.hpp>
 #include <types/RowCol.h>
@@ -42,7 +42,7 @@
 #include <cphd/PVPBlock.h>
 #include <cphd/ReferenceGeometry.h>
 #include <cphd/TestDataGenerator.h>
-#include <TestCase.h>
+#include <catch2/catch_test_macros.hpp>
 
 /*!
  * Tests write and read of Signal Block with compressed data
@@ -135,15 +135,10 @@ bool runTest(const std::vector<std::byte>& writeData)
     return compareVectors(readData, writeData);
 }
 
-TEST_CASE(testCompressed)
+TEST_CASE("testCompressed")
 {
     const types::RowCol<size_t> dims(128, 256);
     const std::vector<std::byte> writeData =
             generateCompressedData(dims.area());
-    TEST_ASSERT_TRUE(runTest(writeData));
+    CHECK(runTest(writeData));
 }
-
-TEST_MAIN(
-        TEST_CHECK(testCompressed);
-)
-

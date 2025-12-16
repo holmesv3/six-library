@@ -23,7 +23,7 @@
 
 #include <limits>
 #include <sstream>
-#include <std/memory>
+#include <memory>
 
 #include <nitf/coda-oss.hpp>
 #include <mt/ThreadGroup.h>

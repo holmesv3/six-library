@@ -24,9 +24,9 @@
 #define SIX_sicd_NITFReadComplexXMLControl_h_INCLUDED_
 
 #include <vector>
-#include <std/filesystem>
+#include <filesystem>
 #include <memory>
-#include <std/cstddef>
+#include <cstddef>
 
 #include <logging/Logger.h>
 #include <io/FileInputStream.h>

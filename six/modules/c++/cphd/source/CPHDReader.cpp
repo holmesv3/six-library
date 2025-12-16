@@ -21,7 +21,7 @@
  */
 #include <cphd/CPHDReader.h>
 
-#include <std/memory>
+#include <memory>
 #include <algorithm>
 
 #include <except/Exception.h>
@@ -30,7 +30,7 @@
 #include <logging/NullLogger.h>
 #include <mem/ScopedArray.h>
 #include <xml/lite/MinidomParser.h>
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 #include <sys/Path.h>
 
 #include <six/XmlLite.h>

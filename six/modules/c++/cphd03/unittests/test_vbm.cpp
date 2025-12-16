@@ -25,7 +25,13 @@
 
 #include <cphd03/VBM.h>
 #include <cphd/TestDataGenerator.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+#define TEST_ASSERT_ALMOST_EQ_EPS(X, Y, Z) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, Z));
 
 static constexpr size_t NUM_CHANNELS = 3;
 static constexpr size_t NUM_VECTORS = 7;
@@ -37,13 +43,10 @@ static void call_srand()
     std::ignore = result;
 }
 
-void testVectorParameters(const std::string& testName_,
-                          size_t channel,
+void testVectorParameters(size_t channel,
                           size_t vector,
                           cphd03::VBM& vbm)
 {
-    const auto testName = testName_;
-
     const double txTime = cphd::getRandom();
     vbm.setTxTime(txTime, channel, vector);
 
@@ -78,7 +81,7 @@ void testVectorParameters(const std::string& testName_,
     TEST_ASSERT_EQ(ampSF, vbm.getAmpSF(channel, vector));
 }
 
-TEST_CASE(testVbmFx)
+TEST_CASE("testVbmFx")
 {
     call_srand();
 
@@ -93,7 +96,7 @@ TEST_CASE(testVbmFx)
     {
         for (size_t vector = 0; vector < NUM_VECTORS; ++vector)
         {
-            testVectorParameters(testName, channel, vector, vbm);
+            testVectorParameters(channel, vector, vbm);
 
             const double fx0 = cphd::getRandom();
             vbm.setFx0(fx0, channel, vector);
@@ -115,7 +118,7 @@ TEST_CASE(testVbmFx)
     }
 }
 
-TEST_CASE(testVbmToa)
+TEST_CASE("testVbmToa")
 {
     call_srand();
 
@@ -130,7 +133,7 @@ TEST_CASE(testVbmToa)
     {
         for (size_t vector = 0; vector < NUM_VECTORS; ++vector)
         {
-            testVectorParameters("testVbmToa", channel, vector, vbm);
+            testVectorParameters(channel, vector, vbm);
 
             const double deltaToa0 = cphd::getRandom();
             vbm.setDeltaTOA0(deltaToa0, channel, vector);
@@ -144,7 +147,7 @@ TEST_CASE(testVbmToa)
     }
 }
 
-TEST_CASE(testVbmThrow)
+TEST_CASE("testVbmThrow")
 {
     call_srand();
 
@@ -166,43 +169,43 @@ TEST_CASE(testVbmThrow)
     {
         for (size_t vector = 0; vector < NUM_VECTORS; ++vector)
         {
-            TEST_EXCEPTION(vbmFx.setSRPTime(0.0, channel, vector));
-            TEST_EXCEPTION(vbmToa.setSRPTime(0.0, channel, vector));
-            TEST_EXCEPTION(vbmFx.getSRPTime(channel, vector));
-            TEST_EXCEPTION(vbmToa.getSRPTime(channel, vector));
+            CHECK_THROWS(vbmFx.setSRPTime(0.0, channel, vector));
+            CHECK_THROWS(vbmToa.setSRPTime(0.0, channel, vector));
+            CHECK_THROWS(vbmFx.getSRPTime(channel, vector));
+            CHECK_THROWS(vbmToa.getSRPTime(channel, vector));
 
-            TEST_EXCEPTION(vbmFx.setTropoSRP(0.0, channel, vector));
-            TEST_EXCEPTION(vbmToa.setTropoSRP(0.0, channel, vector));
-            TEST_EXCEPTION(vbmFx.getTropoSRP(channel, vector));
-            TEST_EXCEPTION(vbmToa.getTropoSRP(channel, vector));
+            CHECK_THROWS(vbmFx.setTropoSRP(0.0, channel, vector));
+            CHECK_THROWS(vbmToa.setTropoSRP(0.0, channel, vector));
+            CHECK_THROWS(vbmFx.getTropoSRP(channel, vector));
+            CHECK_THROWS(vbmToa.getTropoSRP(channel, vector));
 
-            TEST_EXCEPTION(vbmFx.setAmpSF(0.0, channel, vector));
-            TEST_EXCEPTION(vbmToa.setAmpSF(0.0, channel, vector));
-            TEST_EXCEPTION(vbmFx.getAmpSF(channel, vector));
-            TEST_EXCEPTION(vbmToa.getAmpSF(channel, vector));
+            CHECK_THROWS(vbmFx.setAmpSF(0.0, channel, vector));
+            CHECK_THROWS(vbmToa.setAmpSF(0.0, channel, vector));
+            CHECK_THROWS(vbmFx.getAmpSF(channel, vector));
+            CHECK_THROWS(vbmToa.getAmpSF(channel, vector));
 
-            TEST_EXCEPTION(vbmFx.setDeltaTOA0(0.0, channel, vector));
-            TEST_EXCEPTION(vbmFx.getDeltaTOA0(channel, vector));
+            CHECK_THROWS(vbmFx.setDeltaTOA0(0.0, channel, vector));
+            CHECK_THROWS(vbmFx.getDeltaTOA0(channel, vector));
 
-            TEST_EXCEPTION(vbmFx.setTOASS(0.0, channel, vector));
-            TEST_EXCEPTION(vbmFx.getTOASS(channel, vector));
+            CHECK_THROWS(vbmFx.setTOASS(0.0, channel, vector));
+            CHECK_THROWS(vbmFx.getTOASS(channel, vector));
 
-            TEST_EXCEPTION(vbmToa.setFx0(0.0, channel, vector));
-            TEST_EXCEPTION(vbmToa.getFx0(channel, vector));
+            CHECK_THROWS(vbmToa.setFx0(0.0, channel, vector));
+            CHECK_THROWS(vbmToa.getFx0(channel, vector));
 
-            TEST_EXCEPTION(vbmToa.setFxSS(0.0, channel, vector));
-            TEST_EXCEPTION(vbmToa.getFxSS(channel, vector));
+            CHECK_THROWS(vbmToa.setFxSS(0.0, channel, vector));
+            CHECK_THROWS(vbmToa.getFxSS(channel, vector));
 
-            TEST_EXCEPTION(vbmToa.setFx1(0.0, channel, vector));
-            TEST_EXCEPTION(vbmToa.getFx1(channel, vector));
+            CHECK_THROWS(vbmToa.setFx1(0.0, channel, vector));
+            CHECK_THROWS(vbmToa.getFx1(channel, vector));
 
-            TEST_EXCEPTION(vbmToa.setFx2(0.0, channel, vector));
-            TEST_EXCEPTION(vbmToa.getFx2(channel, vector));
+            CHECK_THROWS(vbmToa.setFx2(0.0, channel, vector));
+            CHECK_THROWS(vbmToa.getFx2(channel, vector));
         }
     }
 }
 
-TEST_CASE(testVbmCopy)
+TEST_CASE("testVbmCopy")
 {
     call_srand();
 
@@ -227,7 +230,7 @@ TEST_CASE(testVbmCopy)
     TEST_ASSERT_EQ(vbmToa, vbmToaCopy);
 }
 
-TEST_CASE(testDataConstructor)
+TEST_CASE("testDataConstructor")
 {
     call_srand();
 
@@ -293,12 +296,3 @@ TEST_CASE(testDataConstructor)
         }
     }
 }
-
-TEST_MAIN(
-    TEST_CHECK(testVbmFx);
-    TEST_CHECK(testVbmToa);
-    TEST_CHECK(testVbmThrow);
-    TEST_CHECK(testVbmCopy);
-    TEST_CHECK(testDataConstructor);
-    )
-

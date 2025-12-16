@@ -21,9 +21,13 @@
 */
 
 #include <import/six/sicd.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-TEST_CASE(DerivedArpPoly)
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+
+TEST_CASE("DerivedArpPoly")
 {
     six::sicd::SCPCOA scpcoa;
     scpcoa.scpTime = 123;
@@ -55,7 +59,3 @@ TEST_CASE(DerivedArpPoly)
     TEST_ASSERT_EQ(position.arpPoly[2][1], 1.5);
     TEST_ASSERT_EQ(position.arpPoly[2][2], 3);
 }
-
-TEST_MAIN(
-    TEST_CHECK(DerivedArpPoly);
-)

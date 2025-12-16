@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <std/filesystem>
+#include <filesystem>
 #include <string>
 #include <vector>
 #include <stdexcept>
 #include <iostream>
-#include <std/memory>
+#include <memory>
 #include <limits>
-#include <std/cstddef>
+#include <cstddef>
 #include <random>
 
 #include <except/Exception.h>

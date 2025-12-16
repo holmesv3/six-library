@@ -24,7 +24,7 @@
 #include <fstream>
 #include <memory>
 #include <thread>
-#include <std/span>
+#include <span>
 
 #include <cphd/CPHDReader.h>
 #include <cphd/CPHDWriter.h>

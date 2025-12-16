@@ -22,7 +22,12 @@
 
 #include <thread>
 
-#include <TestCase.h>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+
 #include <cphd/CPHDReader.h>
 #include <cphd/CPHDWriter.h>
 #include <cphd/Metadata.h>
@@ -187,7 +192,7 @@ bool runTest(bool /*scale*/,
     return checkData(tempfile.pathname(), numThreads, meta, pvpBlock);
 }
 
-TEST_CASE(testPVPBlockSimple)
+TEST_CASE("testPVPBlockSimple")
 {
     const types::RowCol<size_t> dims(128, 256);
     const auto writeData = generateComplexData<cphd::zint16_t>(dims.area());
@@ -208,10 +213,10 @@ TEST_CASE(testPVPBlockSimple)
                 false,
                 addedParams);
 
-    TEST_ASSERT_TRUE(runTest(scale, writeData, meta, pvpBlock, dims));
+    CHECK(runTest(scale, writeData, meta, pvpBlock, dims));
 }
 
-TEST_CASE(testPVPBlockOptional)
+TEST_CASE("testPVPBlockOptional")
 {
     const types::RowCol<size_t> dims(128, 256);
     const auto writeData = generateComplexData<cphd::zint16_t>(dims.area());
@@ -237,10 +242,10 @@ TEST_CASE(testPVPBlockOptional)
                 true,
                 addedParams);
 
-    TEST_ASSERT_TRUE(runTest(scale, writeData, meta, pvpBlock, dims));
+    CHECK(runTest(scale, writeData, meta, pvpBlock, dims));
 }
 
-TEST_CASE(testPVPBlockAdditional)
+TEST_CASE("testPVPBlockAdditional")
 {
     const types::RowCol<size_t> dims(128, 256);
     const auto writeData = generateComplexData<cphd::zint16_t>(dims.area());
@@ -266,11 +271,5 @@ TEST_CASE(testPVPBlockAdditional)
                 false,
                 addedParams);
 
-    TEST_ASSERT_TRUE(runTest(scale, writeData, meta, pvpBlock, dims));
+    CHECK(runTest(scale, writeData, meta, pvpBlock, dims));
 }
-
-TEST_MAIN(
-        TEST_CHECK(testPVPBlockSimple);
-        TEST_CHECK(testPVPBlockOptional);
-        TEST_CHECK(testPVPBlockAdditional);
-        )

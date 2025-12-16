@@ -26,13 +26,13 @@
 
 #include <cassert>
 #include <memory>
-#include <std/numbers>
+#include <numbers>
 #include <algorithm>
 #include <functional>
 #include <stdexcept>
 
 #include <mt/Algorithm.h>
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 #include <math/Utilities.h>
 #include <units/Angles.h>
 

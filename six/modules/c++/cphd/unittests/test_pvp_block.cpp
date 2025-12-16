@@ -28,7 +28,10 @@
 #include <cphd/PVPBlock.h>
 #include <cphd/TestDataGenerator.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+
 
 static constexpr size_t NUM_CHANNELS = 3;
 static constexpr size_t NUM_VECTORS = 2;
@@ -114,7 +117,7 @@ void setVectorParameters(size_t channel,
     pvpBlock2.setSCSS(scss, channel, vector);
 }
 
-TEST_CASE(testPvpRequired)
+TEST_CASE("testPvpRequired")
 {
     call_srand();
     cphd::Pvp pvp;
@@ -132,7 +135,7 @@ TEST_CASE(testPvpRequired)
     }
 }
 
-TEST_CASE(testPvpOptional)
+TEST_CASE("testPvpOptional")
 {
     call_srand();
     cphd::Pvp pvp;
@@ -193,7 +196,7 @@ TEST_CASE(testPvpOptional)
     }
 }
 
-TEST_CASE(testPvpThrow)
+TEST_CASE("testPvpThrow")
 {
     call_srand();
 
@@ -201,14 +204,14 @@ TEST_CASE(testPvpThrow)
     cphd::setPVPXML(pvp);
     pvp.setOffset(29, pvp.ampSF);
     pvp.setOffset(28, pvp.fxN1);
-    TEST_EXCEPTION(pvp.setOffset(15, pvp.toaE1)); // Overwrite block
+    CHECK_THROWS(pvp.setOffset(15, pvp.toaE1)); // Overwrite block
     pvp.setOffset(27, pvp.toaE1);
 
     pvp.setCustomParameter(1, 30, "F8", "Param1");
     pvp.setCustomParameter(1, 31, "F8", "Param2");
-    TEST_EXCEPTION(pvp.setCustomParameter(1, 30, "F8", "Param1")); //Rewriting to existing memory block
-    TEST_EXCEPTION(pvp.setCustomParameter(1, 30, "X=F8;YF8;", "Param1")); //
-    TEST_EXCEPTION(pvp.setCustomParameter(1, 30, "X=F8;Y=F8;Z=", "Param1"));
+    CHECK_THROWS(pvp.setCustomParameter(1, 30, "F8", "Param1")); //Rewriting to existing memory block
+    CHECK_THROWS(pvp.setCustomParameter(1, 30, "X=F8;YF8;", "Param1")); //
+    CHECK_THROWS(pvp.setCustomParameter(1, 30, "X=F8;Y=F8;Z=", "Param1"));
 
     cphd::PVPBlock pvpBlock(NUM_CHANNELS,
                             std::vector<size_t>(NUM_CHANNELS, NUM_VECTORS),
@@ -235,12 +238,12 @@ TEST_CASE(testPvpThrow)
             pvpBlock.setAddedPVP(addedParam1, channel, vector, "Param1");
 
             const double addedParam2 = cphd::getRandom();
-            TEST_EXCEPTION(pvpBlock.setAddedPVP(addedParam2, channel, vector, "Param3"));
-            TEST_EXCEPTION(pvpBlock.getAddedPVP<double>(channel, vector, "Param3"));
+            CHECK_THROWS(pvpBlock.setAddedPVP(addedParam2, channel, vector, "Param3"));
+            CHECK_THROWS(pvpBlock.getAddedPVP<double>(channel, vector, "Param3"));
 
             const double fxN2 = cphd::getRandom();
-            TEST_EXCEPTION(pvpBlock.setFxN2(fxN2, channel, vector));
-            TEST_EXCEPTION(pvpBlock.getFxN2(channel, vector));
+            CHECK_THROWS(pvpBlock.setFxN2(fxN2, channel, vector));
+            CHECK_THROWS(pvpBlock.getFxN2(channel, vector));
         }
     }
 
@@ -264,7 +267,7 @@ TEST_CASE(testPvpThrow)
     }
 }
 
-TEST_CASE(testPvpEquality)
+TEST_CASE("testPvpEquality")
 {
     call_srand();
 
@@ -291,7 +294,7 @@ TEST_CASE(testPvpEquality)
                              pvp2);
 
     TEST_ASSERT_EQ(pvp1, pvp2);
-    TEST_ASSERT_TRUE(pvpBlock1 == pvpBlock2);
+    CHECK(pvpBlock1 == pvpBlock2);
 
     for (size_t channel = 0; channel < NUM_CHANNELS; ++channel)
     {
@@ -322,7 +325,7 @@ TEST_CASE(testPvpEquality)
     TEST_ASSERT_EQ(pvpBlock1, pvpBlock2);
 }
 
-TEST_CASE(testLoadPVPBlockFromMemory)
+TEST_CASE("testLoadPVPBlockFromMemory")
 {
     call_srand();
 
@@ -366,11 +369,3 @@ TEST_CASE(testLoadPVPBlockFromMemory)
     TEST_ASSERT_EQ(pvpBlock.getTxPos(0, 0)[1], 6);
     TEST_ASSERT_EQ(pvpBlock.getTxPos(0, 0)[2], 9);
 }
-
-TEST_MAIN(
-    TEST_CHECK(testPvpRequired);
-    TEST_CHECK(testPvpOptional);
-    TEST_CHECK(testPvpThrow);
-    TEST_CHECK(testPvpEquality);
-    TEST_CHECK(testLoadPVPBlockFromMemory);
-    )

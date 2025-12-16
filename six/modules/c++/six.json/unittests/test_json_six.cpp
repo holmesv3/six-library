@@ -19,13 +19,17 @@
  * see <http://www.gnu.org/licenses/>.
  */
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
 
 #include <import/six/json.h>
 
 using json = nlohmann::json;
 
-TEST_CASE(TestPhaseSGNJson)
+TEST_CASE("TestPhaseSGNJson")
 {
     json serialized;
     cphd::PhaseSGN deserialized;
@@ -35,17 +39,17 @@ TEST_CASE(TestPhaseSGNJson)
 
     serialized = minus1;
     deserialized = serialized.template get<cphd::PhaseSGN>();
-    TEST_ASSERT(deserialized == minus1)
+    CHECK(deserialized == minus1);
 
     serialized = plus1;
     deserialized = serialized.template get<cphd::PhaseSGN>();
-    TEST_ASSERT(deserialized == plus1)
+    CHECK(deserialized == plus1);
 
     serialized = notSet;
     deserialized = serialized.template get<cphd::PhaseSGN>();
-    TEST_ASSERT(deserialized == notSet)
+    CHECK(deserialized == notSet);
 }
-TEST_CASE(TestCollectTypeJson)
+TEST_CASE("TestCollectTypeJson")
 {
     json serialized;
     six::CollectType deserialized;
@@ -55,17 +59,17 @@ TEST_CASE(TestCollectTypeJson)
 
     serialized = monostatic;
     deserialized = serialized.template get<six::CollectType>();
-    TEST_ASSERT(deserialized == monostatic)
+    CHECK(deserialized == monostatic);
 
     serialized = bistatic;
     deserialized = serialized.template get<six::CollectType>();
-    TEST_ASSERT(deserialized == bistatic)
+    CHECK(deserialized == bistatic);
 
     serialized = notSet;
     deserialized = serialized.template get<six::CollectType>();
-    TEST_ASSERT(deserialized == notSet)
+    CHECK(deserialized == notSet);
 }
-TEST_CASE(TestRadarModeTypeJson)
+TEST_CASE("TestRadarModeTypeJson")
 {
     json serialized;
     six::RadarModeType deserialized;
@@ -77,25 +81,25 @@ TEST_CASE(TestRadarModeTypeJson)
 
     serialized = spotlight;
     deserialized = serialized.template get<six::RadarModeType>();
-    TEST_ASSERT(deserialized == spotlight)
+    CHECK(deserialized == spotlight);
 
     serialized = stripmap;
     deserialized = serialized.template get<six::RadarModeType>();
-    TEST_ASSERT(deserialized == stripmap)
+    CHECK(deserialized == stripmap);
 
     serialized = dynamicStrip;
     deserialized = serialized.template get<six::RadarModeType>();
-    TEST_ASSERT(deserialized == dynamicStrip)
+    CHECK(deserialized == dynamicStrip);
 
     serialized = scansar;
     deserialized = serialized.template get<six::RadarModeType>();
-    TEST_ASSERT(deserialized == scansar)
+    CHECK(deserialized == scansar);
 
     serialized = notSet;
     deserialized = serialized.template get<six::RadarModeType>();
-    TEST_ASSERT(deserialized == notSet)
+    CHECK(deserialized == notSet);
 }
-TEST_CASE(TestBooleanTypeJson)
+TEST_CASE("TestBooleanTypeJson")
 {
     json serialized;
     six::BooleanType deserialized;
@@ -105,17 +109,17 @@ TEST_CASE(TestBooleanTypeJson)
 
     serialized = boolTrue;
     deserialized = serialized.template get<six::BooleanType>();
-    TEST_ASSERT(deserialized == boolTrue)
+    CHECK(deserialized == boolTrue);
 
     serialized = boolFalse;
     deserialized = serialized.template get<six::BooleanType>();
-    TEST_ASSERT(deserialized == boolFalse)
+    CHECK(deserialized == boolFalse);
 
     serialized = boolNotSet;
     deserialized = serialized.template get<six::BooleanType>();
-    TEST_ASSERT(deserialized == boolNotSet)
+    CHECK(deserialized == boolNotSet);
 }
-TEST_CASE(TestDualPolarizationTypeJson)
+TEST_CASE("TestDualPolarizationTypeJson")
 {
     using PolT = six::DualPolarizationType;
     // Not going to test every case of this...
@@ -135,10 +139,10 @@ TEST_CASE(TestDualPolarizationTypeJson)
     {
         serialized = pol;
         deserialized = serialized.template get<PolT>();
-        TEST_ASSERT(deserialized == pol)
+        CHECK(deserialized == pol);
     }
 }
-TEST_CASE(TestLatLonJson)
+TEST_CASE("TestLatLonJson")
 {
     json serialized;
     scene::LatLon deserialized;
@@ -146,9 +150,9 @@ TEST_CASE(TestLatLonJson)
 
     serialized = ll;
     deserialized = serialized.template get<scene::LatLon>();
-    TEST_ASSERT(deserialized == ll)
+    CHECK(deserialized == ll);
 }
-TEST_CASE(TestLatLonAltJson)
+TEST_CASE("TestLatLonAltJson")
 {
     json serialized;
     scene::LatLonAlt deserialized;
@@ -156,9 +160,9 @@ TEST_CASE(TestLatLonAltJson)
 
     serialized = lla;
     deserialized = serialized.template get<scene::LatLonAlt>();
-    TEST_ASSERT(deserialized == lla)
+    CHECK(deserialized == lla);
 }
-TEST_CASE(TestFrameTypeJson)
+TEST_CASE("TestFrameTypeJson")
 {
     json serialized;
     scene::FrameType deserialized;
@@ -169,21 +173,21 @@ TEST_CASE(TestFrameTypeJson)
 
     serialized = ecf;
     deserialized = serialized.template get<scene::FrameType>();
-    TEST_ASSERT(deserialized == ecf);
+    CHECK(deserialized == ecf);
 
     serialized = ricEcf;
     deserialized = serialized.template get<scene::FrameType>();
-    TEST_ASSERT(deserialized == ricEcf);
+    CHECK(deserialized == ricEcf);
 
     serialized = ricEci;
     deserialized = serialized.template get<scene::FrameType>();
-    TEST_ASSERT(deserialized == ricEci);
+    CHECK(deserialized == ricEci);
 
     serialized = notSet;
     deserialized = serialized.template get<scene::FrameType>();
-    TEST_ASSERT(deserialized == notSet);
+    CHECK(deserialized == notSet);
 }
-TEST_CASE(TestEarthModelTypeJson)
+TEST_CASE("TestEarthModelTypeJson")
 {
     json serialized;
     six::EarthModelType deserialized;
@@ -192,13 +196,13 @@ TEST_CASE(TestEarthModelTypeJson)
 
     serialized = wgs;
     deserialized = serialized.template get<six::EarthModelType>();
-    TEST_ASSERT(deserialized == wgs);
+    CHECK(deserialized == wgs);
 
     serialized = notSet;
     deserialized = serialized.template get<six::EarthModelType>();
-    TEST_ASSERT(deserialized == notSet);
+    CHECK(deserialized == notSet);
 }
-TEST_CASE(TestParameterJson)
+TEST_CASE("TestParameterJson")
 {
     json serialized;
     six::Parameter deserialized;
@@ -208,9 +212,10 @@ TEST_CASE(TestParameterJson)
 
     serialized = param;
     deserialized = serialized.template get<six::Parameter>();
-    TEST_ASSERT(deserialized == param)
+    CHECK(deserialized.getName() == param.getName());
+    CHECK(deserialized.str() == param.str());
 }
-TEST_CASE(TestParameterCollectionJson)
+TEST_CASE("TestParameterCollectionJson")
 {
     json serialized;
     six::ParameterCollection deserialized;
@@ -225,9 +230,9 @@ TEST_CASE(TestParameterCollectionJson)
 
     serialized = params;
     deserialized = serialized.template get<six::ParameterCollection>();
-    TEST_ASSERT(deserialized == params)
+    CHECK(deserialized == params);
 }
-TEST_CASE(TestCornersJson)
+TEST_CASE("TestCornersJson")
 {
     json serialized;
     six::Corners<scene::LatLon> deserialized;
@@ -239,18 +244,18 @@ TEST_CASE(TestCornersJson)
 
     serialized = corners;
     deserialized = serialized.template get<six::Corners<scene::LatLon>>();
-    TEST_ASSERT(deserialized == corners)
+    CHECK(deserialized == corners);
 }
-TEST_CASE(TestXsElementJson)
+TEST_CASE("TestXsElementJson")
 {
     json serialized;
     six::XsElement<int32_t> deserialized{"ElemName"};
     six::XsElement<int32_t> xsElem("ElemName", 42);
     serialized = xsElem;
     deserialized = serialized.template get<six::XsElement<int32_t>>();
-    TEST_ASSERT(deserialized == xsElem)
+    CHECK(deserialized == xsElem);
 }
-TEST_CASE(TestSCPTypeJson)
+TEST_CASE("TestSCPTypeJson")
 {
     json serialized;
     six::SCPType deserialized;
@@ -260,17 +265,17 @@ TEST_CASE(TestSCPTypeJson)
 
     serialized = rowCol;
     deserialized = serialized.template get<six::SCPType>();
-    TEST_ASSERT(deserialized == rowCol);
+    CHECK(deserialized == rowCol);
 
     serialized = rangeAz;
     deserialized = serialized.template get<six::SCPType>();
-    TEST_ASSERT(deserialized == rangeAz);
+    CHECK(deserialized == rangeAz);
 
     serialized = notSet;
     deserialized = serialized.template get<six::SCPType>();
-    TEST_ASSERT(deserialized == notSet);
+    CHECK(deserialized == notSet);
 }
-TEST_CASE(TestDateTimeJson)
+TEST_CASE("TestDateTimeJson")
 {
     json serialized;
     nitf::DateTime deserialized;
@@ -278,23 +283,5 @@ TEST_CASE(TestDateTimeJson)
 
     serialized = dt;
     deserialized = serialized.template get<nitf::DateTime>();
-    TEST_ASSERT(deserialized == dt)
+    CHECK(deserialized == dt);
 }
-
-TEST_MAIN(
-    TEST_CHECK(TestPhaseSGNJson)
-    TEST_CHECK(TestCollectTypeJson)
-    TEST_CHECK(TestRadarModeTypeJson)
-    TEST_CHECK(TestBooleanTypeJson)
-    TEST_CHECK(TestDualPolarizationTypeJson)
-    TEST_CHECK(TestLatLonJson)
-    TEST_CHECK(TestLatLonAltJson)
-    TEST_CHECK(TestFrameTypeJson)
-    TEST_CHECK(TestEarthModelTypeJson)
-    TEST_CHECK(TestParameterJson)
-    TEST_CHECK(TestParameterCollectionJson)
-    TEST_CHECK(TestCornersJson)
-    TEST_CHECK(TestXsElementJson)
-    TEST_CHECK(TestSCPTypeJson)
-    TEST_CHECK(TestDateTimeJson)
-)

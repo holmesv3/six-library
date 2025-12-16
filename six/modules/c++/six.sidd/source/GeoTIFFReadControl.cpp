@@ -20,13 +20,13 @@
  *
  */
 
-#include <std/string>
+#include <string>
 #include <vector>
-#include <std/memory>
+#include <memory>
 
 #include <str/Convert.h>
 #include <str/Encoding.h>
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 #include <mem/ScopedArray.h>
 #include "six/sidd/GeoTIFFReadControl.h"
 #include "six/XMLControlFactory.h"

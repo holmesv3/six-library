@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include <std/cstddef> // std::byte
+#include <cstddef> // std::byte
 
 #include <scene/sys_Conf.h>
 

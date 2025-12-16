@@ -38,7 +38,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <memory>
-#include <std/filesystem>
+#include <filesystem>
 
 #include <nitf/coda-oss.hpp>
 #include <except/Exception.h>

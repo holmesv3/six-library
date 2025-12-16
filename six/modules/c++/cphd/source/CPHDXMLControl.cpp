@@ -27,7 +27,7 @@
 #include <memory>
 #include <iterator>
 #include <stdexcept>
-#include <std/string>
+#include <string>
 
 #include <io/StringStream.h>
 #include <logging/NullLogger.h>

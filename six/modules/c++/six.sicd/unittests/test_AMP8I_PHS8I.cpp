@@ -26,11 +26,11 @@
 #include <iostream>
 #include <string>
 #include <utility>
-#include <std/filesystem>
-#include <std/optional>
+#include <filesystem>
+#include <optional>
 #include <cmath>
 #include <random>
-#include <std/span>
+#include <span>
 #include <numeric>
 #include <future>
 
@@ -50,7 +50,12 @@
 #include <six/sicd/Utilities.h>
 
 #include "../tests/TestUtilities.h"
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+#define TEST_ASSERT_ALMOST_EQ_EPS(X, Y, Z) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, Z));
 
 #if _MSC_VER
 #pragma warning(disable: 4459) //  declaration of '...' hides global declaration
@@ -60,7 +65,6 @@ using AMP8I_PHS8I_t = six::AMP8I_PHS8I_t;
 
 static std::shared_ptr<six::Container> getContainer(six::sicd::NITFReadComplexXMLControl& reader)
 {
-    static const std::string testName("test_AMP8I_PHS8I");
     auto container = reader.getContainer();
     TEST_ASSERT_EQ(six::DataType::COMPLEX, container->getDataType());
     TEST_ASSERT_EQ(static_cast<size_t>(1), container->size());
@@ -69,7 +73,6 @@ static std::shared_ptr<six::Container> getContainer(six::sicd::NITFReadComplexXM
 
 static std::unique_ptr<six::sicd::ComplexData> getComplexData(const six::Container& container, size_t jj)
 {
-    static const std::string testName("test_AMP8I_PHS8I");
     std::unique_ptr<six::Data> data_;
     data_.reset(container.getData(jj)->clone());
 
@@ -77,20 +80,19 @@ static std::unique_ptr<six::sicd::ComplexData> getComplexData(const six::Contain
     std::unique_ptr<six::sicd::ComplexData> retval(dynamic_cast<six::sicd::ComplexData*>(data_.release()));
 
     logging::NullLogger nullLogger;
-    //TEST_ASSERT_TRUE(retval->validate(nullLogger));
+    //CHECK(retval->validate(nullLogger));
     const auto& geoData = *(retval->geoData);
-    TEST_ASSERT_TRUE(geoData.validate(nullLogger));
+    CHECK(geoData.validate(nullLogger));
     const auto& imageData = *(retval->imageData);
-    TEST_ASSERT_TRUE(imageData.validate(geoData, nullLogger));
+    CHECK(imageData.validate(geoData, nullLogger));
 
     const auto& classification = retval->getClassification();
-    TEST_ASSERT_TRUE(classification.isUnclassified());
+    CHECK(classification.isUnclassified());
 
     return retval;
 }
 
-static void test_nitf_image_info(const std::string& testName,
-    six::sicd::ComplexData& complexData, const std::filesystem::path& inputPathname,
+static void test_nitf_image_info(six::sicd::ComplexData& complexData, const std::filesystem::path& inputPathname,
     nitf::PixelValueType expectedPixelValueType)
 {
     constexpr auto expectedBlockingMode = nitf::BlockingMode::Pixel;
@@ -126,8 +128,7 @@ static void test_nitf_image_info(const std::string& testName,
     }
 }
 
-static void test_assert_eq(const std::string& testName,
-    const std::vector<six::zfloat>& actuals, const std::vector<AMP8I_PHS8I_t>& amp8i_phs8i)
+static void test_assert_eq(const std::vector<six::zfloat>& actuals, const std::vector<AMP8I_PHS8I_t>& amp8i_phs8i)
 {
     TEST_ASSERT_EQ(actuals.size(), amp8i_phs8i.size());
     for (size_t i = 0; i < actuals.size(); i++)
@@ -152,7 +153,7 @@ inline static void to_AMP8I_PHS8I(const six::sicd::ImageData& imageData,
     results = imageData.fromComplex(sys::make_span(inputs));
 }
 
-TEST_CASE(test_8bit_ampphs)
+TEST_CASE("test_8bit_ampphs")
 {
     six::sicd::ImageData imageData;
     imageData.pixelType = six::PixelType::AMP8I_PHS8I;
@@ -172,21 +173,20 @@ TEST_CASE(test_8bit_ampphs)
     }
 
     const auto actuals = from_AMP8I_PHS8I(imageData, inputs);
-    TEST_ASSERT(actuals == expecteds);
+    CHECK(actuals == expecteds);
 
 
     // we should now be able to convert the `zfloat`s back to amp/value
     std::vector<AMP8I_PHS8I_t> amp8i_phs8i(actuals.size());
     to_AMP8I_PHS8I(imageData, actuals, amp8i_phs8i);
-    test_assert_eq(testName, actuals, amp8i_phs8i);
+    test_assert_eq(actuals, amp8i_phs8i);
 
     // ... and again, async
     to_AMP8I_PHS8I(imageData, actuals, amp8i_phs8i);
-    test_assert_eq(testName, actuals, amp8i_phs8i);
+    test_assert_eq(actuals, amp8i_phs8i);
 }
 
-static std::vector <six::zfloat> read_8bit_ampphs(const std::string& testName,
-    const std::filesystem::path& inputPathname,
+static std::vector <six::zfloat> read_8bit_ampphs(const std::filesystem::path& inputPathname,
     std::optional<six::AmplitudeTable>& amplitudeTable, std::unique_ptr<six::sicd::ComplexData>& pResultComplexData,
     std::complex<long double> expected_sum)
 {
@@ -207,7 +207,7 @@ static std::vector <six::zfloat> read_8bit_ampphs(const std::string& testName,
     TEST_ASSERT_EQ(static_cast<size_t>(2), complexData.getNumBytesPerPixel());
 
     const auto& classification = complexData.getClassification();
-    TEST_ASSERT_TRUE(classification.isUnclassified());
+    CHECK(classification.isUnclassified());
 
     const auto& imageData = *(complexData.imageData);
     const auto pAmplitudeTable = imageData.amplitudeTable.get();
@@ -222,7 +222,7 @@ static std::vector <six::zfloat> read_8bit_ampphs(const std::string& testName,
     const auto numChannels = complexData.getNumChannels();
     TEST_ASSERT_EQ(static_cast<size_t>(2), numChannels);
 
-    test_nitf_image_info(testName, complexData, inputPathname, nitf::PixelValueType::Integer);
+    test_nitf_image_info(complexData, inputPathname, nitf::PixelValueType::Integer);
 
     return retval;
 }
@@ -249,7 +249,7 @@ static Pair<uint64_t> to_AMP8I_PHS8I(const six::sicd::ImageData& imageData, cons
     }
     return retval;
 }
-TEST_CASE(read_8bit_ampphs_with_table)
+TEST_CASE("read_8bit_ampphs_with_table")
 {
     const auto subdir = std::filesystem::path("8_bit_Amp_Phs_Examples") / "With_amplitude_table";
     const auto filename = subdir / "sicd_example_1_PFA_AMP8I_PHS8I_VV_with_amplitude_table_SICD.nitf";
@@ -258,14 +258,14 @@ TEST_CASE(read_8bit_ampphs_with_table)
     std::optional<six::AmplitudeTable> amplitudeTable;
     std::unique_ptr<six::sicd::ComplexData> pComplexData;
     const std::complex<long double> expected_sum(-193324027.52878466, -3688020.3755293526);
-    const auto widebandData = read_8bit_ampphs(testName, inputPathname, amplitudeTable, pComplexData, expected_sum);
+    const auto widebandData = read_8bit_ampphs(inputPathname, amplitudeTable, pComplexData, expected_sum);
 
-    TEST_ASSERT_TRUE(amplitudeTable.has_value());
+    CHECK(amplitudeTable.has_value());
     auto& AmpTable = amplitudeTable.value();
     for (size_t i = 0; i < AmpTable.size(); i++)
     {
         // be sure we don't have garbage data
-        TEST_ASSERT_TRUE(std::isfinite(AmpTable.index(i)));
+        CHECK(std::isfinite(AmpTable.index(i)));
     }
 
     six::sicd::ImageData imageData;
@@ -276,7 +276,7 @@ TEST_CASE(read_8bit_ampphs_with_table)
     //TEST_ASSERT_EQ(actual.first, expected.first); // TODO
     TEST_ASSERT_EQ(actual.second, expected.second);
 }
-TEST_CASE(read_8bit_ampphs_no_table)
+TEST_CASE("read_8bit_ampphs_no_table")
 {
     const auto subdir = std::filesystem::path("8_bit_Amp_Phs_Examples") / "No_amplitude_table";
     const auto filename = subdir / "sicd_example_1_PFA_AMP8I_PHS8I_VV_no_amplitude_table_SICD.nitf";
@@ -285,8 +285,8 @@ TEST_CASE(read_8bit_ampphs_no_table)
     std::optional<six::AmplitudeTable> amplitudeTable;
     std::unique_ptr<six::sicd::ComplexData> pComplexData;
     const std::complex<long double> expected_sum(-12398989.376837999, 397846.88834372163);
-    const auto widebandData = read_8bit_ampphs(testName, inputPathname, amplitudeTable, pComplexData, expected_sum);
-    TEST_ASSERT_FALSE(amplitudeTable.has_value());
+    const auto widebandData = read_8bit_ampphs(inputPathname, amplitudeTable, pComplexData, expected_sum);
+    CHECK_FALSE(amplitudeTable.has_value());
 
     six::sicd::ImageData imageData;
     const auto actual = to_AMP8I_PHS8I(imageData, widebandData);
@@ -299,12 +299,10 @@ TEST_CASE(read_8bit_ampphs_no_table)
 static void test_assert(const six::sicd::ComplexData& complexData,
     six::PixelType expectedPixelType, size_t expectedNumBytesPerPixel)
 {
-    static const std::string testName("test_AMP8I_PHS8I");
-
     TEST_ASSERT_EQ(expectedPixelType, complexData.getPixelType());
 
     const auto& classification = complexData.getClassification();
-    TEST_ASSERT_TRUE(classification.isUnclassified());
+    CHECK(classification.isUnclassified());
 
     const auto numBytesPerPixel = complexData.getNumBytesPerPixel();
     TEST_ASSERT_EQ(expectedNumBytesPerPixel, numBytesPerPixel);
@@ -328,7 +326,7 @@ static std::vector<std::byte> readFromNITF(const std::filesystem::path& inputPat
     throw std::invalid_argument("Unknown pixelType");
 }
 
-TEST_CASE(test_readFromNITF_8_bit_Amp_Phs_Examples)
+TEST_CASE("test_readFromNITF_8_bit_Amp_Phs_Examples")
 {
     auto subdir = std::filesystem::path("8_bit_Amp_Phs_Examples") / "No_amplitude_table";
     auto filename = subdir / "sicd_example_1_PFA_AMP8I_PHS8I_VV_no_amplitude_table_SICD.nitf";
@@ -352,7 +350,7 @@ static std::vector<six::zfloat> readSicd(const std::filesystem::path& inputPathn
 {
     return readSicd_(inputPathname, six::PixelType::AMP8I_PHS8I, sizeof(AMP8I_PHS8I_t)).widebandData;
 }
-TEST_CASE(test_read_sicd_8_bit_Amp_Phs_Examples)
+TEST_CASE("test_read_sicd_8_bit_Amp_Phs_Examples")
 {
     auto subdir = std::filesystem::path("8_bit_Amp_Phs_Examples") / "No_amplitude_table";
     auto filename = subdir / "sicd_example_1_PFA_AMP8I_PHS8I_VV_no_amplitude_table_SICD.nitf";
@@ -408,7 +406,6 @@ static std::vector<six::zfloat> make_complex_image(const six::sicd::ComplexData&
 template<typename T>
 static void test_assert_eq(std::span<const std::byte> bytes, const std::vector<T>& rawData)
 {
-    static const std::string testName("test_AMP8I_PHS8I");
     const auto rawDataSizeInBytes = rawData.size() * sizeof(rawData[0]);
     TEST_ASSERT_EQ(bytes.size(), rawDataSizeInBytes);
 
@@ -454,12 +451,11 @@ static void read_raw_data(const std::filesystem::path& path, six::PixelType pixe
     }
 }
 
-static void read_nitf(const std::string& testName,
-    const std::filesystem::path& path, six::PixelType pixelType, const std::vector<six::zfloat>& image)
+static void read_nitf(const std::filesystem::path& path, six::PixelType pixelType, const std::vector<six::zfloat>& image)
 {
     const auto expectedNumBytesPerPixel = pixelType == six::PixelType::RE32F_IM32F ? 8 : (pixelType == six::PixelType::AMP8I_PHS8I ? 2 : -1);
     const auto result = readSicd_(path, pixelType, expectedNumBytesPerPixel);
-    TEST_ASSERT(result.widebandData == image);
+    CHECK(result.widebandData == image);
 
     const auto bytes = six::sicd::testing::toBytes(result);
     read_raw_data(path, pixelType, std::span<const std::byte>(bytes.data(), bytes.size()));
@@ -482,8 +478,7 @@ static void save(const std::filesystem::path& outputName, const std::vector<six:
     six::sicd::writeAsNITF(outputName, fs_schemaPaths, *pComplexData, std::span<const six::zfloat>(image.data(), image.size()));
 }
 
-static void test_assert_image_(const std::string& testName,
-    const std::vector<six::zfloat>& image, const six::sicd::ComplexData& complexData)
+static void test_assert_image_(const std::vector<six::zfloat>& image, const six::sicd::ComplexData& complexData)
 {
     static const std::vector<six::zfloat> expected_cxfloat{
         six::zfloat(46.7833481f, 78.0533066f),
@@ -509,8 +504,7 @@ static void test_assert_image_(const std::string& testName,
 }
 
 template<typename TSave>
-static void test_create_sicd_from_mem_(const std::string& testName,
-    const std::filesystem::path& outputName, six::PixelType pixelType, bool makeAmplitudeTable,
+static void test_create_sicd_from_mem_(const std::filesystem::path& outputName, six::PixelType pixelType, bool makeAmplitudeTable,
     TSave save)
 {
     const types::RowCol<size_t> dims(2, 2);
@@ -524,22 +518,21 @@ static void test_create_sicd_from_mem_(const std::string& testName,
 
     const auto image = make_complex_image(*pComplexData, dims);
     TEST_ASSERT_EQ(image.size(), dims.area());
-    test_assert_image_(testName, image, *pComplexData);
+    test_assert_image_(image, *pComplexData);
 
     save(outputName, image, std::move(pComplexData));
-    read_nitf(testName, outputName, pixelType, image);
+    read_nitf(outputName, pixelType, image);
 }
-static void test_create_sicd_from_mem(const std::string& testName,
-    const std::filesystem::path& outputName, six::PixelType pixelType, bool makeAmplitudeTable = false)
+static void test_create_sicd_from_mem(const std::filesystem::path& outputName, six::PixelType pixelType, bool makeAmplitudeTable = false)
 {
-    test_create_sicd_from_mem_(testName, outputName, pixelType, makeAmplitudeTable, save);
-    test_create_sicd_from_mem_(testName, outputName, pixelType, makeAmplitudeTable, buffer_list_save);
+    test_create_sicd_from_mem_(outputName, pixelType, makeAmplitudeTable, save);
+    test_create_sicd_from_mem_(outputName, pixelType, makeAmplitudeTable, buffer_list_save);
 }
 
-TEST_CASE(test_create_sicd_from_mem_8i)
+TEST_CASE("test_create_sicd_from_mem_8i")
 {
-    test_create_sicd_from_mem(testName, "test_create_sicd_from_mem_8i_amp.sicd", six::PixelType::AMP8I_PHS8I, true /*makeAmplitudeTable*/);
-    test_create_sicd_from_mem(testName, "test_create_sicd_from_mem_8i_noamp.sicd", six::PixelType::AMP8I_PHS8I, false /*makeAmplitudeTable*/);
+    test_create_sicd_from_mem("test_create_sicd_from_mem_8i_amp.sicd", six::PixelType::AMP8I_PHS8I, true /*makeAmplitudeTable*/);
+    test_create_sicd_from_mem("test_create_sicd_from_mem_8i_noamp.sicd", six::PixelType::AMP8I_PHS8I, false /*makeAmplitudeTable*/);
 }
 
 static std::vector<AMP8I_PHS8I_t> testing_fromComplex(std::span<const six::zfloat> inputs)
@@ -555,7 +548,7 @@ static std::vector<AMP8I_PHS8I_t> testing_fromComplex(six::execution_policy poli
     return imageData.fromComplex(policy, inputs);
 }
 
-static void test_adjusted_values(const std::string& testName, const std::vector<six::zfloat>& values,
+static void test_adjusted_values(std::vector<six::zfloat>& values,
     const std::vector<AMP8I_PHS8I_t>& expected, six::zfloat delta)
 {
     auto adjusted_values = values;
@@ -572,9 +565,9 @@ static void test_adjusted_values(const std::string& testName, const std::vector<
     }
 }
 
-static void test_nearest_neighbor_(const std::string& testName, const six::execution_policy* pPolicy = nullptr)
+static void test_nearest_neighbor_(std::optional<six::execution_policy> policy = std::nullopt)
 {
-    const std::vector<six::zfloat> values{
+    std::vector<six::zfloat> values{
         {0.0, 0.0}, {1.0, 1.0}, {10.0, -10.0}, {-100.0, 100.0}, {-1000.0, -1000.0} };
 
     const std::vector<AMP8I_PHS8I_t> expected{
@@ -585,7 +578,7 @@ static void test_nearest_neighbor_(const std::string& testName, const six::execu
         {static_cast<uint8_t>(255), static_cast<uint8_t>(160)} };
 
     const auto values_ = sys::make_span(values);
-    const auto actual = pPolicy ? testing_fromComplex(*pPolicy, values_) : testing_fromComplex(values_);
+    const auto actual = policy ? testing_fromComplex(*policy, values_) : testing_fromComplex(values_);
     for (size_t i = 0; i < expected.size(); i++)
     {
         TEST_ASSERT_EQ(expected[i].amplitude, actual[i].amplitude);
@@ -595,86 +588,74 @@ static void test_nearest_neighbor_(const std::string& testName, const six::execu
     auto other_expected = expected;
 
     constexpr auto delta = 0.0122f;
-    test_adjusted_values(testName, values, other_expected,  six::zfloat(delta, 0.0f));
+    test_adjusted_values(values, other_expected,  six::zfloat(delta, 0.0f));
 
     other_expected[0].phase = 32;
-    test_adjusted_values(testName, values, other_expected, six::zfloat(delta, delta));
+    test_adjusted_values(values, other_expected, six::zfloat(delta, delta));
 
     other_expected[0].phase += 32;
-    test_adjusted_values(testName, values, other_expected, six::zfloat(0.0f, delta));
+    test_adjusted_values(values, other_expected, six::zfloat(0.0f, delta));
 
     other_expected[0].phase += 32;
-    test_adjusted_values(testName, values, other_expected, six::zfloat(-delta, delta));
+    test_adjusted_values(values, other_expected, six::zfloat(-delta, delta));
 
     other_expected[0].phase += 32;
-    test_adjusted_values(testName, values, other_expected, six::zfloat(-delta, 0.0f));
+    test_adjusted_values(values, other_expected, six::zfloat(-delta, 0.0f));
 
     other_expected[0].phase += 32;
-    test_adjusted_values(testName, values, other_expected, six::zfloat(-delta, -delta));
+    test_adjusted_values(values, other_expected, six::zfloat(-delta, -delta));
 
     other_expected[0].phase += 32;
-    test_adjusted_values(testName, values, other_expected, six::zfloat(0.0f, -delta));
+    test_adjusted_values(values, other_expected, six::zfloat(0.0f, -delta));
 
     other_expected[0].phase += 32;
-    test_adjusted_values(testName, values, other_expected, six::zfloat(delta, -delta));
+    test_adjusted_values(values, other_expected, six::zfloat(delta, -delta));
 
     other_expected[0].phase += 32;
     TEST_ASSERT_EQ(other_expected[0].phase, expected[0].phase);
 }
-static void test_nearest_neighbor_(const std::string& testName, six::execution_policy policy)
+TEST_CASE("test_nearest_neighbor")
 {
-    test_nearest_neighbor_(testName, &policy);
-}
-TEST_CASE(test_nearest_neighbor)
-{
-    test_nearest_neighbor_(testName);
-    test_nearest_neighbor_(testName, six::execution_policy::seq);
-    test_nearest_neighbor_(testName, six::execution_policy::par);
-    test_nearest_neighbor_(testName, six::execution_policy::unseq);
-    test_nearest_neighbor_(testName, six::execution_policy::par_unseq);
+    test_nearest_neighbor_();
+    test_nearest_neighbor_(six::execution_policy::seq);
+    test_nearest_neighbor_(six::execution_policy::par);
+    test_nearest_neighbor_(six::execution_policy::unseq);
+    test_nearest_neighbor_(six::execution_policy::par_unseq);
 
     #if SIX_sicd_ComplexToAMP8IPHS8I_unseq
-    extern std::string six_sicd_set_nearest_neighbors_unseq(std::string unseq);
-    const auto default_unseq = six_sicd_set_nearest_neighbors_unseq("xyz");
-    try
-    {
-        test_nearest_neighbor_(testName, six::execution_policy::unseq);
-        TEST_FAIL;
-    }
-    catch (const std::logic_error&)
-    {
-        TEST_SUCCESS;
-    }
+        extern std::string six_sicd_set_nearest_neighbors_unseq(std::string unseq);
+        const auto default_unseq = six_sicd_set_nearest_neighbors_unseq("xyz");
+        CHECK_THROWS_AS(test_nearest_neighbor_(six::execution_policy::unseq), std::logic_error);
 
-    #if SIX_sicd_has_simd
-    six_sicd_set_nearest_neighbors_unseq("simd");
-    test_nearest_neighbor_(testName, six::execution_policy::unseq);
-    test_nearest_neighbor_(testName, six::execution_policy::par_unseq);
-    #endif
+        #if SIX_sicd_has_simd
+            six_sicd_set_nearest_neighbors_unseq("simd");
+            test_nearest_neighbor_(six::execution_policy::unseq);
+            test_nearest_neighbor_(six::execution_policy::par_unseq);
+        #endif
 
-    #if SIX_sicd_has_VCL
-    six_sicd_set_nearest_neighbors_unseq("vcl");
-    test_nearest_neighbor_(testName, six::execution_policy::unseq);
-    test_nearest_neighbor_(testName, six::execution_policy::par_unseq);
-    #endif
+        #if SIX_sicd_has_VCL
+            six_sicd_set_nearest_neighbors_unseq("vcl");
+            test_nearest_neighbor_(six::execution_policy::unseq);
+            test_nearest_neighbor_(six::execution_policy::par_unseq);
+        #endif
 
-    #if SIX_sicd_has_ximd
-    six_sicd_set_nearest_neighbors_unseq("ximd");
-    test_nearest_neighbor_(testName, six::execution_policy::unseq);
-    test_nearest_neighbor_(testName, six::execution_policy::par_unseq);
-    #endif
+        #if SIX_sicd_has_ximd
+            six_sicd_set_nearest_neighbors_unseq("ximd");
+            test_nearest_neighbor_(six::execution_policy::unseq);
+            test_nearest_neighbor_(six::execution_policy::par_unseq);
+        #endif
 
-    #if SIX_sicd_has_sisd
-    six_sicd_set_nearest_neighbors_unseq("sisd");
-    test_nearest_neighbor_(testName, six::execution_policy::unseq);
-    test_nearest_neighbor_(testName, six::execution_policy::par_unseq);
-    #endif
+        #if SIX_sicd_has_sisd
+            six_sicd_set_nearest_neighbors_unseq("sisd");
+            test_nearest_neighbor_(six::execution_policy::unseq);
+            test_nearest_neighbor_(six::execution_policy::par_unseq);
+        #endif
 
-    six_sicd_set_nearest_neighbors_unseq(default_unseq); // restore default
+        six_sicd_set_nearest_neighbors_unseq(default_unseq); // restore default
     #endif // SIX_sicd_ComplexToAMP8IPHS8I_unseq
 }
 
-TEST_CASE(test_verify_phase_uint8_ordering)
+TEST_CASE("test_verify_phase_uint8_ordering")
 {
     // Verify that the uint8 phase values are ordered and evenly spaced from [0, 2PI).
     // If this fails, then a core assumption of the ComplexToAmpPhase8I structure is wrong.
@@ -703,8 +684,7 @@ struct Pairs final
     six::zfloat floating;
     AMP8I_PHS8I_t integral;
 };
-static void do_test_ComplexToAMP8IPHS8I_(const std::string& testName,
-    const six::sicd::details::ComplexToAMP8IPHS8I& item,
+static void do_test_ComplexToAMP8IPHS8I_(const six::sicd::details::ComplexToAMP8IPHS8I& item,
     const six::zfloat& input_dbl, const std::vector<Pairs>& candidates)
 {
     // Calculate the nearest neighbor quickly.
@@ -726,35 +706,33 @@ static void do_test_ComplexToAMP8IPHS8I_(const std::string& testName,
     TEST_ASSERT_EQ(test_integral.phase, best.integral.phase);
 }
 using it_t = std::vector<six::zfloat>::const_iterator;
-static void test_ComplexToAMP8IPHS8I_(const std::string& testName,
-    const six::sicd::details::ComplexToAMP8IPHS8I& item,
+static void test_ComplexToAMP8IPHS8I_(const six::sicd::details::ComplexToAMP8IPHS8I& item,
     it_t beg, it_t end, const std::vector<Pairs>& candidates)
 {
     for (auto it = beg; it != end; ++it)
     {
-        do_test_ComplexToAMP8IPHS8I_(testName, item, *it, candidates);
+        do_test_ComplexToAMP8IPHS8I_(item, *it, candidates);
     }
 }
-static void test_ComplexToAMP8IPHS8I(const std::string& testName,
-    const six::sicd::details::ComplexToAMP8IPHS8I& item,
+static void test_ComplexToAMP8IPHS8I(const six::sicd::details::ComplexToAMP8IPHS8I& item,
     it_t beg, it_t end, const std::vector<Pairs>& candidates)
 {
     // https://en.cppreference.com/w/cpp/thread/async
     const auto len = end - beg;
     if (len < 500)
     {
-        test_ComplexToAMP8IPHS8I_(testName, item, beg, end, candidates);
+        test_ComplexToAMP8IPHS8I_(item, beg, end, candidates);
         return;
     }
 
     const auto mid = beg + len / 2;
-    static const auto f = [&](it_t mid, it_t end) { test_ComplexToAMP8IPHS8I(testName, item, mid, end, candidates); };
+    static const auto f = [&](it_t mid, it_t end) { test_ComplexToAMP8IPHS8I(item, mid, end, candidates); };
     auto handle = std::async(std::launch::async, f, mid, end);
     f(beg, mid);
     handle.get();
 }
 
-TEST_CASE(test_ComplexToAMP8IPHS8I)
+TEST_CASE("test_ComplexToAMP8IPHS8I")
 {
     // Set up a converter that has a fake amplitude table.
     six::AmplitudeTable amplitudeTable; // "amp" is a (somewhat) reserved with MSVC
@@ -809,18 +787,5 @@ TEST_CASE(test_ComplexToAMP8IPHS8I)
         double y = dist(eng);
         inputs.emplace_back(x, y);
     }
-    test_ComplexToAMP8IPHS8I(testName, item, inputs.begin(), inputs.end(), candidates);
+    test_ComplexToAMP8IPHS8I(item, inputs.begin(), inputs.end(), candidates);
 }
-
-TEST_MAIN(
-    TEST_CHECK(test_8bit_ampphs);
-    TEST_CHECK(read_8bit_ampphs_with_table);
-    TEST_CHECK(read_8bit_ampphs_no_table);
-    TEST_CHECK(test_readFromNITF_8_bit_Amp_Phs_Examples);
-    TEST_CHECK(test_read_sicd_8_bit_Amp_Phs_Examples);
-    TEST_CHECK(test_create_sicd_from_mem_8i);
-    TEST_CHECK(test_nearest_neighbor);
-    TEST_CHECK(test_verify_phase_uint8_ordering);
-    TEST_CHECK(test_ComplexToAMP8IPHS8I);
-    )
-

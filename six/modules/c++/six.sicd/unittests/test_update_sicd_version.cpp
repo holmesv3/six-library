@@ -19,30 +19,33 @@
  * see <http://www.gnu.org/licenses/>.
  *
  */
-#include "TestCase.h"
 #include <six/sicd/Utilities.h>
 #include <six/sicd/SICDVersionUpdater.h>
 
-TEST_CASE(testInvalidVersions)
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+
+TEST_CASE("testInvalidVersions")
 {
     six::sicd::ComplexData complexData;
     complexData.setVersion("1.1.0");
     logging::NullLogger log;
 
     // Invalid SICD version should throw
-    TEST_EXCEPTION(six::sicd::SICDVersionUpdater(complexData, "1.1.7", log));
+    CHECK_THROWS(six::sicd::SICDVersionUpdater(complexData, "1.1.7", log));
 
     // No-op should throw
-    TEST_EXCEPTION(six::sicd::SICDVersionUpdater(complexData, "1.1.0", log));
+    CHECK_THROWS(six::sicd::SICDVersionUpdater(complexData, "1.1.0", log));
 
     // Downgrade should throw
-    TEST_EXCEPTION(six::sicd::SICDVersionUpdater(complexData, "1.0.0", log));
+    CHECK_THROWS(six::sicd::SICDVersionUpdater(complexData, "1.0.0", log));
 
     // Don't support 0.3.1 (yet?)
-    TEST_EXCEPTION(six::sicd::SICDVersionUpdater(complexData, "0.3.1", log));
+    CHECK_THROWS(six::sicd::SICDVersionUpdater(complexData, "0.3.1", log));
 }
 
-TEST_CASE(test110To120)
+TEST_CASE("test110To120")
 {
     six::sicd::ComplexData complexData;
     complexData.setVersion("1.1.0");
@@ -53,7 +56,7 @@ TEST_CASE(test110To120)
     TEST_ASSERT_EQ(complexData.getVersion(), "1.2.0");
 }
 
-TEST_CASE(test120To121)
+TEST_CASE("test120To121")
 {
     six::sicd::ComplexData complexData;
     complexData.setVersion("1.2.0");
@@ -64,7 +67,7 @@ TEST_CASE(test120To121)
     TEST_ASSERT_EQ(complexData.getVersion(), "1.2.1");
 }
 
-TEST_CASE(test120To130)
+TEST_CASE("test120To130")
 {
     six::sicd::ComplexData complexData;
     complexData.setVersion("1.2.0");
@@ -75,7 +78,7 @@ TEST_CASE(test120To130)
     TEST_ASSERT_EQ(complexData.getVersion(), "1.3.0");
 }
 
-TEST_CASE(testTransitiveUpdate)
+TEST_CASE("testTransitiveUpdate")
 {
     six::sicd::ComplexData complexData;
     complexData.setVersion("1.0.0");
@@ -87,14 +90,14 @@ TEST_CASE(testTransitiveUpdate)
 
     // We should still have a new processing block for this "empty"
     // version update
-    TEST_ASSERT(complexData.imageFormation.get());
+    CHECK(complexData.imageFormation.get());
     TEST_ASSERT_EQ(complexData.imageFormation->processing.size(), static_cast<size_t>(1));
     const auto& processing = complexData.imageFormation->processing[0];
-    TEST_ASSERT_FALSE(processing.type.empty());
+    CHECK_FALSE(processing.type.empty());
     TEST_ASSERT_EQ(processing.applied, six::AppliedType::IS_TRUE);
 }
 
-TEST_CASE(testUpdateDistRefLinePoly)
+TEST_CASE("testUpdateDistRefLinePoly")
 {
     logging::NullLogger log;
     six::sicd::ComplexData complexData;
@@ -105,7 +108,7 @@ TEST_CASE(testUpdateDistRefLinePoly)
     complexData.rma->rmat.reset(new six::sicd::RMAT());
 
     six::sicd::SICDVersionUpdater(complexData, "0.5.0", log).update();
-    TEST_ASSERT_FALSE(six::Init::isUndefined(complexData.rma->rmat->distRefLinePoly));
+    CHECK_FALSE(six::Init::isUndefined(complexData.rma->rmat->distRefLinePoly));
 
     // Jumping from 0.4.0 to 1.0.0 should leave it uninitialized
     complexData.setVersion("0.4.0");
@@ -113,10 +116,10 @@ TEST_CASE(testUpdateDistRefLinePoly)
     complexData.rma->rmat.reset(new six::sicd::RMAT());
 
     six::sicd::SICDVersionUpdater(complexData, "1.0.0", log).update();
-    TEST_ASSERT_TRUE(six::Init::isUndefined(complexData.rma->rmat->distRefLinePoly));
+    CHECK(six::Init::isUndefined(complexData.rma->rmat->distRefLinePoly));
 }
 
-TEST_CASE(testWarningParameters)
+TEST_CASE("testWarningParameters")
 {
     logging::NullLogger log;
     six::sicd::ComplexData complexData;
@@ -131,27 +134,14 @@ TEST_CASE(testWarningParameters)
 
     // Make sure original Processing is still there
     TEST_ASSERT_EQ(complexData.imageFormation->processing.size(), static_cast<size_t>(2));
-    TEST_ASSERT(complexData.imageFormation->processing[0].parameters.empty());
+    CHECK(complexData.imageFormation->processing[0].parameters.empty());
 
     // We should have a new processing block with parameters for
     // reported warnings
     const auto& processing = complexData.imageFormation->processing[1];
-    TEST_ASSERT_FALSE(processing.type.empty());
+    CHECK_FALSE(processing.type.empty());
     TEST_ASSERT_EQ(processing.applied, six::AppliedType::IS_TRUE);
 
     const auto& parameters = processing.parameters;
-    TEST_ASSERT_FALSE(parameters.empty());
+    CHECK_FALSE(parameters.empty());
 }
-
-TEST_MAIN(
-    // These tests should suffice to cover all of the "tricky"
-    // logic in the implementation.  Any remaining bugs would
-    // most likely be due to misreading the standards.
-    TEST_CHECK(testInvalidVersions);
-    TEST_CHECK(test110To120);
-    TEST_CHECK(test120To121);
-    TEST_CHECK(test120To130);
-    TEST_CHECK(testTransitiveUpdate);
-    TEST_CHECK(testUpdateDistRefLinePoly);
-    TEST_CHECK(testWarningParameters);
-    )

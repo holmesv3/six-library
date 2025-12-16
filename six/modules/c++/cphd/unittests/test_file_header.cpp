@@ -22,7 +22,10 @@
 
 #include <cphd/FileHeader.h>
 #include <io/ByteStream.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
 
 const char* FILE_HEADER_CONTENT = "CPHD/1.0\n"
         "XML_BLOCK_SIZE := 3\n"
@@ -37,25 +40,25 @@ const char* FILE_HEADER_CONTENT = "CPHD/1.0\n"
         "RELEASE_INFO := UNRESTRICTED\n"
         "\f\n";
 
-TEST_CASE(testReadVersion1_0)
+TEST_CASE("testReadVersion1_0")
 {
     const char* FILE_TYPE_HEADER = "CPHD/1.0\n";
 
     io::ByteStream fileTypeHeader;
     fileTypeHeader.write(FILE_TYPE_HEADER, strlen(FILE_TYPE_HEADER));
-    TEST_ASSERT(cphd::FileHeader::readVersion(fileTypeHeader) == cphd::Version::v1_0_0);
+    CHECK(cphd::FileHeader::readVersion(fileTypeHeader) == cphd::Version::v1_0_0);
 }
 
-TEST_CASE(testReadVersion1_1_0)
+TEST_CASE("testReadVersion1_1_0")
 {
     const char* FILE_TYPE_HEADER = "CPHD/1.1.0\n";
 
     io::ByteStream fileTypeHeader;
     fileTypeHeader.write(FILE_TYPE_HEADER, strlen(FILE_TYPE_HEADER));
-    TEST_ASSERT(cphd::FileHeader::readVersion(fileTypeHeader) == cphd::Version::v1_1_0);
+    CHECK(cphd::FileHeader::readVersion(fileTypeHeader) == cphd::Version::v1_1_0);
 }
 
-TEST_CASE(testCanReadHeaderWithoutBreaking)
+TEST_CASE("testCanReadHeaderWithoutBreaking")
 {
     io::ByteStream fileHeaderContentWithSupport;
     fileHeaderContentWithSupport.write(FILE_HEADER_CONTENT, strlen(FILE_HEADER_CONTENT));
@@ -106,7 +109,7 @@ TEST_CASE(testCanReadHeaderWithoutBreaking)
             "\f\n";
     io::ByteStream fileHeaderContentWithoutClassification;
     fileHeaderContentWithoutClassification.write(fileHeaderTxtNoClass);
-    TEST_THROWS(cphd::FileHeader::read(fileHeaderContentWithoutClassification));
+    CHECK_THROWS(cphd::FileHeader::read(fileHeaderContentWithoutClassification));
 
     std::string fileHeaderTxtInvalid = "CPHD/1.0\n"
             "XML_BLOCK_SIZE := foo\n"
@@ -120,10 +123,10 @@ TEST_CASE(testCanReadHeaderWithoutBreaking)
             "\f\n";
     io::ByteStream fileHeaderContentWithInvalidValue;
     fileHeaderContentWithInvalidValue.write(fileHeaderTxtInvalid);
-    TEST_THROWS(cphd::FileHeader::read(fileHeaderContentWithInvalidValue));
+    CHECK_THROWS(cphd::FileHeader::read(fileHeaderContentWithInvalidValue));
 }
 
-TEST_CASE(testRoundTripHeader)
+TEST_CASE("testRoundTripHeader")
 {
     io::ByteStream headerContent;
     headerContent.write(FILE_HEADER_CONTENT, strlen(FILE_HEADER_CONTENT));
@@ -155,10 +158,3 @@ TEST_CASE(testRoundTripHeader)
     TEST_ASSERT_EQ(header.getReleaseInfo(),
             roundTrippedHeader.getReleaseInfo());
 }
-
-TEST_MAIN(
-        TEST_CHECK(testReadVersion1_0);
-        TEST_CHECK(testReadVersion1_1_0);
-        TEST_CHECK(testCanReadHeaderWithoutBreaking);
-        TEST_CHECK(testRoundTripHeader);
-        )

@@ -24,7 +24,7 @@
 #define __SIX_BYTE_PROVIDER_H__
 
 #include <memory>
-#include <std/string>
+#include <string>
 
 #include <scene/sys_Conf.h>
 #include <nitf/ByteProvider.hpp>

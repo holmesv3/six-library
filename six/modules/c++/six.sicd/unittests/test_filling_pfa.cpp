@@ -21,9 +21,13 @@
 */
 
 #include <import/six/sicd.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-TEST_CASE(DefaultPFA)
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+
+TEST_CASE("DefaultPFA")
 {
     six::sicd::GeoData geoData;
     for (size_t ii = 0; ii < geoData.scp.ecf.size(); ++ii)
@@ -53,7 +57,3 @@ TEST_CASE(DefaultPFA)
     TEST_ASSERT_ALMOST_EQ(pfa.focusPlaneNormal[2], 0.80370110);
     TEST_ASSERT_EQ(pfa.polarAngleRefTime, 123);
 }
-
-TEST_MAIN(
-    TEST_CHECK(DefaultPFA);
-)

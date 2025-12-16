@@ -23,7 +23,7 @@
 
 #include <numeric>
 
-#include <std/bit>
+#include <bit>
 
 #include <six/Serialize.h>
 

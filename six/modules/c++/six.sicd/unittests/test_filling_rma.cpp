@@ -21,9 +21,12 @@
 */
 
 #include <import/six/sicd.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-TEST_CASE(DerivedRMATandRMCR)
+#define TEST_ASSERT_ALMOST_EQ(X, Y) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, 0.0001));
+
+TEST_CASE("DerivedRMATandRMCR")
 {
     six::sicd::GeoData geoData;
     for (size_t ii = 0; ii < geoData.scp.ecf.size(); ++ii)
@@ -58,7 +61,7 @@ TEST_CASE(DerivedRMATandRMCR)
     TEST_ASSERT_ALMOST_EQ(rma.rmcr->dopConeAngleRef, 0.10082275);
 }
 
-TEST_CASE(DerivedINCA)
+TEST_CASE("DerivedINCA")
 {
     six::sicd::RMA rma;
     rma.inca.reset(new six::sicd::INCA());
@@ -94,7 +97,3 @@ TEST_CASE(DerivedINCA)
     TEST_ASSERT_ALMOST_EQ(rma.inca->rangeCA, 372.0282247);
 }
 
-TEST_MAIN(
-    TEST_CHECK(DerivedRMATandRMCR);
-    TEST_CHECK(DerivedINCA);
-    )

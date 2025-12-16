@@ -22,7 +22,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <std/filesystem>
+#include <filesystem>
 
 #include <nitf/coda-oss.hpp>
 #include <sys/DLL.h>

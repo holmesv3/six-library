@@ -22,7 +22,7 @@
 #include <six/Container.h>
 
 #include <stdexcept>
-#include <std/memory>
+#include <memory>
 
 namespace six
 {

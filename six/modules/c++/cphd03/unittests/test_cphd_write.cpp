@@ -21,7 +21,7 @@
  */
 
 #include <string>
-#include <std/filesystem>
+#include <filesystem>
 #include <tuple>
 
 #include <cphd03/CPHDWriter.h>
@@ -29,7 +29,10 @@
 #include <cphd/Wideband.h>
 #include <types/RowCol.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
 
 static constexpr size_t MAX_SIZE_T = 1000000;
 static constexpr double MAX_DOUBLE = 1000000.0;
@@ -357,11 +360,8 @@ void writeCPHD(
 }
 
 
-void runCPHDTest(const std::string& testName_,
-                 cphd03::Metadata& metadata)
+void runCPHDTest(cphd03::Metadata& metadata)
 {
-    const auto testName = testName_;
-
     metadata.data.numCPHDChannels = NUM_IMAGES;
 
     cphd03::VBM vbm(metadata.data, metadata.vectorParameters);
@@ -435,7 +435,7 @@ void runCPHDTest(const std::string& testName_,
 
 }
 
-TEST_CASE(testWriteFXOneWay)
+TEST_CASE("testWriteFXOneWay")
 {
     call_srand();
 
@@ -444,20 +444,20 @@ TEST_CASE(testWriteFXOneWay)
     addFXParams(metadata);
     addOneWayParams(metadata);
 
-    runCPHDTest(testName, metadata);
+    runCPHDTest(metadata);
 }
 
-TEST_CASE(testWriteFXTwoWay)
+TEST_CASE("testWriteFXTwoWay")
 {
     cphd03::Metadata metadata;
     buildRandomMetadata(metadata);
     addFXParams(metadata);
     addTwoWayParams(metadata);
 
-    runCPHDTest(testName, metadata);
+    runCPHDTest(metadata);
 }
 
-TEST_CASE(testWriteTOAOneWay)
+TEST_CASE("testWriteTOAOneWay")
 {
     call_srand();
 
@@ -466,10 +466,10 @@ TEST_CASE(testWriteTOAOneWay)
     addTOAParams(metadata);
     addOneWayParams(metadata);
 
-    runCPHDTest(testName, metadata);
+    runCPHDTest(metadata);
 }
 
-TEST_CASE(testWriteTOATwoWay)
+TEST_CASE("testWriteTOATwoWay")
 {
     call_srand();
 
@@ -478,14 +478,5 @@ TEST_CASE(testWriteTOATwoWay)
     addTOAParams(metadata);
     addTwoWayParams(metadata);
 
-    runCPHDTest(testName, metadata);
+    runCPHDTest(metadata);
 }
-
-TEST_MAIN(
-    TEST_CHECK(testWriteFXOneWay);
-    TEST_CHECK(testWriteFXTwoWay);
-    TEST_CHECK(testWriteTOAOneWay);
-    TEST_CHECK(testWriteTOATwoWay);
-    std::filesystem::remove(FILE_NAME);
-    )
-

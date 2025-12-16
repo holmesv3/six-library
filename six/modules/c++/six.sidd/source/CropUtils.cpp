@@ -23,7 +23,7 @@
 
 #include <memory>
 #include <vector>
-#include <std/cstddef>
+#include <cstddef>
 
 #include <nitf/coda-oss.hpp>
 #include <except/Exception.h>

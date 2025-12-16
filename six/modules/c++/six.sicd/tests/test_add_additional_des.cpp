@@ -22,7 +22,7 @@
 
 #include <cstdio>
 
-#include <std/filesystem>
+#include <filesystem>
 
 #include <six/NITFWriteControl.h>
 #include <six/Types.h>

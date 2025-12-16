@@ -21,10 +21,11 @@
 */
 
 #include <import/six/sicd.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
 
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
 
-TEST_CASE(fmRateFromDemodType)
+TEST_CASE("fmRateFromDemodType")
 {
     six::sicd::WaveformParameters params;
     params.rcvDemodType = six::DemodType::CHIRP;
@@ -32,16 +33,16 @@ TEST_CASE(fmRateFromDemodType)
     TEST_ASSERT_EQ(params.rcvFMRate, 0);
 }
 
-TEST_CASE(demodTypeFromFmRate)
+TEST_CASE("demodTypeFromFmRate")
 {
     six::sicd::WaveformParameters params;
     params.rcvFMRate = 0;
     params.fillDerivedFields();
-    TEST_ASSERT(params.rcvDemodType.toString() == "CHIRP");
+    CHECK(params.rcvDemodType.toString() == "CHIRP");
     TEST_ASSERT_EQ(params.rcvDemodType, six::DemodType::CHIRP);
 }
 
-TEST_CASE(pulseLength)
+TEST_CASE("pulseLength")
 {
     six::sicd::WaveformParameters params;
     params.txRFBandwidth = 5;
@@ -51,7 +52,7 @@ TEST_CASE(pulseLength)
             std::numeric_limits<double>::infinity());
 }
 
-TEST_CASE(txFrequencies)
+TEST_CASE("txFrequencies")
 {
     six::sicd::RadarCollection radarCollection;
     radarCollection.waveform.resize(3);
@@ -67,7 +68,7 @@ TEST_CASE(txFrequencies)
     TEST_ASSERT_EQ(radarCollection.txFrequencyMax, 13);
 }
 
-TEST_CASE(wfParamTxFrequencies)
+TEST_CASE("wfParamTxFrequencies")
 {
     six::sicd::RadarCollection radarCollection;
     radarCollection.waveform.resize(1);
@@ -78,10 +79,3 @@ TEST_CASE(wfParamTxFrequencies)
     TEST_ASSERT_EQ(radarCollection.waveform[0]->txFrequencyStart, 1);
     TEST_ASSERT_EQ(radarCollection.waveform[0]->txRFBandwidth, 4);
 }
-
-TEST_MAIN(
-    TEST_CHECK(fmRateFromDemodType);
-    TEST_CHECK(demodTypeFromFmRate);
-    TEST_CHECK(pulseLength);
-    TEST_CHECK(txFrequencies);
-    )

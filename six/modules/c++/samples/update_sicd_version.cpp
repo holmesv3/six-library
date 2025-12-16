@@ -22,7 +22,7 @@
 #include <six/sicd/SICDVersionUpdater.h>
 
 #include <iostream>
-#include <std/filesystem>
+#include <filesystem>
 #include <algorithm>
 
 #include <cli/ArgumentParser.h>

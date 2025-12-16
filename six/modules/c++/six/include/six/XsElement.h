@@ -24,10 +24,10 @@
 #ifndef SIX_six_XsElement_h_INCLUDED_
 #define SIX_six_XsElement_h_INCLUDED_
 
-#include <std/string>
+#include <string>
 #include <ostream>
 #include <utility>
-#include <std/optional>
+#include <optional>
 
 #include <xml/lite/Element.h>
 #include <xml/lite/QName.h>

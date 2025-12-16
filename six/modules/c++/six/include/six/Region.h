@@ -27,8 +27,8 @@
 
 #include <memory>
 
-#include <std/memory>
-#include <gsl/gsl.h>
+#include <memory>
+#include <gsl/gsl>
 
 #include <scene/sys_Conf.h>
 

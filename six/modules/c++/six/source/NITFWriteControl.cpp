@@ -24,8 +24,8 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
-#include <std/bit>
-#include <std/memory>
+#include <bit>
+#include <memory>
 #include <algorithm>
 #include <type_traits>
 #include <stdexcept>
@@ -33,7 +33,7 @@
 #include <io/ByteStream.h>
 #include <math/Round.h>
 #include <mem/ScopedArray.h>
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 #include <sys/Span.h>
 #include <sys/Path.h>
 

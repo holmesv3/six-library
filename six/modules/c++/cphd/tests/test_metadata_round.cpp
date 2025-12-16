@@ -38,8 +38,6 @@
 #include <cphd/Metadata.h>
 #include <cphd/SceneCoordinates.h>
 
-#include "TestCase.h"
-
 /*!
  * Tests write and read of metadata
  * Fails if values don't match

@@ -24,9 +24,9 @@
 #ifndef SIX_cphd_Channel_h_INCLUDED_
 #define SIX_cphd_Channel_h_INCLUDED_
 
-#include <std/string>
+#include <string>
 #include <vector>
-#include <std/optional>
+#include <optional>
 
 #include <six/XsElement.h>
 

@@ -27,7 +27,7 @@
 #include <typeinfo>
 #include <string>
 
-#include <std/bit>
+#include <bit>
 
 #include <nitf/coda-oss.hpp>
 #include <six/Init.h>

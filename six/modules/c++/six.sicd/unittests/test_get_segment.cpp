@@ -21,9 +21,11 @@
 */
 
 #include <import/six/sicd.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
 
-TEST_CASE(testCanFindSegment)
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+
+TEST_CASE("testCanFindSegment")
 {
     six::sicd::AreaPlane areaPlane;
     mem::ScopedCloneablePtr<six::sicd::Segment> firstSegment(
@@ -48,7 +50,7 @@ TEST_CASE(testCanFindSegment)
             2);
 }
 
-TEST_CASE(testThrowIfMissingSegment)
+TEST_CASE("testThrowIfMissingSegment")
 {
     six::sicd::AreaPlane areaPlane;
     mem::ScopedCloneablePtr<six::sicd::Segment> segment(
@@ -56,10 +58,10 @@ TEST_CASE(testThrowIfMissingSegment)
     segment->identifier = "id";
     areaPlane.segmentList.push_back(segment);
 
-    TEST_EXCEPTION(areaPlane.getSegment("Wrong id"));
+    CHECK_THROWS(areaPlane.getSegment("Wrong id"));
 }
 
-TEST_CASE(testHandlesNullPointers)
+TEST_CASE("testHandlesNullPointers")
 {
     six::sicd::AreaPlane areaPlane;
     areaPlane.segmentList.resize(3);
@@ -67,10 +69,3 @@ TEST_CASE(testHandlesNullPointers)
     areaPlane.segmentList[2]->identifier = "void";
     areaPlane.getSegment("void");
 }
-
-TEST_MAIN(
-    TEST_CHECK(testCanFindSegment);
-    TEST_CHECK(testThrowIfMissingSegment);
-    TEST_CHECK(testHandlesNullPointers);
-    )
-

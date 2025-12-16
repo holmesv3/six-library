@@ -28,7 +28,7 @@
 #include <limits>
 #include <stdexcept>
 
-#include <std/optional>
+#include <optional>
 
 #include <six/Parameter.h>
 #include <types/RgAz.h>
@@ -145,24 +145,12 @@ inline bool has_value(const std::optional<T>& v)
     return v.has_value() && has_value(*v);
 }
 
-namespace details
-{
-    inline void throw_undefined_value()
-    {
-    #if CODA_OSS_cpp17
-        throw std::bad_optional_access();
-    #else
-        coda_oss::details::throw_bad_optional_access();
-    #endif
-    }
-}
-
 template<typename T>
 inline const T& value(const T& v)
 {
     if (!has_value(v))
     {
-        details::throw_undefined_value();
+        throw std::bad_optional_access();
     }
     return v;
 }

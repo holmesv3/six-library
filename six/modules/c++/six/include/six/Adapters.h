@@ -26,8 +26,8 @@
 
 #include <complex>
 #include <utility>
-#include <std/span>
-#include <std/cstddef>
+#include <span>
+#include <cstddef>
 #include <memory>
 
 #include <import/sys.h>

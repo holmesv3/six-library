@@ -21,8 +21,8 @@
  */
 #include <cphd03/CPHDWriter.h>
 
-#include <std/bit>
-#include <std/memory>
+#include <bit>
+#include <memory>
 
 #include <scene/sys_Conf.h>
 #include <except/Exception.h>

@@ -23,7 +23,7 @@
 
 #include <algorithm>
 #include <iterator>
-#include <std/memory>
+#include <memory>
 
 #include "six/sicd/ComplexXMLControl.h"
 #include "six/sicd/Utilities.h"

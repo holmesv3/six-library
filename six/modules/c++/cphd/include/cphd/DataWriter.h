@@ -25,9 +25,9 @@
 #define SIX_cphd_DataWriter_h_INCLUDED_
 
 #include <vector>
-#include <std/bit>
-#include <std/cstddef> // std::byte
-#include <std/span>
+#include <bit>
+#include <cstddef> // std::byte
+#include <span>
 
 #include <io/FileOutputStream.h>
 #include <sys/OS.h>

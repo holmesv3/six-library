@@ -26,7 +26,7 @@
 #include <sstream>
 #include <string>
 
-#include <std/bit>
+#include <bit>
 
 #include <six/Init.h>
 

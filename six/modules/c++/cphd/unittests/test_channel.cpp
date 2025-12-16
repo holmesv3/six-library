@@ -28,18 +28,20 @@
 #include <cphd/Enums.h>
 #include <cphd/Types.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
 
-TEST_CASE(EmptyChannel)
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+
+TEST_CASE("EmptyChannel")
 {
     cphd::Channel channel1, channel2;
     channel1.parameters.resize(3);
     channel2.parameters.resize(3);
-    TEST_ASSERT_TRUE((channel1.parameters == channel2.parameters));
-    TEST_ASSERT_TRUE((channel1 == channel2));
+    CHECK((channel1.parameters == channel2.parameters));
+    CHECK((channel1 == channel2));
 }
 
-TEST_CASE(TestPolygonInvalid)
+TEST_CASE("TestPolygonInvalid")
 {
     cphd::Channel channel;
 
@@ -57,11 +59,10 @@ TEST_CASE(TestPolygonInvalid)
     channel.parameters[0].imageArea.polygon.push_back(vertex1);
     channel.parameters[0].imageArea.polygon.push_back(vertex2);
 
-    TEST_ASSERT_FALSE(channel.parameters[0].imageArea.polygon.size() >= 3);
+    CHECK_FALSE(channel.parameters[0].imageArea.polygon.size() >= 3);
 }
 
-
-TEST_CASE(TxRcvMultIds)
+TEST_CASE("TxRcvMultIds")
 {
     cphd::Channel channel;
     channel.parameters.resize(2);
@@ -76,10 +77,3 @@ TEST_CASE(TxRcvMultIds)
     TEST_ASSERT_EQ(channel.parameters[0].txRcv->txWFId.size(), static_cast<size_t>(3));
     TEST_ASSERT_EQ(channel.parameters[0].txRcv->rcvId.size(), static_cast<size_t>(2));
 }
-
-TEST_MAIN(
-        TEST_CHECK(EmptyChannel);
-        TEST_CHECK(TestPolygonInvalid);
-        TEST_CHECK(TxRcvMultIds);
-        )
-

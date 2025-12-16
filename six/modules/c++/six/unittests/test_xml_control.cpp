@@ -20,7 +20,7 @@
  *
  */
 
-#include <std/filesystem>
+#include <filesystem>
 
 #include <six/XMLControl.h>
 #include <string>
@@ -28,7 +28,10 @@
 
 #include "six/XmlLite.h"
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_NOT_EQ(X, Y) CHECK(X != Y);
 
 // prefer SIX_DEFAULT_SCHEMA_PATH, existing scripts use DEFAULT_SCHEMA_PATH
 #if defined(DEFAULT_SCHEMA_PATH) && !defined(SIX_DEFAULT_SCHEMA_PATH)
@@ -44,7 +47,7 @@
 #endif
 #endif
 
-TEST_CASE(loadCompiledSchemaPath)
+TEST_CASE("loadCompiledSchemaPath")
 {
     sys::OS().unsetEnv("SIX_SCHEMA_PATH");
     std::vector<std::string> schemaPaths;
@@ -62,7 +65,7 @@ TEST_CASE(loadCompiledSchemaPath)
     }
 }
 
-TEST_CASE(respectGivenPaths)
+TEST_CASE("respectGivenPaths")
 {
     std::vector<std::string> schemaPaths = {"some/path"};
     sys::OS().setEnv("SIX_SCHEMA_PATH", "another/path", true /*overwrite*/);
@@ -70,7 +73,7 @@ TEST_CASE(respectGivenPaths)
     TEST_ASSERT_EQ(schemaPaths.size(), static_cast<size_t>(1));
 }
 
-TEST_CASE(loadFromEnvVariable)
+TEST_CASE("loadFromEnvVariable")
 {
     std::vector<std::string> schemaPaths;
     sys::OS().setEnv("SIX_SCHEMA_PATH", "another/path", true /*overwrite*/);
@@ -79,7 +82,7 @@ TEST_CASE(loadFromEnvVariable)
     TEST_ASSERT_EQ(schemaPaths[0], "another/path");
 }
 
-TEST_CASE(ignoreEmptyEnvVariable)
+TEST_CASE("ignoreEmptyEnvVariable")
 {
     std::vector<std::string> schemaPaths;
     sys::OS().setEnv("SIX_SCHEMA_PATH", "   ", true /*overwrite*/);
@@ -97,7 +100,7 @@ TEST_CASE(ignoreEmptyEnvVariable)
     }
 }
 
-TEST_CASE(dataTypeToString)
+TEST_CASE("dataTypeToString")
 {
     std::string result = six::XMLControl::dataTypeToString(six::DataType::COMPLEX);
     TEST_ASSERT_EQ("SICD_XML", result);
@@ -113,10 +116,10 @@ TEST_CASE(dataTypeToString)
     *pIntDataType = 999; // bypass overloads; should now be a garbage value
     TEST_ASSERT_NOT_EQ(dataType, six::DataType::COMPLEX);
     TEST_ASSERT_NOT_EQ(dataType, six::DataType::DERIVED);
-    TEST_EXCEPTION(six::XMLControl::dataTypeToString(dataType)); // the "default:" case label will throw, as desired
+    CHECK_THROWS(six::XMLControl::dataTypeToString(dataType)); // the "default:" case label will throw, as desired
 }
 
-TEST_CASE(testXmlLiteAttributeClass)
+TEST_CASE("testXmlLiteAttributeClass")
 {
     six::XmlLite xmlLite(xml::lite::Uri("urn:example.com"), true /*addClassAttributes*/);
     auto root = xmlLite.newElement("root", nullptr /*prnt*/);
@@ -146,35 +149,35 @@ TEST_CASE(testXmlLiteAttributeClass)
 }
 
 template<typename T>
-void test_six_toString_Exception(const std::string& testName)
+void test_six_toString_Exception()
 {
     auto v = six::Enum::cast<T>(1); // most enums have a value for 1
     v.value = -2; // cause toString() to fail
-    TEST_EXCEPTION(six::toString(v));
+    CHECK_THROWS(six::toString(v));
     v = T::NOT_SET;
-    TEST_EXCEPTION(six::toString(v)); // NOT_SET throws for this type
+    CHECK_THROWS(six::toString(v)); // NOT_SET throws for this type
 }
-TEST_CASE(test_six_toString)
+TEST_CASE("test_six_toString")
 {
     // This doesn't have anything to do with XML per-se, but that's the main use-case for six::toString()
 
-    test_six_toString_Exception<six::MagnificationMethod>(testName);
-    test_six_toString_Exception<six::DecimationMethod>(testName);
-    test_six_toString_Exception<six::OrientationType>(testName);
-    test_six_toString_Exception<six::DemodType>(testName);
-    test_six_toString_Exception<six::ImageFormationType>(testName);
-    test_six_toString_Exception<six::SlowTimeBeamCompensationType>(testName);
-    test_six_toString_Exception<six::ImageBeamCompensationType>(testName);
-    test_six_toString_Exception<six::AutofocusType>(testName);
-    test_six_toString_Exception<six::RMAlgoType>(testName);
-    test_six_toString_Exception<six::ComplexImagePlaneType>(testName);
-    test_six_toString_Exception<six::ComplexImageGridType>(testName);
-    test_six_toString_Exception<six::CollectType>(testName);
-    test_six_toString_Exception<six::RadarModeType>(testName);
+    test_six_toString_Exception<six::MagnificationMethod>();
+    test_six_toString_Exception<six::DecimationMethod>();
+    test_six_toString_Exception<six::OrientationType>();
+    test_six_toString_Exception<six::DemodType>();
+    test_six_toString_Exception<six::ImageFormationType>();
+    test_six_toString_Exception<six::SlowTimeBeamCompensationType>();
+    test_six_toString_Exception<six::ImageBeamCompensationType>();
+    test_six_toString_Exception<six::AutofocusType>();
+    test_six_toString_Exception<six::RMAlgoType>();
+    test_six_toString_Exception<six::ComplexImagePlaneType>();
+    test_six_toString_Exception<six::ComplexImageGridType>();
+    test_six_toString_Exception<six::CollectType>();
+    test_six_toString_Exception<six::RadarModeType>();
 }
 
 template<typename T>
-void test_six_toType_(const std::string& testName)
+void test_six_toType_()
 {
     const auto v = six::Enum::cast<T>(1); // most enums have a value for 1
     const auto s = six::toString(v);
@@ -184,46 +187,33 @@ void test_six_toType_(const std::string& testName)
     TEST_ASSERT_EQ(v, v_);
 }
 template<typename T>
-void test_six_toType_NOT_SET(const std::string& testName)
+void test_six_toType_NOT_SET()
 {
-    test_six_toType_<T>(testName);
+    test_six_toType_<T>();
     const auto v = six::toType<T>("Q W E R T Y"); // any string that will cause failure
     TEST_ASSERT_EQ(v, T::NOT_SET); // returns NOT_SET rather than throwing
 }
 template<typename T>
-void test_six_toType_Exception(const std::string& testName)
+void test_six_toType_Exception()
 {
-    test_six_toType_<T>(testName);
-    TEST_EXCEPTION(six::toType<T>("Q W E R T Y" /*any string that will cause failure*/)); // throw rather than returning NOT_SET
+    test_six_toType_<T>();
+    CHECK_THROWS(six::toType<T>("Q W E R T Y" /*any string that will cause failure*/)); // throw rather than returning NOT_SET
 }
-TEST_CASE(test_six_toType)
+TEST_CASE("test_six_toType")
 {
     // This doesn't have anything to do with XML per-se, but that's the main use-case for six::toString()
 
-    test_six_toType_NOT_SET<six::MagnificationMethod>(testName);
-    test_six_toType_NOT_SET<six::DecimationMethod>(testName);
-    test_six_toType_Exception<six::OrientationType>(testName);
-    test_six_toType_Exception<six::DemodType>(testName);
-    test_six_toType_Exception<six::ImageFormationType>(testName);
-    test_six_toType_Exception<six::SlowTimeBeamCompensationType>(testName);
-    test_six_toType_Exception<six::ImageBeamCompensationType>(testName);
-    test_six_toType_Exception<six::AutofocusType>(testName);
-    test_six_toType_Exception<six::RMAlgoType>(testName);
-    test_six_toType_Exception<six::ComplexImagePlaneType>(testName);
-    test_six_toType_Exception<six::ComplexImageGridType>(testName);
-    test_six_toType_Exception<six::CollectType>(testName);
-    test_six_toType_NOT_SET<six::RadarModeType>(testName);
-
+    test_six_toType_NOT_SET<six::MagnificationMethod>();
+    test_six_toType_NOT_SET<six::DecimationMethod>();
+    test_six_toType_Exception<six::OrientationType>();
+    test_six_toType_Exception<six::DemodType>();
+    test_six_toType_Exception<six::ImageFormationType>();
+    test_six_toType_Exception<six::SlowTimeBeamCompensationType>();
+    test_six_toType_Exception<six::ImageBeamCompensationType>();
+    test_six_toType_Exception<six::AutofocusType>();
+    test_six_toType_Exception<six::RMAlgoType>();
+    test_six_toType_Exception<six::ComplexImagePlaneType>();
+    test_six_toType_Exception<six::ComplexImageGridType>();
+    test_six_toType_Exception<six::CollectType>();
+    test_six_toType_NOT_SET<six::RadarModeType>();
 }
-
-TEST_MAIN(
-    TEST_CHECK(loadCompiledSchemaPath);
-    TEST_CHECK(respectGivenPaths);
-    TEST_CHECK(loadFromEnvVariable);
-    TEST_CHECK(ignoreEmptyEnvVariable);
-    TEST_CHECK(dataTypeToString);
-    TEST_CHECK(testXmlLiteAttributeClass);
-
-    TEST_CHECK(test_six_toString);
-    TEST_CHECK(test_six_toType);
-    )

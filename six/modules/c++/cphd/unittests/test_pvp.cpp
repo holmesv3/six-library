@@ -27,20 +27,19 @@
 
 #include <cphd/PVP.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
 
-
-TEST_CASE(testSimpleEqualityOperatorTrue)
+TEST_CASE("testSimpleEqualityOperatorTrue")
 {
     cphd::Pvp pvp1, pvp2;
 
     pvp1.txTime.setOffset(0);
     pvp2.txTime.setOffset(0);
 
-    TEST_ASSERT_TRUE((pvp1 == pvp2));
+    CHECK((pvp1 == pvp2));
 }
 
-TEST_CASE(testAppend)
+TEST_CASE("testAppend")
 {
     cphd::Pvp pvp;
     pvp.append(pvp.txTime);
@@ -52,17 +51,17 @@ TEST_CASE(testAppend)
     pvp.appendTxAnt();
     pvp.appendRcvAnt();
 
-    TEST_ASSERT_TRUE(pvp.txTime.getOffset() == 0);
-    TEST_ASSERT_TRUE(pvp.txPos.getOffset() == 1);
-    TEST_ASSERT_TRUE(pvp.txVel.getOffset() == 4);
-    TEST_ASSERT_TRUE(pvp.ampSF.getOffset() == 7);
-    TEST_ASSERT_TRUE(pvp.addedPVP["AddedParam1"].getOffset() == 8);
-    TEST_ASSERT_TRUE(pvp.signal.getOffset() == 16);
-    TEST_ASSERT_TRUE(value(pvp.txAntenna).getOffset() == 17);
-    TEST_ASSERT_TRUE(value(pvp.rcvAntenna).getOffset() == 25);
+    CHECK(pvp.txTime.getOffset() == 0);
+    CHECK(pvp.txPos.getOffset() == 1);
+    CHECK(pvp.txVel.getOffset() == 4);
+    CHECK(pvp.ampSF.getOffset() == 7);
+    CHECK(pvp.addedPVP["AddedParam1"].getOffset() == 8);
+    CHECK(pvp.signal.getOffset() == 16);
+    CHECK(value(pvp.txAntenna).getOffset() == 17);
+    CHECK(value(pvp.rcvAntenna).getOffset() == 25);
 }
 
-TEST_CASE(testAddedParamsEqualityOperatorTrue)
+TEST_CASE("testAddedParamsEqualityOperatorTrue")
 {
     cphd::Pvp pvp1;
     pvp1.setCustomParameter(1, 0, "F8", "AddedParam1");
@@ -72,11 +71,11 @@ TEST_CASE(testAddedParamsEqualityOperatorTrue)
     pvp2.setCustomParameter(1, 0, "F8", "AddedParam1");
     pvp2.setCustomParameter(1, 1, "F8", "AddedParam2");
 
-    TEST_ASSERT_TRUE((pvp1 == pvp2));
+    CHECK((pvp1 == pvp2));
 }
 
 
-TEST_CASE(testSimpleEqualityOperatorFalse)
+TEST_CASE("testSimpleEqualityOperatorFalse")
 {
     cphd::Pvp pvp1;
     pvp1.fxN1.setOffset(0);
@@ -84,11 +83,11 @@ TEST_CASE(testSimpleEqualityOperatorFalse)
     cphd::Pvp pvp2;
     pvp2.txTime.setOffset(1);
 
-    TEST_ASSERT_TRUE((pvp1 != pvp2));
+    CHECK((pvp1 != pvp2));
 
 }
 
-TEST_CASE(testAddedParamsEqualityOperatorFalse)
+TEST_CASE("testAddedParamsEqualityOperatorFalse")
 {
     cphd::Pvp pvp1;
     pvp1.setCustomParameter(1, 0, "F8", "AddedParam1");
@@ -101,24 +100,15 @@ TEST_CASE(testAddedParamsEqualityOperatorFalse)
     pvp3.setCustomParameter(1, 0, "F8", "AddedParam1");
     pvp3.setCustomParameter(1, 1, "F8", "AddedParam3");
 
-    TEST_ASSERT_TRUE((pvp1 != pvp2));
-    TEST_ASSERT_TRUE((pvp1 != pvp3));
+    CHECK((pvp1 != pvp2));
+    CHECK((pvp1 != pvp3));
 }
 
-TEST_CASE(testAntennaFailure)
+TEST_CASE("testAntennaFailure")
 {
     cphd::Pvp pvp;
     pvp.appendTxAnt();
     pvp.appendRcvAnt();
-    TEST_EXCEPTION(pvp.appendTxAnt());
-    TEST_EXCEPTION(pvp.appendRcvAnt());
+    CHECK_THROWS(pvp.appendTxAnt());
+    CHECK_THROWS(pvp.appendRcvAnt());
 }
-
-TEST_MAIN(
-        TEST_CHECK(testSimpleEqualityOperatorTrue);
-        TEST_CHECK(testAppend);
-        TEST_CHECK(testAddedParamsEqualityOperatorTrue);
-        TEST_CHECK(testSimpleEqualityOperatorFalse);
-        TEST_CHECK(testAddedParamsEqualityOperatorFalse);
-        TEST_CHECK(testAntennaFailure);
-        )

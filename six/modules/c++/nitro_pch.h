@@ -2,13 +2,13 @@
 
 #include "cpp_pch.h"
 
-#include <std/bit>
-#include <std/cstddef>
-#include <std/filesystem>
-#include <std/memory>
-#include <std/optional>
-#include <std/span>
-#include <std/string>
+#include <bit>
+#include <cstddef>
+#include <filesystem>
+#include <memory>
+#include <optional>
+#include <span>
+#include <string>
 
 #pragma warning(disable: 4619) // #pragma warning: there is no warning number '...'
 #pragma warning(disable: 4251) // '...' : class '...' needs to have dll-interface to be used by clients of struct '...'

@@ -28,7 +28,7 @@
 
 #include <ostream>
 #include <vector>
-#include <std/optional>
+#include <optional>
 
 #include <scene/FrameType.h>
 #include <six/ErrorStatistics.h>

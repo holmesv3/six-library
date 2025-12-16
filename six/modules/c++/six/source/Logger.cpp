@@ -1,6 +1,6 @@
 #include "six/Logger.h"
 
-#include <std/memory>
+#include <memory>
 
 six::Logger::Logger(logging::Logger*& log, bool& ownLog, std::nullptr_t)
     : mLog(log), mOwnLog(ownLog)

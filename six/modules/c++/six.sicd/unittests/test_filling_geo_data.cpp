@@ -22,7 +22,11 @@
 
 #include <import/six/sicd.h>
 #include <scene/ProjectionModel.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+#define TEST_ASSERT_ALMOST_EQ_EPS(X, Y, Z) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, Z));
 
 bool isNaN(double val)
 {
@@ -30,7 +34,7 @@ bool isNaN(double val)
     return (val != val);
 }
 
-TEST_CASE(fillValidData)
+TEST_CASE("fillValidData")
 {
     six::sicd::GeoData geoData;
     geoData.scp.ecf = six::Vector3(3);
@@ -68,19 +72,19 @@ TEST_CASE(fillValidData)
     for (size_t ii = 0; ii < 3; ++ii)
     {
         // If this fails, try with -ffast-math not set
-        TEST_ASSERT(isNaN(geoData.validData[ii].getLat()));
-        TEST_ASSERT(isNaN(geoData.validData[ii].getLon()));
+        CHECK(isNaN(geoData.validData[ii].getLat()));
+        CHECK(isNaN(geoData.validData[ii].getLon()));
     }
 
     for (size_t ii = 0; ii < 4; ++ii)
     {
         // If this fails, try with -ffast-math not set
-        TEST_ASSERT(isNaN(geoData.imageCorners.getCorner(ii).getLat()));
-        TEST_ASSERT(isNaN(geoData.imageCorners.getCorner(ii).getLon()));
+        CHECK(isNaN(geoData.imageCorners.getCorner(ii).getLat()));
+        CHECK(isNaN(geoData.imageCorners.getCorner(ii).getLon()));
     }
 }
 
-TEST_CASE(ecfFromLlh)
+TEST_CASE("ecfFromLlh")
 {
     six::sicd::GeoData geoData;
     geoData.scp.llh = six::LatLonAlt(10, 20, 30);
@@ -107,8 +111,3 @@ TEST_CASE(ecfFromLlh)
         TEST_ASSERT_ALMOST_EQ_EPS(expected[ii], geoData.scp.ecf[ii], 1e-4);
     }
 }
-
-TEST_MAIN(
-    TEST_CHECK(ecfFromLlh);
-    TEST_CHECK(fillValidData);
-    )

@@ -22,14 +22,14 @@
 
 #include <sstream>
 
-#include <std/filesystem>
-#include <gsl/gsl.h>
+#include <filesystem>
+#include <gsl/gsl>
 #include <stdexcept>
 
 #include "io/FileOutputStream.h"
 #include "str/Encoding.h"
 #include "sys/Path.h"
-#include "gsl/gsl.h"
+#include "gsl/gsl"
 #include "scene/GridECEFTransform.h"
 #include "scene/Utilities.h"
 #include "six/sidd/GeoTIFFWriteControl.h"

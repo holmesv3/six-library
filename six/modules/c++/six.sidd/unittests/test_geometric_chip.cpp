@@ -21,9 +21,12 @@
  */
 
 #include <six/sidd/DownstreamReprocessing.h>
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-TEST_CASE(testGeometricChip)
+#define TEST_ASSERT_ALMOST_EQ_EPS(X, Y, Z) CHECK_THAT(X, Catch::Matchers::WithinAbs(Y, Z));
+
+TEST_CASE("testGeometricChip")
 {
     six::sidd::GeometricChip chip;
     chip.chipSize.row = 1000;
@@ -56,8 +59,3 @@ TEST_CASE(testGeometricChip)
     TEST_ASSERT_ALMOST_EQ_EPS(computedFullCoord.row, fullCoord.row, TOL);
     TEST_ASSERT_ALMOST_EQ_EPS(computedFullCoord.col, fullCoord.col, TOL);
 }
-
-TEST_MAIN(
-    TEST_CHECK(testGeometricChip);
-)
-

@@ -22,11 +22,11 @@
 
 #include <iostream>
 
-#include "TestCase.h"
-
 #include <six/sidd/Annotations.h>
 
-TEST_CASE(SFAPoint)
+#include <catch2/catch_test_macros.hpp>
+
+TEST_CASE("SFAPoint")
 {
     six::sidd::SFATyped* pointTyped = new six::sidd::SFAPoint(1, 2, 3, 4);
     six::sidd::SFATyped* secondPointTyped = new six::sidd::SFAPoint(1, 2, 3, 4);
@@ -37,22 +37,22 @@ TEST_CASE(SFAPoint)
     six::sidd::SFAPoint* pointPointerOne = new six::sidd::SFAPoint(1, 2, 3, 4);
     six::sidd::SFAPoint* pointPointerTwo = new six::sidd::SFAPoint(1, 2, 3, 4);
 
-    TEST_ASSERT(*pointTyped == *secondPointTyped);
-    TEST_ASSERT(rawPointOne == rawPointTwo);
-    TEST_ASSERT(rawPointOne == static_cast<six::sidd::SFATyped&>(rawPointTwo));
-    TEST_ASSERT(static_cast<six::sidd::SFATyped&>(rawPointOne) == rawPointTwo);
-    TEST_ASSERT(*pointPointerOne == *pointPointerTwo);
-    TEST_ASSERT(*pointTyped == rawPointTwo);
-    TEST_ASSERT(*pointTyped == *pointPointerOne);
-    TEST_ASSERT(rawPointOne == *pointPointerOne);
+    CHECK(*pointTyped == *secondPointTyped);
+    CHECK(rawPointOne == rawPointTwo);
+    CHECK(rawPointOne == static_cast<six::sidd::SFATyped&>(rawPointTwo));
+    CHECK(static_cast<six::sidd::SFATyped&>(rawPointOne) == rawPointTwo);
+    CHECK(*pointPointerOne == *pointPointerTwo);
+    CHECK(*pointTyped == rawPointTwo);
+    CHECK(*pointTyped == *pointPointerOne);
+    CHECK(rawPointOne == *pointPointerOne);
 
     six::sidd::SFAPoint different(2, 4, 6, 8);
-    TEST_ASSERT(different != *pointTyped);
-    TEST_ASSERT(different != rawPointOne);
-    TEST_ASSERT(different != *pointPointerOne);
+    CHECK(different != *pointTyped);
+    CHECK(different != rawPointOne);
+    CHECK(different != *pointPointerOne);
 }
 
-TEST_CASE(SFALineString)
+TEST_CASE("SFALineString")
 {
     six::sidd::SFALineString stringOne;
     stringOne.vertices.resize(2);
@@ -70,11 +70,11 @@ TEST_CASE(SFALineString)
     stringThree.vertices[0].reset(new six::sidd::SFAPoint(1, 2, 3, 4));
     stringThree.vertices[1].reset(new six::sidd::SFAPoint(2, 4, 6, 8));
 
-    TEST_ASSERT(stringOne == stringThree);
-    TEST_ASSERT(stringOne != stringTwo);
+    CHECK(stringOne == stringThree);
+    CHECK(stringOne != stringTwo);
 }
 
-TEST_CASE(SFALine)
+TEST_CASE("SFALine")
 {
     six::sidd::SFALine lineOne;
     lineOne.vertices.resize(2);
@@ -85,31 +85,25 @@ TEST_CASE(SFALine)
     lineTwo.vertices.resize(2);
     lineTwo.vertices[0].reset(new six::sidd::SFAPoint(1, 2, 3, 4));
     lineTwo.vertices[1].reset(new six::sidd::SFAPoint(3, 4, 5, 6));
-    TEST_ASSERT(lineOne != lineTwo);
+    CHECK(lineOne != lineTwo);
 
     six::sidd::SFALine lineThree;
     lineThree.vertices.resize(2);
     lineThree.vertices[0].reset(new six::sidd::SFAPoint(1, 2, 3, 4));
     lineThree.vertices[1].reset(new six::sidd::SFAPoint(2, 4, 6, 8));
-    TEST_ASSERT(lineOne == lineThree);
+    CHECK(lineOne == lineThree);
 
     // Make sure different types aren't equal
     six::sidd::SFALineString stringOne;
     stringOne.vertices.resize(2);
     stringOne.vertices[0].reset(new six::sidd::SFAPoint(1, 2, 3, 4));
     stringOne.vertices[1].reset(new six::sidd::SFAPoint(2, 4, 6, 8));
-    TEST_ASSERT(lineOne != stringOne);
+    CHECK(lineOne != stringOne);
 
     // Make sure pointers to different types aren't equal
     six::sidd::SFALineString* stringTwo = new six::sidd::SFALineString();
     stringTwo->vertices.resize(2);
     stringTwo->vertices[0].reset(new six::sidd::SFAPoint(1, 2, 3, 4));
     stringTwo->vertices[1].reset(new six::sidd::SFAPoint(2, 4, 6, 8));
-    TEST_ASSERT(lineOne != *stringTwo);
+    CHECK(lineOne != *stringTwo);
 }
-
-TEST_MAIN(
-    TEST_CHECK(SFAPoint);
-    TEST_CHECK(SFALineString);
-    TEST_CHECK(SFALine);
-)

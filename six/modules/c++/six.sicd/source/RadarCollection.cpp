@@ -21,7 +21,7 @@
  */
 #include <six/sicd/RadarCollection.h>
 
-#include <gsl/gsl.h>
+#include <gsl/gsl>
 #include <six/Utilities.h>
 
 #undef min

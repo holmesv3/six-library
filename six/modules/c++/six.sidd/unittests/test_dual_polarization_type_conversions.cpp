@@ -24,11 +24,14 @@
 
 #include <import/str.h>
 
-#include "TestCase.h"
+#include <catch2/catch_test_macros.hpp>
+
+#define TEST_ASSERT_EQ(X, Y) CHECK(X == Y);
+
 #include <six/Enums.h>
 #include <six/sidd/Utilities.h>
 
-TEST_CASE(DualPolarization)
+TEST_CASE("DualPolarization")
 {
     auto&& map = six::PolarizationType::string_to_value_();
     for (auto&& tx : map)
@@ -57,7 +60,3 @@ TEST_CASE(DualPolarization)
         }
     }
 }
-
-TEST_MAIN(
-    TEST_CHECK(DualPolarization);
-    )

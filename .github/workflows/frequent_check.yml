@@ -6,7 +6,6 @@ on:
     branches:
       - main
 
-
 jobs:
   build-cmake-windows:
     strategy:
@@ -39,14 +38,6 @@ jobs:
       run: |
         cd out/six
         ctest -C ${{ matrix.configuration }} --output-on-failure
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1 # https://github.com/marketplace/actions/setup-msbuild
-      with:
-        msbuild-architecture: x64
-    - name: msbuild
-      run: |
-        msbuild six.sln /p:configuration=${{ matrix.configuration }}
-        msbuild six.sln /p:configuration=${{ matrix.configuration }} /t:Clean
 
   build-msbuild-windows:
     strategy:

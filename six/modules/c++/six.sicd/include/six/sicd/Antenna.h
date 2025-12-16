@@ -25,8 +25,8 @@
 #define SIX_six_sicd_Antenna_h_INCLUDED_
 
 #include <ostream>
-#include <std/optional>
-#include <std/string>
+#include <optional>
+#include <string>
 
 #include "six/Types.h"
 #include "six/Init.h"
