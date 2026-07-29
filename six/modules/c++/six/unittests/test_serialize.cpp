@@ -1,52 +1,57 @@
 /* =========================================================================
-* This file is part of six-c++
-* =========================================================================
-*
-* (C) Copyright 2004 - 2018, MDA Information Systems LLC
-*
-* six-c++ is free software; you can redistribute it and/or modify
-* it under the terms of the GNU Lesser General Public License as published by
-* the Free Software Foundation; either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public
-* License along with this program; If not,
-* see <http://www.gnu.org/licenses/>.
-*
-*/
+ * This file is part of six-c++
+ * =========================================================================
+ *
+ * (C) Copyright 2004 - 2018, MDA Information Systems LLC
+ *
+ * six-c++ is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; If not,
+ * see <http://www.gnu.org/licenses/>.
+ *
+ */
+#include <six/Serialize.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 #include "TestCase.h"
-#include <six/Serialize.h>
 
-template<typename T> T getRandomScalar()
+template <typename T>
+T getRandomScalar()
 {
     return static_cast<T>(rand() / static_cast<T>(RAND_MAX));
 }
 
-template<> int getRandomScalar<int>()
+template <>
+int getRandomScalar<int>()
 {
     return static_cast<int>(rand());
 }
 
-template<> size_t getRandomScalar<size_t>()
+template <>
+size_t getRandomScalar<size_t>()
 {
     return static_cast<size_t>(rand());
 }
 
-template<> sys::byte getRandomScalar<sys::byte>()
+template <>
+sys::byte getRandomScalar<sys::byte>()
 {
     return static_cast<sys::byte>(rand());
 }
 
-template<typename T> std::vector<T> getRandomVector(size_t length)
+template <typename T>
+std::vector<T> getRandomVector(size_t length)
 {
     std::vector<T> values(length);
     for (size_t ii = 0; ii < length; ++ii)
@@ -56,7 +61,7 @@ template<typename T> std::vector<T> getRandomVector(size_t length)
     return values;
 }
 
-template<typename T>
+template <typename T>
 bool testScalar(bool byteSwap)
 {
     const T val = getRandomScalar<T>();
@@ -68,15 +73,15 @@ bool testScalar(bool byteSwap)
     return val == valCopy;
 }
 
-template<typename T>
+template <typename T>
 bool testVector(size_t length, bool byteSwap)
 {
     const std::vector<T> val = getRandomVector<T>(length);
     std::vector<sys::byte> serializedData;
-    six::serialize<std::vector<T> >(val, byteSwap, serializedData);
+    six::serialize<std::vector<T>>(val, byteSwap, serializedData);
     const sys::byte* buffer = serializedData.data();
     std::vector<T> valCopy;
-    six::deserialize<std::vector<T> >(buffer, byteSwap, valCopy);
+    six::deserialize<std::vector<T>>(buffer, byteSwap, valCopy);
     return val == valCopy;
 }
 
@@ -136,9 +141,7 @@ TEST_CASE(VectorSerialize)
     TEST_ASSERT_TRUE(testVector<double>(length, true));
 }
 
-TEST_MAIN(
-    srand(static_cast<unsigned int>(time(NULL)));
-    TEST_CHECK(ScalarSerialize);
-    TEST_CHECK(VectorSerialize);
-    TEST_CHECK(StringSerialize);
-    )
+TEST_MAIN(srand(static_cast<unsigned int>(time(NULL)));
+          TEST_CHECK(ScalarSerialize);
+          TEST_CHECK(VectorSerialize);
+          TEST_CHECK(StringSerialize);)

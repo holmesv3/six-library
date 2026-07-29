@@ -24,54 +24,55 @@
 #ifndef SIX_six_Logger_h_INCLUDED_
 #define SIX_six_Logger_h_INCLUDED_
 
-#include <memory>
-#include <new> // std::nothrow_t
-
 #include <import/logging.h>
+
+#include <memory>
+#include <new>  // std::nothrow_t
 
 #include "six/Exports.h"
 
 namespace six
 {
-	// Encapsulate common (and legacy) logging code
-	class SIX_SIX_API Logger final
-	{
-		logging::Logger* pLog_ = nullptr;
-		bool ownLog_ = false;
+// Encapsulate common (and legacy) logging code
+class SIX_SIX_API Logger final
+{
+    logging::Logger* pLog_ = nullptr;
+    bool ownLog_ = false;
 
-		logging::Logger* &mLog;
-		bool &mOwnLog;
-		std::unique_ptr<logging::Logger> mLogger;
+    logging::Logger*& mLog;
+    bool& mOwnLog;
+    std::unique_ptr<logging::Logger> mLogger;
 
-	public:
-		Logger();
-		Logger(std::unique_ptr<logging::Logger>&&);
-		Logger(logging::Logger&);
-		~Logger() = default; // for mOwnLog=true, mLog is managed by std::unique_ptr
+public:
+    Logger();
+    Logger(std::unique_ptr<logging::Logger>&&);
+    Logger(logging::Logger&);
+    ~Logger() =
+            default;  // for mOwnLog=true, mLog is managed by std::unique_ptr
 
-		// Legacy class that can't be changed, mLog and mOwnLog are "protected"
-		// Don't want to inadvertantly pass non-member data as that will create
-		// danging references.
-		Logger(logging::Logger*& log, bool& ownLog, std::nullptr_t);
+    // Legacy class that can't be changed, mLog and mOwnLog are "protected"
+    // Don't want to inadvertantly pass non-member data as that will create
+    // danging references.
+    Logger(logging::Logger*& log, bool& ownLog, std::nullptr_t);
 
-		Logger(const Logger&) = delete;
-		Logger& operator=(const Logger&) = delete;
-		Logger(Logger&&) = default;
-		Logger& operator=(Logger&&) = delete;
+    Logger(const Logger&) = delete;
+    Logger& operator=(const Logger&) = delete;
+    Logger(Logger&&) = default;
+    Logger& operator=(Logger&&) = delete;
 
-		logging::Logger* get(std::nothrow_t) const;
-		logging::Logger& get() const;
+    logging::Logger* get(std::nothrow_t) const;
+    logging::Logger& get() const;
 
-        /*!
-		 * Set the logger.
-		 * \param logger The logger.
-		 * \param ownLog Flag for whether the class takes ownership of the
-		 *  logger. Default is false.
-		 */
-        void setLogger(logging::Logger* logger, bool ownLog = false);
-		void setLogger(std::unique_ptr<logging::Logger>&&);
-        void setLogger(logging::Logger&);
-	};
+    /*!
+     * Set the logger.
+     * \param logger The logger.
+     * \param ownLog Flag for whether the class takes ownership of the
+     *  logger. Default is false.
+     */
+    void setLogger(logging::Logger* logger, bool ownLog = false);
+    void setLogger(std::unique_ptr<logging::Logger>&&);
+    void setLogger(logging::Logger&);
+};
 }
 
-#endif // SIX_six_Logger_h_INCLUDED_
+#endif  // SIX_six_Logger_h_INCLUDED_

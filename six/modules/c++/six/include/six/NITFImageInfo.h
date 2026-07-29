@@ -23,16 +23,15 @@
 #ifndef __SIX_NITF_IMAGE_INFO_H__
 #define __SIX_NITF_IMAGE_INFO_H__
 
-#include <string>
+#include <nitf/ImageSegmentComputer.h>
+#include <six/Data.h>
+#include <six/Exports.h>
+#include <six/NITFSegmentInfo.h>
+#include <six/Types.h>
+#include <six/Utilities.h>
 
 #include <nitf/ImageSubheader.hpp>
-
-#include <six/Types.h>
-#include <six/Data.h>
-#include <six/Utilities.h>
-#include <six/NITFSegmentInfo.h>
-#include <six/Exports.h>
-#include <nitf/ImageSegmentComputer.h>
+#include <string>
 
 namespace six
 {
@@ -104,7 +103,8 @@ public:
     {
         return getRepresentation(mData->getPixelType());
     }
-    static nitf::ImageRepresentation getImageRepresentation(PixelType pixelType);
+    static nitf::ImageRepresentation getImageRepresentation(
+            PixelType pixelType);
     nitf::ImageRepresentation getImageRepresentation() const
     {
         return getImageRepresentation(mData->getPixelType());
@@ -182,16 +182,20 @@ public:
     // always sending in the display LUT because that method will throw for
     // ComplexData
     template <typename GetDisplayLutT>
-    inline static const LUT* getDisplayLUT_(PixelType pixelType, const GetDisplayLutT& getDisplayLUT)
+    inline static const LUT* getDisplayLUT_(PixelType pixelType,
+                                            const GetDisplayLutT& getDisplayLUT)
     {
-        if ((pixelType == PixelType::MONO8LU) || (pixelType == PixelType::RGB8LU) || (pixelType == PixelType::AMP8I_PHS8I))
+        if ((pixelType == PixelType::MONO8LU) ||
+            (pixelType == PixelType::RGB8LU) ||
+            (pixelType == PixelType::AMP8I_PHS8I))
         {
             return getDisplayLUT();
         }
         return nullptr;
     }
     template <typename GetDisplayLutT>
-    static std::vector<nitf::BandInfo> getBandInfoImpl(PixelType pixelType, const GetDisplayLutT& getDisplayLUT)
+    static std::vector<nitf::BandInfo> getBandInfoImpl(
+            PixelType pixelType, const GetDisplayLutT& getDisplayLUT)
     {
         const LUT* lutPtr = getDisplayLUT_(pixelType, getDisplayLUT);
         return getBandInfoImpl_(pixelType, lutPtr);
@@ -228,9 +232,11 @@ public:
     //!  File security control number
     static const std::string CTLN;
 
-    //! Utility that generates a key for the given field, with optional prefix and index
+    //! Utility that generates a key for the given field, with optional prefix
+    //! and index
     static std::string generateFieldKey(const std::string& field,
-            const std::string& prefix = "", int index = -1);
+                                        const std::string& prefix = "",
+                                        int index = -1);
 
 private:
     /*!
@@ -267,7 +273,8 @@ private:
      */
     std::vector<NITFSegmentInfo> mImageSegments;
 
-    static std::vector<nitf::BandInfo> getBandInfoImpl_(PixelType, const LUT* = nullptr);
+    static std::vector<nitf::BandInfo> getBandInfoImpl_(PixelType,
+                                                        const LUT* = nullptr);
 };
 
 }

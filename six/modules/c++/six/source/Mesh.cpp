@@ -19,9 +19,9 @@
  * see <http://www.gnu.org/licenses/>.
  *
  */
-#include <string>
-
 #include <six/Mesh.h>
+
+#include <string>
 
 namespace six
 {
@@ -50,12 +50,12 @@ std::vector<six::Parameter> Mesh::fieldsToParameters() const
     for (size_t ii = 0; ii < fields.size(); ++ii)
     {
         // Set the field name
-        p.setName("field " + std::to_string(ii+1) + " name");
+        p.setName("field " + std::to_string(ii + 1) + " name");
         p.setValue(fields[ii].name);
         parameters.push_back(p);
 
         // Set the field type
-        p.setName("field " + std::to_string(ii+1) + " type");
+        p.setName("field " + std::to_string(ii + 1) + " type");
         p.setValue(fields[ii].type);
         parameters.push_back(p);
     }

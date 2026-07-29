@@ -22,13 +22,13 @@
 #ifndef __SIX_MESH_H__
 #define __SIX_MESH_H__
 
-#include <vector>
-#include <iomanip>
-#include <string>
-
 #include <scene/sys_Conf.h>
 #include <six/Parameter.h>
 #include <types/RowCol.h>
+
+#include <iomanip>
+#include <string>
+#include <vector>
 
 namespace six
 {
@@ -36,11 +36,10 @@ namespace six
  *  \class Mesh
  *  \brief A mesh is the abstract class for objects that hold position
  *   information and values at these positions.
- */ 
+ */
 class Mesh
 {
 public:
-
     virtual ~Mesh()
     {
     }
@@ -55,7 +54,7 @@ public:
         std::string type;
     };
 
-    /*! 
+    /*!
      * Convert Field entries to Parameter types.
      * \return Vector of Parameters created from Fields.
      */
@@ -87,7 +86,6 @@ public:
         auto end = begin + values_.size();
         values.insert(values.end(), begin, end);
     }
-
 
     /*!
      * Deserializes an array of byte data to populate a Mesh. This is

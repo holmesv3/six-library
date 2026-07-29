@@ -24,24 +24,27 @@
 
 namespace six
 {
-std::ostream& operator<< (std::ostream& os, const GeoInfo& g)
+std::ostream& operator<<(std::ostream& os, const GeoInfo& g)
 {
     os << "GeoInfo:: \n"
-        << "  Name             : " << g.name << "\n";
+       << "  Name             : " << g.name << "\n";
     for (size_t ii = 0; ii < g.desc.size(); ++ii)
     {
-        os << "  Description      : " << g.desc[ii].getName() << ": " << g.desc[ii] << "\n";
+        os << "  Description      : " << g.desc[ii].getName() << ": "
+           << g.desc[ii] << "\n";
     }
     if (g.geometryLatLon.size() == 1)
     {
-        os << "  Point            : " << g.geometryLatLon[0].getLat() << ", " << g.geometryLatLon[0].getLon() << "\n";
+        os << "  Point            : " << g.geometryLatLon[0].getLat() << ", "
+           << g.geometryLatLon[0].getLon() << "\n";
     }
     else if (g.geometryLatLon.size() == 2)
     {
         os << "  Line             : " << "\n";
         for (size_t ii = 0; ii < g.geometryLatLon.size(); ++ii)
         {
-            os << "  Endpoint         : " << g.geometryLatLon[ii].getLat() << ", " << g.geometryLatLon[ii].getLon() << "\n";
+            os << "  Endpoint         : " << g.geometryLatLon[ii].getLat()
+               << ", " << g.geometryLatLon[ii].getLon() << "\n";
         }
     }
     else if (g.geometryLatLon.size() > 2)
@@ -49,7 +52,8 @@ std::ostream& operator<< (std::ostream& os, const GeoInfo& g)
         os << "  Polygon          : " << "\n";
         for (size_t ii = 0; ii < g.geometryLatLon.size(); ++ii)
         {
-            os << "  Vertex           : " << g.geometryLatLon[ii].getLat() << ", " << g.geometryLatLon[ii].getLon() << "\n";
+            os << "  Vertex           : " << g.geometryLatLon[ii].getLat()
+               << ", " << g.geometryLatLon[ii].getLon() << "\n";
         }
     }
 

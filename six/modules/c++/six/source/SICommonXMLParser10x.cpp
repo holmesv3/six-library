@@ -19,9 +19,9 @@
  * see <http://www.gnu.org/licenses/>.
  *
  */
-#include <set>
-
 #include <six/SICommonXMLParser10x.h>
+
+#include <set>
 
 namespace
 {
@@ -30,16 +30,35 @@ typedef xml::lite::Element* XMLElem;
 
 namespace six
 {
-    SICommonXMLParser10x::SICommonXMLParser10x(const std::string& defaultURI, bool addClassAttributes, const std::string& siCommonURI,
-        logging::Logger* log, bool ownLog) : SICommonXMLParser(defaultURI, addClassAttributes, siCommonURI, log, ownLog) {  }
-    SICommonXMLParser10x::SICommonXMLParser10x(const std::string& defaultURI, bool addClassAttributes, const std::string& siCommonURI,
-        std::unique_ptr<logging::Logger>&& log) : SICommonXMLParser(defaultURI, addClassAttributes, siCommonURI, std::move(log)) {  }
-    SICommonXMLParser10x::SICommonXMLParser10x(const std::string& defaultURI, bool addClassAttributes, const std::string& siCommonURI,
-        logging::Logger& log) : SICommonXMLParser(defaultURI, addClassAttributes, siCommonURI, log) {  }
+SICommonXMLParser10x::SICommonXMLParser10x(const std::string& defaultURI,
+                                           bool addClassAttributes,
+                                           const std::string& siCommonURI,
+                                           logging::Logger* log,
+                                           bool ownLog) :
+    SICommonXMLParser(defaultURI, addClassAttributes, siCommonURI, log, ownLog)
+{
+}
+SICommonXMLParser10x::SICommonXMLParser10x(
+        const std::string& defaultURI,
+        bool addClassAttributes,
+        const std::string& siCommonURI,
+        std::unique_ptr<logging::Logger>&& log) :
+    SICommonXMLParser(defaultURI,
+                      addClassAttributes,
+                      siCommonURI,
+                      std::move(log))
+{
+}
+SICommonXMLParser10x::SICommonXMLParser10x(const std::string& defaultURI,
+                                           bool addClassAttributes,
+                                           const std::string& siCommonURI,
+                                           logging::Logger& log) :
+    SICommonXMLParser(defaultURI, addClassAttributes, siCommonURI, log)
+{
+}
 
 XMLElem SICommonXMLParser10x::convertCompositeSCPToXML(
-    const ErrorStatistics* errorStatistics,
-    XMLElem errorStatsXML) const
+        const ErrorStatistics* errorStatistics, XMLElem errorStatsXML) const
 {
     //! optional field
     std::string defaultURI = getSICommonURI();
@@ -47,11 +66,17 @@ XMLElem SICommonXMLParser10x::convertCompositeSCPToXML(
     {
         XMLElem scpXML = newElement("CompositeSCP", defaultURI, errorStatsXML);
 
-        createDouble("Rg", defaultURI, errorStatistics->compositeSCP->xErr,
+        createDouble("Rg",
+                     defaultURI,
+                     errorStatistics->compositeSCP->xErr,
                      scpXML);
-        createDouble("Az", defaultURI, errorStatistics->compositeSCP->yErr,
+        createDouble("Az",
+                     defaultURI,
+                     errorStatistics->compositeSCP->yErr,
                      scpXML);
-        createDouble("RgAz", defaultURI, errorStatistics->compositeSCP->xyErr,
+        createDouble("RgAz",
+                     defaultURI,
+                     errorStatistics->compositeSCP->xyErr,
                      scpXML);
         return scpXML;
     }
@@ -59,12 +84,12 @@ XMLElem SICommonXMLParser10x::convertCompositeSCPToXML(
 }
 
 void SICommonXMLParser10x::parseCompositeSCPFromXML(
-    const xml::lite::Element* errorStatsXML,
-    ErrorStatistics* errorStatistics) const
+        const xml::lite::Element* errorStatsXML,
+        ErrorStatistics* errorStatistics) const
 {
     XMLElem compositeSCPXML = getOptional(errorStatsXML, "CompositeSCP");
 
-    //optional
+    // optional
     if (compositeSCPXML)
     {
         errorStatistics->compositeSCP.reset(
@@ -79,8 +104,8 @@ void SICommonXMLParser10x::parseCompositeSCPFromXML(
     }
 }
 
-XMLElem SICommonXMLParser10x::convertRadiometryToXML(
-    const Radiometric *r, XMLElem parent) const
+XMLElem SICommonXMLParser10x::convertRadiometryToXML(const Radiometric* r,
+                                                     XMLElem parent) const
 {
     std::string defaultURI = getSICommonURI();
     XMLElem rXML = newElement("Radiometric", getDefaultURI(), parent);
@@ -88,8 +113,14 @@ XMLElem SICommonXMLParser10x::convertRadiometryToXML(
     if (!r->noiseLevel.noiseType.empty() && !r->noiseLevel.noisePoly.empty())
     {
         XMLElem noiseLevelXML = newElement("NoiseLevel", defaultURI, rXML);
-        createString("NoiseLevelType", defaultURI, r->noiseLevel.noiseType, noiseLevelXML);
-        createPoly2D("NoisePoly", defaultURI, r->noiseLevel.noisePoly, noiseLevelXML);
+        createString("NoiseLevelType",
+                     defaultURI,
+                     r->noiseLevel.noiseType,
+                     noiseLevelXML);
+        createPoly2D("NoisePoly",
+                     defaultURI,
+                     r->noiseLevel.noisePoly,
+                     noiseLevelXML);
     }
 
     if (!r->rcsSFPoly.empty())
@@ -99,10 +130,7 @@ XMLElem SICommonXMLParser10x::convertRadiometryToXML(
 
     if (!r->sigmaZeroSFPoly.empty())
     {
-        createPoly2D("SigmaZeroSFPoly",
-                     defaultURI,
-                     r->sigmaZeroSFPoly,
-                     rXML);
+        createPoly2D("SigmaZeroSFPoly", defaultURI, r->sigmaZeroSFPoly, rXML);
     }
 
     if (!r->betaZeroSFPoly.empty())
@@ -119,10 +147,10 @@ XMLElem SICommonXMLParser10x::convertRadiometryToXML(
 }
 
 void SICommonXMLParser10x::parseRadiometryFromXML(
-    const xml::lite::Element* radiometricXML,
-    Radiometric* radiometric) const
+        const xml::lite::Element* radiometricXML,
+        Radiometric* radiometric) const
 {
-     XMLElem tmpElem = getOptional(radiometricXML, "NoiseLevel");
+    XMLElem tmpElem = getOptional(radiometricXML, "NoiseLevel");
     if (tmpElem)
     {
         parseString(getFirstAndOnly(tmpElem, "NoiseLevelType"),
@@ -132,13 +160,18 @@ void SICommonXMLParser10x::parseRadiometryFromXML(
     }
 
     parseOptionalPoly2D(radiometricXML, "RCSSFPoly", radiometric->rcsSFPoly);
-    parseOptionalPoly2D(radiometricXML, "BetaZeroSFPoly", radiometric->betaZeroSFPoly);
-    parseOptionalPoly2D(radiometricXML, "SigmaZeroSFPoly", radiometric->sigmaZeroSFPoly);
-    parseOptionalPoly2D(radiometricXML, "GammaZeroSFPoly", radiometric->gammaZeroSFPoly);
+    parseOptionalPoly2D(radiometricXML,
+                        "BetaZeroSFPoly",
+                        radiometric->betaZeroSFPoly);
+    parseOptionalPoly2D(radiometricXML,
+                        "SigmaZeroSFPoly",
+                        radiometric->sigmaZeroSFPoly);
+    parseOptionalPoly2D(radiometricXML,
+                        "GammaZeroSFPoly",
+                        radiometric->gammaZeroSFPoly);
 }
 XMLElem SICommonXMLParser10x::convertMatchInformationToXML(
-    const MatchInformation& matchInfo,
-    XMLElem parent) const
+        const MatchInformation& matchInfo, XMLElem parent) const
 {
     XMLElem matchInfoXML = newElement("MatchInfo", parent);
 
@@ -169,8 +202,8 @@ XMLElem SICommonXMLParser10x::convertMatchInformationToXML(
 }
 
 void SICommonXMLParser10x::parseMatchInformationFromXML(
-    const xml::lite::Element* matchInfoXML,
-    MatchInformation* matchInfo) const
+        const xml::lite::Element* matchInfoXML,
+        MatchInformation* matchInfo) const
 {
     size_t numMatchTypes = 0;
     parseInt(getFirstAndOnly(matchInfoXML, "NumMatchTypes"), numMatchTypes);
@@ -179,14 +212,14 @@ void SICommonXMLParser10x::parseMatchInformationFromXML(
         throw except::Exception(Ctxt("NumMatchTypes cannot be zero"));
     }
 
-    std::vector < XMLElem > typesXML;
+    std::vector<XMLElem> typesXML;
     matchInfoXML->getElementsByTagName("MatchType", typesXML);
 
     //! validate the numMatchTypes
     if (typesXML.size() != numMatchTypes)
     {
-        throw except::Exception(
-            Ctxt("NumMatchTypes does not match number of MatchType fields"));
+        throw except::Exception(Ctxt(
+                "NumMatchTypes does not match number of MatchType fields"));
     }
 
     matchInfo->types.resize(typesXML.size());
@@ -199,7 +232,7 @@ void SICommonXMLParser10x::parseMatchInformationFromXML(
         XMLElem curIndexElem = getOptional(typesXML[ii], "CurrentIndex");
         if (curIndexElem)
         {
-            //optional
+            // optional
             parseInt(curIndexElem, type.currentIndex);
         }
 
@@ -207,16 +240,17 @@ void SICommonXMLParser10x::parseMatchInformationFromXML(
         parseInt(getFirstAndOnly(typesXML[ii], "NumMatchCollections"),
                  numMatchCollections);
 
-        std::vector < XMLElem > matchCollectionsXML;
-        typesXML[ii]->getElementsByTagName("MatchCollection", matchCollectionsXML);
+        std::vector<XMLElem> matchCollectionsXML;
+        typesXML[ii]->getElementsByTagName("MatchCollection",
+                                           matchCollectionsXML);
 
         //! validate the numMatchTypes
         if (matchCollectionsXML.size() !=
             static_cast<size_t>(numMatchCollections))
         {
             throw except::Exception(
-                Ctxt("NumMatchCollections does not match number of " \
-                     "MatchCollect fields"));
+                    Ctxt("NumMatchCollections does not match number of "
+                         "MatchCollect fields"));
         }
 
         // Need to make sure this is resized properly - at MatchType
@@ -227,18 +261,19 @@ void SICommonXMLParser10x::parseMatchInformationFromXML(
         {
             MatchCollect& collect(type.matchCollects[jj]);
 
-            parseString(getFirstAndOnly(
-                matchCollectionsXML[jj], "CoreName"), collect.coreName);
+            parseString(getFirstAndOnly(matchCollectionsXML[jj], "CoreName"),
+                        collect.coreName);
 
             XMLElem matchIndexXML =
-                getOptional(matchCollectionsXML[jj], "MatchIndex");
+                    getOptional(matchCollectionsXML[jj], "MatchIndex");
             if (matchIndexXML)
             {
                 parseInt(matchIndexXML, collect.matchIndex);
             }
 
-            parseParameters(
-                matchCollectionsXML[jj], "Parameter", collect.parameters);
+            parseParameters(matchCollectionsXML[jj],
+                            "Parameter",
+                            collect.parameters);
         }
     }
 }

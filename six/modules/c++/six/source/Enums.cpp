@@ -29,15 +29,15 @@
 static bool is_OTHER_(const std::string& v)
 {
     // OTHER.* for  SIDD 3.0/SICD 1.3, not "OTHER"
-    if (str::starts_with(v, "OTHER") && (v != "OTHER")) // i.e., "OTHER_foo"
+    if (str::starts_with(v, "OTHER") && (v != "OTHER"))  // i.e., "OTHER_foo"
     {
         // "where * = 0 or more characters that does not contain “:” (0x3A)."
-        return v.find(':') == std::string::npos; // "OTHER:foo" is invalid
+        return v.find(':') == std::string::npos;  // "OTHER:foo" is invalid
     }
-    return false; // "OTHER" or "<something else>"
+    return false;  // "OTHER" or "<something else>"
 }
 
-template<typename T>
+template <typename T>
 inline T toType_(const std::string& s, const except::Exception& ex)
 {
     const auto result = T::toType(s, std::nothrow);
@@ -54,15 +54,16 @@ inline T toType(const std::string& s)
     if (is_OTHER_(s))
     {
         T retval = T::OTHER;
-        retval.other_ = s; // save away original value for toString()
+        retval.other_ = s;  // save away original value for toString()
         return retval;
     }
 
-    const except::Exception ex(Ctxt("Unsupported polarization type '" + s + "'"));
+    const except::Exception ex(
+            Ctxt("Unsupported polarization type '" + s + "'"));
     return toType_<T>(s, ex);
 }
 
-template<typename T>
+template <typename T>
 inline std::string toString_(const T& t, const except::Exception& ex)
 {
     if (t == T::NOT_SET)
@@ -82,7 +83,8 @@ inline std::string toString(const T& t)
         return t.other_;
     }
 
-    const except::Exception ex(Ctxt("Unsupported conversion from polarization type"));
+    const except::Exception ex(
+            Ctxt("Unsupported conversion from polarization type"));
     if (!t.other_.empty())
     {
         // other_ got set to some non-OTHER.* string
@@ -95,8 +97,7 @@ namespace six
 {
 
 template <>
-PolarizationSequenceType toType<PolarizationSequenceType>(
-    const std::string& s)
+PolarizationSequenceType toType<PolarizationSequenceType>(const std::string& s)
 {
     return ::toType<PolarizationSequenceType>(s);
 }
@@ -120,23 +121,29 @@ std::string toString(const PolarizationType& t)
 template <>
 DualPolarizationType toType<DualPolarizationType>(const std::string& s)
 {
-    const except::Exception ex(Ctxt("Unsupported conversion to dual polarization type '" + s + "'"));
+    const except::Exception ex(Ctxt(
+            "Unsupported conversion to dual polarization type '" + s + "'"));
     const auto splits = str::split(s, ":");
     if (splits.size() != 2)
     {
         // Note there is no "top level" OTHER.*; rather it's OTHER.*:OTHER.*
-        return toType_<DualPolarizationType>(s, ex); // No ":", assume it is another allowed value.
+        return toType_<DualPolarizationType>(
+                s, ex);  // No ":", assume it is another allowed value.
     }
 
-    // "Allowed values include the form TX:RCV that is formed from one TX value and one RCV value."
+    // "Allowed values include the form TX:RCV that is formed from one TX value
+    // and one RCV value."
     auto&& tx = splits[0];
     auto&& rcv = splits[1];
 
     // "V:OTHER.*" or "OTHER.*:V" or "OTHER.*:OTHER.*"
     static const PolarizationType other = PolarizationType::OTHER;
-    const auto strTx = is_OTHER_(tx) ? other.toString() : tx;  // get rid of .* from OTHER strings
-    const auto strRcv = is_OTHER_(rcv) ? other.toString() : rcv;  // get rid of .* from OTHER strings
-    const auto type = strTx + "_" + strRcv; // "OTHER_abc:V" -> "OTHER_V"
+    const auto strTx = is_OTHER_(tx) ? other.toString()
+                                     : tx;  // get rid of .* from OTHER strings
+    const auto strRcv = is_OTHER_(rcv)
+            ? other.toString()
+            : rcv;  // get rid of .* from OTHER strings
+    const auto type = strTx + "_" + strRcv;  // "OTHER_abc:V" -> "OTHER_V"
 
     auto retval = toType_<DualPolarizationType>(type, ex);
     if (is_OTHER_(tx) || is_OTHER_(rcv))
@@ -153,7 +160,7 @@ std::string toString(const DualPolarizationType& t)
     if ((splits.size() == 2) && (is_OTHER_(splits[0]) || is_OTHER_(splits[1])))
     {
         // Looking good ... convert to type to be sure other_ wasn't set
-        // to a string representing a different type.  This corresponds to 
+        // to a string representing a different type.  This corresponds to
         // checking against PolarizationType::OTHER above; but since there
         // a more combinations (OTHER_V, H_OTHER, etc.), this is easier.
         const auto otherType = six::toType<DualPolarizationType>(t.other_);
@@ -163,7 +170,8 @@ std::string toString(const DualPolarizationType& t)
         }
     }
 
-    const except::Exception ex(Ctxt("Unsupported dual polarization type to string"));
+    const except::Exception ex(
+            Ctxt("Unsupported dual polarization type to string"));
     if (!t.other_.empty())
     {
         // other_ got set to some non-OTHER.* string ... or an OTHER.*
@@ -172,7 +180,7 @@ std::string toString(const DualPolarizationType& t)
     }
 
     auto retval = toString_(t, ex);
-    str::replace(retval, "_", ":"); // "V_V" -> "V:V"
+    str::replace(retval, "_", ":");  // "V_V" -> "V:V"
     return retval;
 }
 

@@ -25,8 +25,9 @@
 
 #include <string>
 #include <vector>
-#include "six/Parameter.h"
+
 #include "six/Exports.h"
+#include "six/Parameter.h"
 
 namespace six
 {
@@ -42,7 +43,6 @@ namespace six
 class SIX_SIX_API ParameterCollection
 {
 public:
-
     /*!
      *  ParameterCollection's iterator
      */
@@ -51,13 +51,14 @@ public:
     /*!
      *  ParameterCollection's const iterator
      */
-    typedef std::vector<Parameter>::const_iterator ConstParameterCollectionIteratorT;
-    
+    typedef std::vector<Parameter>::const_iterator
+            ConstParameterCollectionIteratorT;
+
     /*!
      * Given the name of a parameter, this function will search
      * for the first parameter of a matching name and return its
-     * index. 
-     * 
+     * index.
+     *
      *
      * \throw Exception if no matching parameter is found
      * \param paramName the name of the parameter to search for
@@ -75,7 +76,7 @@ public:
      */
     const Parameter& findParameter(const std::string& paramName) const
     {
-        return mParams.at( findParameterIndex(paramName) );
+        return mParams.at(findParameterIndex(paramName));
     }
 
     /*!
@@ -113,7 +114,7 @@ public:
     {
         mParams.push_back(p);
     }
-    
+
     size_t size() const
     {
         return mParams.size();
@@ -122,7 +123,7 @@ public:
     {
         return mParams.empty();
     }
-       
+
     ParameterCollectionIteratorT begin()
     {
         return mParams.begin();
@@ -149,7 +150,7 @@ public:
     {
         return mParams.back();
     }
-    
+
     Parameter& front()
     {
         return mParams.front();
@@ -166,11 +167,9 @@ public:
     }
 
 private:
-
     std::vector<Parameter> mParams;
 };
 
 }
 
 #endif
-

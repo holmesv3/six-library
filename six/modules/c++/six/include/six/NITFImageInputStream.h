@@ -22,14 +22,13 @@
 #ifndef __SIX_NITF_IMAGE_INPUT_STREAM_H__
 #define __SIX_NITF_IMAGE_INPUT_STREAM_H__
 
-#include <std/span>
-
-#include <scene/sys_Conf.h>
-#include <import/six.h>
-#include <import/nitf.hpp>
 #include <import/io.h>
-
+#include <import/six.h>
 #include <mem/ScopedArray.h>
+#include <scene/sys_Conf.h>
+
+#include <import/nitf.hpp>
+#include <std/span>
 
 namespace six
 {
@@ -45,7 +44,6 @@ namespace six
 class NITFImageInputStream : public io::InputStream
 {
 public:
-
     /*!
      *  Takes in an ImageSubheader for the image of interest within
      *  the nitf Record, along with an ImageReader that was initialized
@@ -53,11 +51,12 @@ public:
      *
      */
     NITFImageInputStream(nitf::ImageSubheader subheader,
-            nitf::ImageReader imageReader);
+                         nitf::ImageReader imageReader);
 
     //!  Destructor
-    virtual ~NITFImageInputStream() noexcept {}
-
+    virtual ~NITFImageInputStream() noexcept
+    {
+    }
 
     NITFImageInputStream(const NITFImageInputStream&) = delete;
     NITFImageInputStream& operator=(const NITFImageInputStream&) = delete;
@@ -71,7 +70,6 @@ public:
     ptrdiff_t read(std::span<sys::byte>);
 
 protected:
-
     ptrdiff_t readRow();
 
     nitf::ImageSubheader mSubheader;
@@ -85,4 +83,3 @@ protected:
 
 }
 #endif
-

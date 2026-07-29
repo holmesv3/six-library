@@ -23,21 +23,21 @@
 #ifndef __SIX_READ_CONTROL_H__
 #define __SIX_READ_CONTROL_H__
 
-#include <memory>
-#include <std/filesystem>
-#include <algorithm>
-
-#include <mem/ScopedArray.h>
 #include <import/logging.h>
+#include <mem/ScopedArray.h>
 #include <sys/Path.h>
 
-#include "six/Types.h"
-#include "six/Region.h"
+#include <algorithm>
+#include <memory>
+#include <std/filesystem>
+
 #include "six/Container.h"
-#include "six/Options.h"
-#include "six/XMLControlFactory.h"
-#include "six/Logger.h"
 #include "six/Exports.h"
+#include "six/Logger.h"
+#include "six/Options.h"
+#include "six/Region.h"
+#include "six/Types.h"
+#include "six/XMLControlFactory.h"
 
 namespace six
 {
@@ -91,8 +91,10 @@ struct SIX_SIX_API ReadControl
     {
         load(fromFile, std::vector<std::string>());
     }
-    virtual void load(const std::string& fromFile, const std::vector<std::string>& schemaPaths) = 0;
-    virtual void load(const std::filesystem::path& fromFile, const std::vector<std::filesystem::path>* pSchemaPaths)
+    virtual void load(const std::string& fromFile,
+                      const std::vector<std::string>& schemaPaths) = 0;
+    virtual void load(const std::filesystem::path& fromFile,
+                      const std::vector<std::filesystem::path>* pSchemaPaths)
     {
         std::vector<std::string> schemaPaths_;
         if (pSchemaPaths != nullptr)
@@ -132,7 +134,9 @@ struct SIX_SIX_API ReadControl
      *  For safety, prefer the overload below.
      */
     virtual UByte* interleaved(Region& region, size_t imageNumber) = 0;
-    virtual void  interleaved(Region& region, size_t imageNumber, std::byte*& result)
+    virtual void interleaved(Region& region,
+                             size_t imageNumber,
+                             std::byte*& result)
     {
         void* result_ = interleaved(region, imageNumber);
         result = static_cast<std::byte*>(result_);
@@ -162,9 +166,10 @@ struct SIX_SIX_API ReadControl
      * \return Buffer of image data.  This is simply equal to buffer.get() and
      * is provided as a convenience.
      */
-    template<typename T>
-    T* interleaved(Region& region, size_t imageNumber,
-        std::unique_ptr<T[]>& buffer)
+    template <typename T>
+    T* interleaved(Region& region,
+                   size_t imageNumber,
+                   std::unique_ptr<T[]>& buffer)
     {
         buffer.reset(reinterpret_cast<T*>(interleaved(region, imageNumber)));
         return buffer.get();
@@ -198,7 +203,7 @@ struct SIX_SIX_API ReadControl
     /*!
      * Sets the logger to use internally
      */
-    template<typename TLogger>
+    template <typename TLogger>
     void setLogger(TLogger&& logger)
     {
         mLogger.setLogger(std::forward<TLogger>(logger));
@@ -208,7 +213,7 @@ struct SIX_SIX_API ReadControl
         mLogger.setLogger(logger, ownLog);
     }
 
-    void setXMLControlRegistry(const XMLControlRegistry *xmlRegistry)
+    void setXMLControlRegistry(const XMLControlRegistry* xmlRegistry)
     {
         mXMLRegistry = xmlRegistry;
         if (!mXMLRegistry)
@@ -233,4 +238,3 @@ private:
 }
 
 #endif
-

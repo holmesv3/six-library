@@ -20,9 +20,9 @@
  *
  */
 
-#include <gsl/gsl.h>
-
 #include "six/Data.h"
+
+#include <gsl/gsl.h>
 
 using namespace six;
 
@@ -42,10 +42,13 @@ size_t Data::getNumBytesPerPixel() const
     case PixelType::MONO16I:
     case PixelType::RGB8LU:
     case PixelType::RGB24I:
-        return gsl::narrow<size_t>(six::Constants::getNumBytesPerPixel(pixelType));
+        return gsl::narrow<size_t>(
+                six::Constants::getNumBytesPerPixel(pixelType));
 
     default:
-        throw except::Exception(Ctxt("Cannot determine number of bytes per pixel - invalid or unsupported pixel type"));
+        throw except::Exception(
+                Ctxt("Cannot determine number of bytes per pixel - invalid or "
+                     "unsupported pixel type"));
     }
 }
 
@@ -65,6 +68,7 @@ size_t Data::getNumChannels() const
     case PixelType::RGB8LU:
         return 1;
     default:
-        throw except::Exception(Ctxt("Cannot determine number of channels - invalid or unsupported pixel type"));
+        throw except::Exception(Ctxt("Cannot determine number of channels - "
+                                     "invalid or unsupported pixel type"));
     }
 }

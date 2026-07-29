@@ -23,12 +23,12 @@
 #ifndef __SIX_LEGEND_H__
 #define __SIX_LEGEND_H__
 
-#include <vector>
-
-#include <scene/sys_Conf.h>
-#include <types/RowCol.h>
 #include <mem/ScopedCopyablePtr.h>
+#include <scene/sys_Conf.h>
 #include <six/Types.h>
+#include <types/RowCol.h>
+
+#include <vector>
 
 namespace six
 {
@@ -56,10 +56,10 @@ struct Legend
 
     //! Location of the legend with respect to the upper-left corner of the
     //  image segment it's attached to
-    types::RowCol<size_t> mLocation{ 0, 0 };
+    types::RowCol<size_t> mLocation{0, 0};
 
     //! Dimensions of the legend image pixels
-    types::RowCol<size_t> mDims{ 0, 0 };
+    types::RowCol<size_t> mDims{0, 0};
 
     //! Image legend pixels.  These are either pixel values or LUT indices
     //  depending on of the pixel type is MONO8I or RGB8LU, respectively.

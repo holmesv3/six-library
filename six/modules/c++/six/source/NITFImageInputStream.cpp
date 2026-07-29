@@ -24,9 +24,11 @@
 #include <gsl/gsl.h>
 
 six::NITFImageInputStream::NITFImageInputStream(nitf::ImageSubheader subheader,
-        nitf::ImageReader imageReader) :
-    mSubheader(subheader), mReader(imageReader), mRowBufferRemaining(0),
-            mRowOffset(0)
+                                                nitf::ImageReader imageReader) :
+    mSubheader(subheader),
+    mReader(imageReader),
+    mRowBufferRemaining(0),
+    mRowOffset(0)
 {
     auto bytesPerPixel = NITF_NBPP_TO_BYTES(subheader.getNumBitsPerPixel());
     mRowSize = subheader.numCols() * bytesPerPixel;
@@ -36,10 +38,15 @@ six::NITFImageInputStream::NITFImageInputStream(nitf::ImageSubheader subheader,
     const auto irep = subheader.imageRepresentation();
     const auto ic = subheader.imageCompression();
 
-    //Check for optimization cases - RGB and IQ
-    if ((nBands == 3 && imageMode == nitf::BlockingMode::Pixel && irep == nitf::ImageRepresentation::RGB && bytesPerPixel
-            == 1 && (ic == nitf::ImageCompression::NC || ic == nitf::ImageCompression::NM)) || (nBands == 2 && imageMode == nitf::BlockingMode::Pixel &&
-                bytesPerPixel == 4 && (ic == nitf::ImageCompression::NC || ic == nitf::ImageCompression::NM)))
+    // Check for optimization cases - RGB and IQ
+    if ((nBands == 3 && imageMode == nitf::BlockingMode::Pixel &&
+         irep == nitf::ImageRepresentation::RGB && bytesPerPixel == 1 &&
+         (ic == nitf::ImageCompression::NC ||
+          ic == nitf::ImageCompression::NM)) ||
+        (nBands == 2 && imageMode == nitf::BlockingMode::Pixel &&
+         bytesPerPixel == 4 &&
+         (ic == nitf::ImageCompression::NC ||
+          ic == nitf::ImageCompression::NM)))
     {
         auto subcategory = subheader.getBandInfo(0).subcategory;
         if (subcategory == nitf::Subcategory::I)
@@ -47,8 +54,9 @@ six::NITFImageInputStream::NITFImageInputStream(nitf::ImageSubheader subheader,
             subcategory = subheader.getBandInfo(1).subcategory;
             if (subcategory == nitf::Subcategory::Q)
             {
-                //using special interleaved shortcut
-                std::cout << "Using optimized pre pixel-interleaved image" << std::endl;
+                // using special interleaved shortcut
+                std::cout << "Using optimized pre pixel-interleaved image"
+                          << std::endl;
                 mRowSize *= nBands;
                 nBands = 1;
             }
@@ -58,18 +66,19 @@ six::NITFImageInputStream::NITFImageInputStream(nitf::ImageSubheader subheader,
     if (nBands > 1)
     {
         throw except::NotImplementedException(
-                Ctxt(
-                        "Only 1 band images (and special-case RGB) are currently supported"));
+                Ctxt("Only 1 band images (and special-case RGB) are currently "
+                     "supported"));
     }
 
     mRowBuffer.reset(new sys::ubyte[mRowSize]);
-    mAvailable = gsl::narrow<decltype(mAvailable )>(mRowSize* subheader.numRows());
+    mAvailable =
+            gsl::narrow<decltype(mAvailable)>(mRowSize * subheader.numRows());
 
     mBandList.reset(new uint32_t[nBands]);
     for (uint32_t band = 0; band < nBands; ++band)
         mBandList.get()[band] = band;
 
-    //setup the window
+    // setup the window
     mWindow.setNumRows(1);
     mWindow.setNumCols(gsl::narrow<uint32_t>(subheader.numCols()));
     mWindow.setBandList(mBandList.get());
@@ -83,21 +92,23 @@ int64_t six::NITFImageInputStream::available()
 
 ptrdiff_t six::NITFImageInputStream::read(std::byte* b, size_t len)
 {
-    //TODO to be 100% complete, we need to interleave multi-bands
-    //this does NOT include the special RGB case that is already interleaved
-    //the special RGB case is already taken care of here
+    // TODO to be 100% complete, we need to interleave multi-bands
+    // this does NOT include the special RGB case that is already interleaved
+    // the special RGB case is already taken care of here
 
     size_t bytesToGo = len, bOffset = 0, rowBufferOffset = 0;
 
     while (bytesToGo > 0)
     {
-        if (mRowBufferRemaining == 0) readRow();
+        if (mRowBufferRemaining == 0)
+            readRow();
 
         rowBufferOffset = mRowSize - mRowBufferRemaining;
         if (bytesToGo >= mRowBufferRemaining)
         {
-            memcpy(b + bOffset, mRowBuffer.get() + rowBufferOffset,
-                    mRowBufferRemaining);
+            memcpy(b + bOffset,
+                   mRowBuffer.get() + rowBufferOffset,
+                   mRowBufferRemaining);
             bytesToGo -= mRowBufferRemaining;
             bOffset += mRowBufferRemaining;
             mRowBufferRemaining = 0;
@@ -131,4 +142,3 @@ ptrdiff_t six::NITFImageInputStream::readRow()
     mRowBufferRemaining = mRowSize;
     return (ptrdiff_t)mRowSize;
 }
-

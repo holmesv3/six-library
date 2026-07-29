@@ -23,12 +23,12 @@
 #ifndef SIX_six_Parameter_h_INCLUDED_
 #define SIX_six_Parameter_h_INCLUDED_
 
-#include <iostream>
-
 #include <import/str.h>
 
-#include "six/Types.h"
+#include <iostream>
+
 #include "six/Exports.h"
+#include "six/Types.h"
 
 namespace six
 {
@@ -52,7 +52,7 @@ struct SIX_SIX_API Parameter final
     Parameter& operator=(Parameter&&) = default;
 
     //!  Templated constructor, constructs from given value
-    template<typename T>
+    template <typename T>
     Parameter(const T& value)
     {
         mValue = str::toString<T>(value);
@@ -61,25 +61,25 @@ struct SIX_SIX_API Parameter final
     {
     }
 
-    template<typename T>
+    template <typename T>
     Parameter(const std::complex<T>& value)
     {
-        mValue = str::toString<std::complex<T> >(mValue);
+        mValue = str::toString<std::complex<T>>(mValue);
     }
-    #if SIX_six_unique_ComplexInteger
-    template<typename T>
+#if SIX_six_unique_ComplexInteger
+    template <typename T>
     Parameter(const six::ComplexInteger<T>& value)
     {
-        mValue = str::toString<six::ComplexInteger<T> >(mValue);
+        mValue = str::toString<six::ComplexInteger<T>>(mValue);
     }
-    #endif
+#endif
 
-     /*!
+    /*!
      * \tparam T Desired (presumably numeric) type to convert to
      *
      * \return Value as a T type
      */
-    template<typename T>
+    template <typename T>
     operator T() const
     {
         return str::toType<T>(mValue);
@@ -97,23 +97,23 @@ struct SIX_SIX_API Parameter final
     }
 
     //! Get complex parameter
-    template<typename T>
+    template <typename T>
     std::complex<T> getComplex() const
     {
-        return str::toType<std::complex<T> >(mValue);
+        return str::toType<std::complex<T>>(mValue);
     }
-    template<typename T>
+    template <typename T>
     void getComplex(std::complex<T>& result) const
     {
-        result = str::toType<std::complex<T> >(mValue);
+        result = str::toType<std::complex<T>>(mValue);
     }
-    #if SIX_six_unique_ComplexInteger
-    template<typename T>
+#if SIX_six_unique_ComplexInteger
+    template <typename T>
     void getComplex(six::ComplexInteger<T>& result) const
     {
-        result = str::toType<six::ComplexInteger<T> >(mValue);
+        result = str::toType<six::ComplexInteger<T>>(mValue);
     }
-    #endif
+#endif
 
     //!  Set the parameters' name
     void setName(std::string name)
@@ -122,7 +122,7 @@ struct SIX_SIX_API Parameter final
     }
 
     //!  Set the parameters' value
-    template<typename T>
+    template <typename T>
     void setValue(const T& value)
     {
         mValue = str::toString<T>(value);
@@ -133,18 +133,18 @@ struct SIX_SIX_API Parameter final
     }
 
     //! Overload templated setValue function
-    template<typename T>
+    template <typename T>
     void setValue(const std::complex<T>& value)
     {
-        mValue = str::toString<std::complex<T> >(value);
+        mValue = str::toString<std::complex<T>>(value);
     }
-    #if SIX_six_unique_ComplexInteger 
-    template<typename T>
+#if SIX_six_unique_ComplexInteger
+    template <typename T>
     void setValue(const six::ComplexInteger<T>& value)
     {
-        mValue = str::toString<six::ComplexInteger<T> >(value);
+        mValue = str::toString<six::ComplexInteger<T>>(value);
     }
-    #endif
+#endif
 
     //!  Get back const char*
     operator const char*() const
@@ -176,10 +176,10 @@ inline std::ostream& operator<<(std::ostream& os, const Parameter& p)
 inline std::ostream& out(std::ostream& os, const Parameter& p)
 {
     os << "    Parameter Name   : " << p.getName() << "\n"
-        << "    Parameter Value  : " << p << "\n";
+       << "    Parameter Value  : " << p << "\n";
     return os;
 }
 
 }
 
-#endif // SIX_six_Parameter_h_INCLUDED_
+#endif  // SIX_six_Parameter_h_INCLUDED_

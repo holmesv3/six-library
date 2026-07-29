@@ -23,22 +23,20 @@
 #ifndef SIX_six_AmplitudeTable_h_INCLUDED_
 #define SIX_six_AmplitudeTable_h_INCLUDED_
 
-#include <stdint.h>
-#include <limits.h>
-
-#include <vector>
-#include <limits>
-#include <string>
-#include <memory>
-#include <array>
-#include <std/mdspan>
-
-#include <import/except.h>
 #include <coda_oss/CPlusPlus.h>
+#include <import/except.h>
+#include <limits.h>
+#include <scene/sys_Conf.h>
+#include <stdint.h>
 #include <sys/Dbg.h>
 
+#include <array>
+#include <limits>
+#include <memory>
 #include <nitf/LookupTable.hpp>
-#include <scene/sys_Conf.h>
+#include <std/mdspan>
+#include <string>
+#include <vector>
 
 #include "six/Complex.h"
 #include "six/Exports.h"
@@ -79,7 +77,8 @@ struct SIX_SIX_API LUT
     }
 
     //! Initialize from nitf::LookupTable read from a NITF
-    LUT(const nitf::LookupTable& lookupTable) : LUT(lookupTable.getEntries(), lookupTable.getTables())
+    LUT(const nitf::LookupTable& lookupTable) :
+        LUT(lookupTable.getEntries(), lookupTable.getTables())
     {
         // NITF stores the tables consecutively.
         // Need to interleave them for SIX
@@ -88,8 +87,8 @@ struct SIX_SIX_API LUT
             // Imagine the vector is a matrix and then transpose it
             for (size_t ii = 0; ii < table.size(); ++ii)
             {
-                table[(ii % numEntries) * elementSize +
-                    (ii / numEntries)] = lookupTable.getTable()[ii];
+                table[(ii % numEntries) * elementSize + (ii / numEntries)] =
+                        lookupTable.getTable()[ii];
             }
         }
 
@@ -109,8 +108,7 @@ struct SIX_SIX_API LUT
 
     bool operator==(const LUT& rhs) const
     {
-        return (table == rhs.table &&
-                numEntries == rhs.numEntries &&
+        return (table == rhs.table && numEntries == rhs.numEntries &&
                 elementSize == rhs.elementSize);
     }
 
@@ -133,7 +131,6 @@ struct SIX_SIX_API LUT
 
     const unsigned char* getTable() const noexcept
     {
-
         return table.empty() ? nullptr : table.data();
     }
 
@@ -160,79 +157,84 @@ struct SIX_SIX_API LUT
  *  double precision amplitude value
  */
 
- // Store the computed `six::zfloat` for every possible 
- // amp/phs pair, a total of 256*256 values.
-static constexpr size_t AmplitudeTableSize = 256; // "This is a fixed size (256-element) LUT"
-using Amp8iPhs8iLookup_t = std::mdspan<const six::zfloat, std::dextents<size_t, 2>>;
- 
- // More descriptive than std::pair<uint8_t, uint8_t>
+// Store the computed `six::zfloat` for every possible
+// amp/phs pair, a total of 256*256 values.
+static constexpr size_t AmplitudeTableSize =
+        256;  // "This is a fixed size (256-element) LUT"
+using Amp8iPhs8iLookup_t =
+        std::mdspan<const six::zfloat, std::dextents<size_t, 2>>;
+
+// More descriptive than std::pair<uint8_t, uint8_t>
 struct SIX_SIX_API AMP8I_PHS8I_t final
 {
     uint8_t amplitude;
     uint8_t phase;
 };
 
-// Control a few details of the ComplexToAMP8IPHS8I implementation, especially "unseq" (i.e., SIMD).
+// Control a few details of the ComplexToAMP8IPHS8I implementation, especially
+// "unseq" (i.e., SIMD).
 #ifndef SIX_sicd_has_VCL
-    // Do we have the "vectorclass" library? https://github.com/vectorclass/version2
-    #if !CODA_OSS_cpp17 // VCL needs C++17
-        #define SIX_sicd_has_VCL 0
-    #else
-        // __has_include is part of C++17
-        #if __has_include("../../../six.sicd/include/six/sicd/vectorclass/version2/vectorclass.h") || \
-            __has_include("six/sicd/vectorclass/version2/vectorclass.h")
-            #if _MSC_VER
-            // Compiler error: bug in MSVC or VCL?
-            #define SIX_sicd_has_VCL !CODA_OSS_cpp20 // TODO: enable for C++20
-            #else
-            #define SIX_sicd_has_VCL 1
-            #endif
-        #else
-            #define SIX_sicd_has_VCL 0
-        #endif // __has_include
-    #endif // C++17
+// Do we have the "vectorclass" library? https://github.com/vectorclass/version2
+#if !CODA_OSS_cpp17  // VCL needs C++17
+#define SIX_sicd_has_VCL 0
+#else
+// __has_include is part of C++17
+#if __has_include(                                                                  \
+        "../../../six.sicd/include/six/sicd/vectorclass/version2/vectorclass.h") || \
+        __has_include("six/sicd/vectorclass/version2/vectorclass.h")
+#if _MSC_VER
+// Compiler error: bug in MSVC or VCL?
+#define SIX_sicd_has_VCL !CODA_OSS_cpp20  // TODO: enable for C++20
+#else
+#define SIX_sicd_has_VCL 1
+#endif
+#else
+#define SIX_sicd_has_VCL 0
+#endif  // __has_include
+#endif  // C++17
 #endif
 
 #ifndef SIX_sicd_has_simd
-    // Do we have `std::experimental::simd? https://en.cppreference.com/w/cpp/experimental/simd
-    #if (__GNUC__ >= 11) && CODA_OSS_cpp20
-        // https://github.com/VcDevel/std-simd "... shipping with GCC since version 11."
-        #define SIX_sicd_has_simd 1
-    #else
-        #define SIX_sicd_has_simd 0
-    #endif // __GNUC__
+// Do we have `std::experimental::simd?
+// https://en.cppreference.com/w/cpp/experimental/simd
+#if (__GNUC__ >= 11) && CODA_OSS_cpp20
+// https://github.com/VcDevel/std-simd "... shipping with GCC since version 11."
+#define SIX_sicd_has_simd 1
+#else
+#define SIX_sicd_has_simd 0
+#endif  // __GNUC__
 #endif
 
 #ifndef SIX_sicd_has_ximd
-    // This is a "hacked up" version of std::experimental::simd using std::array.
-    // It's primarily for development and testing: VCL needs C++17 and
-    // std::experimental::simd is G++11/C++20.
-    #define SIX_sicd_has_ximd CODA_OSS_DEBUG
-    //#define SIX_sicd_has_ximd 0
+// This is a "hacked up" version of std::experimental::simd using std::array.
+// It's primarily for development and testing: VCL needs C++17 and
+// std::experimental::simd is G++11/C++20.
+#define SIX_sicd_has_ximd CODA_OSS_DEBUG
+// #define SIX_sicd_has_ximd 0
 #endif
 
 #ifndef SIX_sicd_has_sisd
-    // This is just normal `int`s and `float`s (not even `std::array`s) made
-    // to look like SIMD types.  Why? Generic code: the same templatized
-    // code works everywhere.
-    #define SIX_sicd_has_sisd 1
+// This is just normal `int`s and `float`s (not even `std::array`s) made
+// to look like SIMD types.  Why? Generic code: the same templatized
+// code works everywhere.
+#define SIX_sicd_has_sisd 1
 #endif
 
 #ifndef SIX_sicd_ComplexToAMP8IPHS8I_unseq
-    #if SIX_sicd_has_VCL || SIX_sicd_has_simd || SIX_sicd_has_ximd
-    #define SIX_sicd_ComplexToAMP8IPHS8I_unseq 1
-    #else
-    #define SIX_sicd_ComplexToAMP8IPHS8I_unseq 0
-    #endif // SIX_sicd_have_VCL || SIX_sicd_has_simd
-#endif // SIX_sicd_ComplexToAMP8IPHS8I_unseq
+#if SIX_sicd_has_VCL || SIX_sicd_has_simd || SIX_sicd_has_ximd
+#define SIX_sicd_ComplexToAMP8IPHS8I_unseq 1
+#else
+#define SIX_sicd_ComplexToAMP8IPHS8I_unseq 0
+#endif  // SIX_sicd_have_VCL || SIX_sicd_has_simd
+#endif  // SIX_sicd_ComplexToAMP8IPHS8I_unseq
 
 // Don't know yet whether SISD code actually make sense ... ease
 // development/testing and the eventual transition.
 #if !SIX_sicd_ComplexToAMP8IPHS8I_unseq
-    #if SIX_sicd_has_sisd && CODA_OSS_DEBUG
-        #undef SIX_sicd_ComplexToAMP8IPHS8I_unseq
-        #define SIX_sicd_ComplexToAMP8IPHS8I_unseq 1
-    #endif
+#if SIX_sicd_has_sisd && CODA_OSS_DEBUG
+#undef SIX_sicd_ComplexToAMP8IPHS8I_unseq
+#define SIX_sicd_ComplexToAMP8IPHS8I_unseq 1
+#endif
 #endif
 
 // We're still at C++14, so we don't have the types in <execution>
@@ -241,36 +243,46 @@ struct SIX_SIX_API AMP8I_PHS8I_t final
 // mimic C++17 (these should be types, not `enum` values).
 enum class execution_policy
 {
-    seq, par, par_unseq, unseq
+    seq,
+    par,
+    par_unseq,
+    unseq
 };
 
-struct AmplitudeTable; // forward
+struct AmplitudeTable;  // forward
 namespace sicd
 {
 namespace details
 {
 
 /*!
- * \brief A utility that's used to convert complex values into 8-bit amplitude and phase values.
- * 
+ * \brief A utility that's used to convert complex values into 8-bit amplitude
+ * and phase values.
+ *
  * *** Implemetned in SIX.SICD ***
  */
 class ComplexToAMP8IPHS8I final
 {
     /*!
-     * Create a lookup structure that converts from complex to amplitude and phase.
+     * Create a lookup structure that converts from complex to amplitude and
+     * phase.
      * @param pAmplitudeTable optional amplitude table.
      */
-    explicit ComplexToAMP8IPHS8I(const six::AmplitudeTable* pAmplitudeTable = nullptr);
+    explicit ComplexToAMP8IPHS8I(
+            const six::AmplitudeTable* pAmplitudeTable = nullptr);
 
 public:
-    static const ComplexToAMP8IPHS8I& make_(const six::AmplitudeTable* pAmplitudeTable); // AmplitudeTable* = NULL is cached
+    static const ComplexToAMP8IPHS8I& make_(
+            const six::AmplitudeTable*
+                    pAmplitudeTable);  // AmplitudeTable* = NULL is cached
 
     ~ComplexToAMP8IPHS8I() = default;
     ComplexToAMP8IPHS8I(const ComplexToAMP8IPHS8I&) = delete;
     ComplexToAMP8IPHS8I& operator=(const ComplexToAMP8IPHS8I&) = delete;
-    ComplexToAMP8IPHS8I(ComplexToAMP8IPHS8I&&) = delete; // implicitly deleted because of =delete for copy
-    ComplexToAMP8IPHS8I& operator=(ComplexToAMP8IPHS8I&&) = delete; // implicitly deleted because of =delete for copy
+    ComplexToAMP8IPHS8I(ComplexToAMP8IPHS8I&&) =
+            delete;  // implicitly deleted because of =delete for copy
+    ComplexToAMP8IPHS8I& operator=(ComplexToAMP8IPHS8I&&) =
+            delete;  // implicitly deleted because of =delete for copy
 
     std::span<const float> magnitudes() const;
     float phase_delta() const;
@@ -278,11 +290,12 @@ public:
     //! Unit vector rays that represent each direction that phase can point.
     struct phase_directions final
     {
-        std::array<zfloat, AmplitudeTableSize> value; // interleaved, std::complex<float>
-        #if SIX_sicd_has_VCL || SIX_sicd_has_sisd
+        std::array<zfloat, AmplitudeTableSize>
+                value;  // interleaved, std::complex<float>
+#if SIX_sicd_has_VCL || SIX_sicd_has_sisd
         std::array<float, AmplitudeTableSize> real;
         std::array<float, AmplitudeTableSize> imag;
-        #endif
+#endif
     };
     const phase_directions& get_phase_directions() const;
 
@@ -309,19 +322,21 @@ struct SIX_SIX_API AmplitudeTable final : public LUT
         LUT(AmplitudeTableSize /*i.e., 256*/, elementSize)
     {
     }
-    AmplitudeTable() noexcept(false) :  AmplitudeTable(sizeof(double)) 
+    AmplitudeTable() noexcept(false) : AmplitudeTable(sizeof(double))
     {
     }
-    AmplitudeTable(const nitf::LookupTable& lookupTable) noexcept(false) : LUT(lookupTable)
+    AmplitudeTable(const nitf::LookupTable& lookupTable) noexcept(false) :
+        LUT(lookupTable)
     {
         if (size() != AmplitudeTableSize)
         {
-            throw std::invalid_argument("lookupTable should have 256 elements.");
+            throw std::invalid_argument(
+                    "lookupTable should have 256 elements.");
         }
     }
 
-    AmplitudeTable(const AmplitudeTable&) = delete; // use clone()
-    AmplitudeTable& operator=(const AmplitudeTable&) = delete; // use clone()
+    AmplitudeTable(const AmplitudeTable&) = delete;  // use clone()
+    AmplitudeTable& operator=(const AmplitudeTable&) = delete;  // use clone()
     AmplitudeTable(AmplitudeTable&&) = default;
     AmplitudeTable& operator=(AmplitudeTable&&) = default;
 
@@ -329,7 +344,7 @@ struct SIX_SIX_API AmplitudeTable final : public LUT
     {
         return numEntries;
     }
-    static constexpr auto ssize() noexcept // signed size()
+    static constexpr auto ssize() noexcept  // signed size()
     {
         return gsl::narrow<ptrdiff_t>(AmplitudeTableSize);
     }
@@ -380,9 +395,10 @@ struct SIX_SIX_API AmplitudeTable final : public LUT
         return ret.release();
     }
 
-    // This is a "cache" mostly because this is a convenient place to store the data; it
-    // doesn't take that long to generate the lookup table.  Note that existing code wants
-    // to work with a `const AmplitudeTable &`, thus `mutable` ... <shrug>.
+    // This is a "cache" mostly because this is a convenient place to store the
+    // data; it doesn't take that long to generate the lookup table.  Note that
+    // existing code wants to work with a `const AmplitudeTable &`, thus
+    // `mutable` ... <shrug>.
     void cacheLookup_(std::vector<six::zfloat>&& lookup_) const
     {
         lookup = std::move(lookup_);
@@ -392,8 +408,10 @@ struct SIX_SIX_API AmplitudeTable final : public LUT
         return lookup.empty() ? nullptr : &lookup;
     }
 
-    // Again, this is a convenient place to store the data as it depends on an AmplitudeTable instance.
-    void cacheFromComplex_(std::unique_ptr<sicd::details::ComplexToAMP8IPHS8I>&& fromComplex) const
+    // Again, this is a convenient place to store the data as it depends on an
+    // AmplitudeTable instance.
+    void cacheFromComplex_(std::unique_ptr<sicd::details::ComplexToAMP8IPHS8I>&&
+                                   fromComplex) const
     {
         pFromComplex = std::move(fromComplex);
     }
@@ -404,9 +422,9 @@ struct SIX_SIX_API AmplitudeTable final : public LUT
 
 private:
     mutable std::vector<zfloat> lookup;
-    mutable std::unique_ptr<sicd::details::ComplexToAMP8IPHS8I> pFromComplex;    
+    mutable std::unique_ptr<sicd::details::ComplexToAMP8IPHS8I> pFromComplex;
 };
 
 }
 
-#endif // SIX_six_AmplitudeTable_h_INCLUDED_
+#endif  // SIX_six_AmplitudeTable_h_INCLUDED_

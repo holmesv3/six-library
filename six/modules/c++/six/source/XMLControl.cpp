@@ -21,70 +21,75 @@
  */
 
 #include <assert.h>
-
-#include <std/filesystem>
-#include <algorithm>
-#include <iterator>
-
 #include <logging/NullLogger.h>
+#include <six/Data.h>
+#include <six/Types.h>
+#include <six/Utilities.h>
+#include <six/XMLControl.h>
 #include <sys/Path.h>
 
-#include <six/XMLControl.h>
-#include <six/Utilities.h>
-#include <six/Types.h>
-#include <six/Data.h>
+#include <algorithm>
+#include <iterator>
+#include <std/filesystem>
 
 namespace fs = std::filesystem;
 
 namespace six
 {
-    // Have mLogger manage mLog and mOwnLog
-    XMLControl::XMLControl(logging::Logger* log, bool ownLog) : mLogger(mLog, mOwnLog, nullptr)
-    {
-        setLogger(log, ownLog);
-    }
-    XMLControl::XMLControl(std::unique_ptr<logging::Logger>&& log) : XMLControl()
-    {
-        setLogger(std::move(log));
-    }
-    XMLControl::XMLControl(logging::Logger& log) : XMLControl(&log, false /*ownLog*/) { }
+// Have mLogger manage mLog and mOwnLog
+XMLControl::XMLControl(logging::Logger* log, bool ownLog) :
+    mLogger(mLog, mOwnLog, nullptr)
+{
+    setLogger(log, ownLog);
+}
+XMLControl::XMLControl(std::unique_ptr<logging::Logger>&& log) : XMLControl()
+{
+    setLogger(std::move(log));
+}
+XMLControl::XMLControl(logging::Logger& log) :
+    XMLControl(&log, false /*ownLog*/)
+{
+}
 
-    XMLControl::~XMLControl() = default;
+XMLControl::~XMLControl() = default;
 
 static void loadDefaultSchemaPath(std::vector<std::string>& schemaPaths)
 {
-        static const sys::OS os;
+    static const sys::OS os;
 
 // prefer SIX_DEFAULT_SCHEMA_PATH, existing scripts use DEFAULT_SCHEMA_PATH
 #if defined(DEFAULT_SCHEMA_PATH) && !defined(SIX_DEFAULT_SCHEMA_PATH)
 #define SIX_DEFAULT_SCHEMA_PATH DEFAULT_SCHEMA_PATH
 #endif
 #ifndef SIX_DEFAULT_SCHEMA_PATH
-// Don't want to set a dummy schema path to a directory that exists as that causes
-// the code to check for valid schemas and validate.
+// Don't want to set a dummy schema path to a directory that exists as that
+// causes the code to check for valid schemas and validate.
 #if defined(_WIN32)
-#define SIX_DEFAULT_SCHEMA_PATH "Z:\\s 0 m e\\p at h" // just to compile ...
+#define SIX_DEFAULT_SCHEMA_PATH "Z:\\s 0 m e\\p at h"  // just to compile ...
 #else
-#define SIX_DEFAULT_SCHEMA_PATH "/s 0 m e/p at h" // just to compile ...
+#define SIX_DEFAULT_SCHEMA_PATH "/s 0 m e/p at h"  // just to compile ...
 #endif
 #endif
 
-        std::string envPath;
-        os.getEnvIfSet(six::SCHEMA_PATH, envPath);
-        str::trim(envPath);
-        if (!envPath.empty())
+    std::string envPath;
+    os.getEnvIfSet(six::SCHEMA_PATH, envPath);
+    str::trim(envPath);
+    if (!envPath.empty())
+    {
+        // SIX_SCHEMA_PATH might be a search path
+        if (!os.splitEnv(six::SCHEMA_PATH,
+                         schemaPaths,
+                         std::filesystem::file_type::directory))
         {
-            // SIX_SCHEMA_PATH might be a search path
-	        if (!os.splitEnv(six::SCHEMA_PATH, schemaPaths, std::filesystem::file_type::directory))
-            {
-                // Nope; assume the caller can figure things out (existing behavior).
-                schemaPaths.push_back(envPath);
-            }
+            // Nope; assume the caller can figure things out (existing
+            // behavior).
+            schemaPaths.push_back(envPath);
         }
-        else if (os.exists(SIX_DEFAULT_SCHEMA_PATH))
-        {
-            schemaPaths.push_back(SIX_DEFAULT_SCHEMA_PATH);
-        }
+    }
+    else if (os.exists(SIX_DEFAULT_SCHEMA_PATH))
+    {
+        schemaPaths.push_back(SIX_DEFAULT_SCHEMA_PATH);
+    }
 }
 
 void XMLControl::loadSchemaPaths(std::vector<std::string>& schemaPaths)
@@ -94,7 +99,8 @@ void XMLControl::loadSchemaPaths(std::vector<std::string>& schemaPaths)
         loadDefaultSchemaPath(schemaPaths);
     }
 }
-std::vector<std::filesystem::path> XMLControl::loadSchemaPaths(const std::vector<std::filesystem::path>* pSchemaPaths)
+std::vector<std::filesystem::path> XMLControl::loadSchemaPaths(
+        const std::vector<std::filesystem::path>* pSchemaPaths)
 {
     std::vector<std::filesystem::path> retval;
 
@@ -103,8 +109,8 @@ std::vector<std::filesystem::path> XMLControl::loadSchemaPaths(const std::vector
     {
         std::vector<std::string> paths = sys::convertPaths(*pSchemaPaths);
 
-        // If *pSchemaPaths is empty, this will use a default value.  To avoid all validation against a schema,
-        // pass NULL for pSchemaPaths.
+        // If *pSchemaPaths is empty, this will use a default value.  To avoid
+        // all validation against a schema, pass NULL for pSchemaPaths.
         loadSchemaPaths(paths);
 
         retval = sys::convertPaths(paths);
@@ -112,7 +118,8 @@ std::vector<std::filesystem::path> XMLControl::loadSchemaPaths(const std::vector
     return retval;
 }
 
-static auto check_whether_paths_exist(const std::vector<std::filesystem::path>& paths)
+static auto check_whether_paths_exist(
+        const std::vector<std::filesystem::path>& paths)
 {
     // If the paths we have don't exist, throw
     std::filesystem::path does_not_exist_path;
@@ -143,9 +150,12 @@ static auto check_whether_paths_exist(const std::vector<std::filesystem::path>& 
 }
 
 // Generate a detaled INVALID XML message
-static auto getInvalidXmlErrorMessage(const std::vector<std::filesystem::path>& paths)
+static auto getInvalidXmlErrorMessage(
+        const std::vector<std::filesystem::path>& paths)
 {
-    static const std::string invalidXML = "INVALID XML: Check both the XML being produced and schemas available at ";
+    static const std::string invalidXML =
+            "INVALID XML: Check both the XML being produced and schemas "
+            "available at ";
     auto message = invalidXML;
     message += (paths.size() > 1 ? "these paths:" : "this path:");
     for (const auto& p : paths)
@@ -155,12 +165,14 @@ static auto getInvalidXmlErrorMessage(const std::vector<std::filesystem::path>& 
     return message;
 }
 
-static void log_any_errors_and_throw(const std::vector<xml::lite::ValidationInfo>& errors,
-    const std::vector<std::filesystem::path>& paths, logging::Logger& log)
+static void log_any_errors_and_throw(
+        const std::vector<xml::lite::ValidationInfo>& errors,
+        const std::vector<std::filesystem::path>& paths,
+        logging::Logger& log)
 {
     if (errors.empty())
     {
-        return; // no errors, nothing to do
+        return;  // no errors, nothing to do
     }
 
     auto ctx(Ctxt(getInvalidXmlErrorMessage(paths)));
@@ -203,9 +215,8 @@ static void validate_(
 
     // deduplicate the schema list
     auto comp = [](const coda_oss::filesystem::path& x,
-                   const coda_oss::filesystem::path& y) {
-        return x.string() < y.string();
-    };
+                   const coda_oss::filesystem::path& y)
+    { return x.string() < y.string(); };
     std::set<coda_oss::filesystem::path, decltype(comp)> uniq(
             foundSchemas.begin(), foundSchemas.end(), comp);
     std::vector<coda_oss::filesystem::path> uniq_schemas(uniq.begin(),
@@ -213,8 +224,9 @@ static void validate_(
 
     // Remove schema paths whose filename component do not match the spec or
     // version
-    auto spec_version_filter = [spec,
-                                version](const coda_oss::filesystem::path& x) {
+    auto spec_version_filter =
+            [spec, version](const coda_oss::filesystem::path& x)
+    {
         auto x2 = x.filename().string();
         return x2.find(spec) == std::string::npos ||
                 x2.find(version) == std::string::npos;
@@ -253,9 +265,8 @@ static void validate_(
         const std::string needle("SIDD_V3.0.0_ISM-v201609");
 
         typename decltype(uniq_schemas)::iterator hitlist;
-        auto has_needle = [needle](const coda_oss::filesystem::path& x) {
-            return x.string().find(needle) != std::string::npos;
-        };
+        auto has_needle = [needle](const coda_oss::filesystem::path& x)
+        { return x.string().find(needle) != std::string::npos; };
         if (is201609)
         {
             // Doc is 201609, remove competing schemas
@@ -293,22 +304,29 @@ static void validate_(
     }
 }
 
-static void validate_(const xml::lite::Document& doc,
-    const std::string& spec, const std::string& version,
-    const std::vector<coda_oss::filesystem::path>& foundSchemas, logging::Logger& log)
+static void validate_(
+        const xml::lite::Document& doc,
+        const std::string& spec,
+        const std::string& version,
+        const std::vector<coda_oss::filesystem::path>& foundSchemas,
+        logging::Logger& log)
 {
     auto rootElement = doc.getRootElement();
     if (rootElement->getUri().empty())
     {
-        throw six::DESValidationException(Ctxt("INVALID XML: URI is empty so document version cannot be determined to use for validation"));
+        throw six::DESValidationException(
+                Ctxt("INVALID XML: URI is empty so document version cannot be "
+                     "determined to use for validation"));
     }
 
     // validate against any specified schemas
     validate_(*rootElement, spec, version, foundSchemas, log);
 }
 
-static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::vector<std::string>&, logging::Logger*);
-static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::vector<std::filesystem::path>*, logging::Logger*);
+static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(
+        const std::vector<std::string>&, logging::Logger*);
+static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(
+        const std::vector<std::filesystem::path>*, logging::Logger*);
 
 void XMLControl::validate(const xml::lite::Document* doc,
                           const std::vector<std::string>& schemaPaths,
@@ -331,9 +349,10 @@ void XMLControl::validate(const xml::lite::Document* doc,
     validate_(*doc, spec, version, foundSchemas, *log);
 }
 
-void XMLControl::validate(const xml::lite::Document& doc,
-    const std::vector<std::filesystem::path>* pSchemaPaths,
-    logging::Logger* log)
+void XMLControl::validate(
+        const xml::lite::Document& doc,
+        const std::vector<std::filesystem::path>* pSchemaPaths,
+        logging::Logger* log)
 {
     // Existing code in xml::lite requires that the Logger be non-NULL
     assert(log != nullptr);
@@ -355,8 +374,8 @@ static auto findValidSchemas(const std::vector<std::filesystem::path>& paths_)
     const auto paths = check_whether_paths_exist(paths_);
     return xml::lite::ValidatorXerces::loadSchemas(paths, true /*recursive*/);
 }
-static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::vector<std::string>& schemaPaths,
-    logging::Logger* log)
+static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(
+        const std::vector<std::string>& schemaPaths, logging::Logger* log)
 {
     // attempt to get the schema location from the
     // environment if nothing is specified
@@ -373,12 +392,15 @@ static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::v
         }
     }
 
-    return findValidSchemas(sys::convertPaths(paths)); // If the paths we have don't exist, throw
+    return findValidSchemas(sys::convertPaths(
+            paths));  // If the paths we have don't exist, throw
 }
-static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::vector<std::filesystem::path>* pSchemaPaths,
-    logging::Logger* log)
+static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(
+        const std::vector<std::filesystem::path>* pSchemaPaths,
+        logging::Logger* log)
 {
-    // attempt to get the schema location from the environment if nothing is specified
+    // attempt to get the schema location from the environment if nothing is
+    // specified
     auto paths = XMLControl::loadSchemaPaths(pSchemaPaths);
     if ((pSchemaPaths != nullptr) && paths.empty())
     {
@@ -390,7 +412,7 @@ static std::vector<coda_oss::filesystem::path> findValidSchemaPaths(const std::v
             log->warn(oss);
         }
     }
-    return findValidSchemas(paths); // If the paths we have don't exist, throw
+    return findValidSchemas(paths);  // If the paths we have don't exist, throw
 }
 
 std::string XMLControl::getDefaultURI(const Data& data)
@@ -437,10 +459,12 @@ void XMLControl::splitVersion(const std::string& versionStr,
     }
 }
 
-std::unique_ptr<xml::lite::Document> XMLControl::toXMLImpl(const Data& data) const
+std::unique_ptr<xml::lite::Document> XMLControl::toXMLImpl(
+        const Data& data) const
 {
     auto pThis = const_cast<XMLControl*>(this);
-    std::unique_ptr<xml::lite::Document> retval(pThis->toXMLImpl(&data)); // store raw pointer right away
+    std::unique_ptr<xml::lite::Document> retval(
+            pThis->toXMLImpl(&data));  // store raw pointer right away
     assert(retval.get() != nullptr);
     return retval;
 }
@@ -453,22 +477,25 @@ xml::lite::Document* XMLControl::toXML(
     return doc;
 }
 std::unique_ptr<xml::lite::Document> XMLControl::toXML(
-    const Data& data, const std::vector<std::string>& schemaPaths)
+        const Data& data, const std::vector<std::string>& schemaPaths)
 {
     return std::unique_ptr<xml::lite::Document>(toXML(&data, schemaPaths));
 }
 std::unique_ptr<xml::lite::Document> XMLControl::toXML(
-    const Data& data, const std::vector<std::filesystem::path>* pSchemaPaths)
+        const Data& data,
+        const std::vector<std::filesystem::path>* pSchemaPaths)
 {
     auto doc = toXMLImpl(data);
     validate(*doc, pSchemaPaths, mLog);
     return doc;
 }
 
-std::unique_ptr<Data> XMLControl::fromXMLImpl(const xml::lite::Document& doc) const
+std::unique_ptr<Data> XMLControl::fromXMLImpl(
+        const xml::lite::Document& doc) const
 {
     auto pThis = const_cast<XMLControl*>(this);
-    std::unique_ptr<Data> retval(pThis->fromXMLImpl(&doc)); // store raw pointer right away
+    std::unique_ptr<Data> retval(
+            pThis->fromXMLImpl(&doc));  // store raw pointer right away
     assert(retval.get() != nullptr);
     return retval;
 }
@@ -482,8 +509,9 @@ Data* XMLControl::fromXML(const xml::lite::Document* doc,
     auto data = fromXML(*doc, &schemaPaths);
     return data.release();
 }
-std::unique_ptr<Data> XMLControl::fromXML(const xml::lite::Document& doc,
-    const std::vector<std::filesystem::path>* pSchemaPaths)
+std::unique_ptr<Data> XMLControl::fromXML(
+        const xml::lite::Document& doc,
+        const std::vector<std::filesystem::path>* pSchemaPaths)
 {
     std::unique_ptr<Data> data;
     if ((pSchemaPaths != nullptr) && (mLog != nullptr))
@@ -500,14 +528,18 @@ std::unique_ptr<Data> XMLControl::fromXML(const xml::lite::Document& doc,
     return data;
 }
 
-std::unique_ptr<Data> XMLControl::validateXMLImpl_(const xml::lite::Document& doc,
-    const std::vector<std::filesystem::path>& schemaPaths, logging::Logger& log) const
+std::unique_ptr<Data> XMLControl::validateXMLImpl_(
+        const xml::lite::Document& doc,
+        const std::vector<std::filesystem::path>& schemaPaths,
+        logging::Logger& log) const
 {
     validate(doc, &schemaPaths, &log);
     return fromXMLImpl(doc);
 }
-std::unique_ptr<Data> XMLControl::validateXMLImpl(const xml::lite::Document& doc,
-    const std::vector<std::filesystem::path>& schemaPaths, logging::Logger& log) const
+std::unique_ptr<Data> XMLControl::validateXMLImpl(
+        const xml::lite::Document& doc,
+        const std::vector<std::filesystem::path>& schemaPaths,
+        logging::Logger& log) const
 {
     return validateXMLImpl_(doc, schemaPaths, log);
 }
@@ -524,7 +556,8 @@ std::string XMLControl::dataTypeToString(DataType dataType, bool appendXML)
         str = "SIDD";
         break;
     default:
-        throw except::Exception(Ctxt("Invalid data type " + str::toString(dataType)));
+        throw except::Exception(
+                Ctxt("Invalid data type " + str::toString(dataType)));
     }
 
     if (appendXML)
@@ -536,13 +569,16 @@ std::string XMLControl::dataTypeToString(DataType dataType, bool appendXML)
 }
 }
 
-std::string six::getSchemaPath(std::vector<std::string>& schemaPaths, bool tryToExpandIfNotFound)
+std::string six::getSchemaPath(std::vector<std::string>& schemaPaths,
+                               bool tryToExpandIfNotFound)
 {
     loadDefaultSchemaPath(schemaPaths);
 
-    // This is hacky; the whole point of having "schemaPaths" be a vector is that there could
-    // be MULTIPLE valid directories, not just one.
-    auto schemaPath = schemaPaths.empty() ? "" : schemaPaths[0]; // TODO: use all directories in schemaPaths
+    // This is hacky; the whole point of having "schemaPaths" be a vector is
+    // that there could be MULTIPLE valid directories, not just one.
+    auto schemaPath = schemaPaths.empty()
+            ? ""
+            : schemaPaths[0];  // TODO: use all directories in schemaPaths
     if (fs::is_directory(schemaPath))
     {
         return schemaPath;
@@ -551,14 +587,18 @@ std::string six::getSchemaPath(std::vector<std::string>& schemaPaths, bool tryTo
     if (tryToExpandIfNotFound)
     {
         // schemaPath might contain special enviroment variables
-        schemaPath = sys::Path::expandEnvironmentVariables(schemaPath, fs::file_type::directory);
+        schemaPath =
+                sys::Path::expandEnvironmentVariables(schemaPath,
+                                                      fs::file_type::directory);
         if (fs::is_directory(schemaPath))
         {
-            schemaPath = fs::absolute(schemaPath).string(); // get rid of embedded ".."
+            schemaPath = fs::absolute(schemaPath)
+                                 .string();  // get rid of embedded ".."
             schemaPaths[0] = schemaPath;
             return schemaPath;
         }
     }
 
-    throw except::IOException(Ctxt(str::Format("Directory does not exist: '%s'", schemaPath)));
+    throw except::IOException(
+            Ctxt(str::Format("Directory does not exist: '%s'", schemaPath)));
 }

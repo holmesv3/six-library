@@ -22,24 +22,22 @@
 #ifndef __SIX_ADAPTERS_H__
 #define __SIX_ADAPTERS_H__
 
+#include <import/io.h>
+#include <import/sys.h>
+#include <scene/sys_Conf.h>
 #include <stdint.h>
 
 #include <complex>
-#include <utility>
-#include <std/span>
-#include <std/cstddef>
-#include <memory>
-
-#include <import/sys.h>
-#include <import/io.h>
 #include <import/nitf.hpp>
+#include <memory>
+#include <std/cstddef>
+#include <std/span>
+#include <utility>
 
-#include <scene/sys_Conf.h>
-
-#include "six/Types.h"
-#include "six/NITFSegmentInfo.h"
-#include "six/Utilities.h"
 #include "six/Data.h"
+#include "six/NITFSegmentInfo.h"
+#include "six/Types.h"
+#include "six/Utilities.h"
 
 /*!
  *  This file contains adapters that are necessary to get six objects
@@ -52,25 +50,23 @@ namespace six
 {
 
 /*!
- *  \class SegmentInputStreamAdapter 
+ *  \class SegmentInputStreamAdapter
  *  \brief Adapter from segment to CODA InputStream
  *
  *  NITRO use a nitf::SegmentReader to get the data out of the DES.  This
  *  class adapts this object so that it can be used by xml.lite's parser.
  *
  */
-class SegmentInputStreamAdapter: public ::io::InputStream
+class SegmentInputStreamAdapter : public ::io::InputStream
 {
-
     nitf::SegmentReader& mReader;
-public:
 
+public:
     /*!
      *  Bind a segment reader for a DES
      *
      */
-    SegmentInputStreamAdapter(nitf::SegmentReader& reader) :
-        mReader(reader)
+    SegmentInputStreamAdapter(nitf::SegmentReader& reader) : mReader(reader)
     {
     }
 
@@ -79,7 +75,8 @@ public:
     {
     }
 
-    SegmentInputStreamAdapter& operator=(const SegmentInputStreamAdapter&) = delete;
+    SegmentInputStreamAdapter& operator=(const SegmentInputStreamAdapter&) =
+            delete;
 
     /*!
      *  Fulfills the C++ IO API function returning how many bytes
@@ -93,7 +90,7 @@ public:
 
 protected:
     /*!
-     *  Read len bytes from the DES.  Returns the number of 
+     *  Read len bytes from the DES.  Returns the number of
      *  bytes that succeeded (which is guaranteed to be len
      *  by SegmentReader)
      */
@@ -112,7 +109,7 @@ protected:
  *  one at a time and transferred into the write handle.  It makes use
  *  of NITRO's low-level WriteHandler API, which assumes that you will handle
  *  the heavy lifting.  This is not typically used, since the ImageWriter
- *  is more general, but in the case of pixel interleaved data, the 
+ *  is more general, but in the case of pixel interleaved data, the
  *  WriteHandler is the most efficient method of data transfer into a NITF.
  *
  *  This class can handle both SIDD and SICD data.  In the current state
@@ -120,17 +117,19 @@ protected:
  *  is always 1, so there is no byte swapping (this may not necessarily always
  *  remain this way).
  *
- *  For SICD data, we do have 2 channels, one for I and one for Q.  
+ *  For SICD data, we do have 2 channels, one for I and one for Q.
  *  Additionally the channel size is 4 or 2.
  *
- *  The SICD/SIDD NITF writer sets this object up, one per actual image 
+ *  The SICD/SIDD NITF writer sets this object up, one per actual image
  *  segment. The caller is responsible for dealing with segmentation
  *  beforehand
  *
  */
-struct MemoryWriteHandler: public nitf::WriteHandler // leaving this for any existing code that might use it
+struct MemoryWriteHandler
+    : public nitf::WriteHandler  // leaving this for any existing code that
+                                 // might use it
 {
-    MemoryWriteHandler(const NITFSegmentInfo& info, 
+    MemoryWriteHandler(const NITFSegmentInfo& info,
                        const UByte* buffer,
                        size_t firstRow,
                        size_t numCols,
@@ -139,14 +138,17 @@ struct MemoryWriteHandler: public nitf::WriteHandler // leaving this for any exi
                        bool doByteSwap);
 };
 
-class NewMemoryWriteHandler final : public nitf::WriteHandler // all of our code now uses this
+class NewMemoryWriteHandler final
+    : public nitf::WriteHandler  // all of our code now uses this
 {
     struct Impl;
     std::unique_ptr<Impl> m_pImpl;
 
     NewMemoryWriteHandler(const NITFSegmentInfo& info,
-        const std::byte* buffer,
-        size_t firstRow, const Data& data, bool doByteSwap);
+                          const std::byte* buffer,
+                          size_t firstRow,
+                          const Data& data,
+                          bool doByteSwap);
 
 public:
     NewMemoryWriteHandler() = delete;
@@ -157,25 +159,36 @@ public:
     NewMemoryWriteHandler& operator=(NewMemoryWriteHandler&&) = default;
 
     NewMemoryWriteHandler(const NITFSegmentInfo& info,
-			  std::span<const std::byte> buffer,
-			  size_t firstRow, const Data& data, bool doByteSwap);
+                          std::span<const std::byte> buffer,
+                          size_t firstRow,
+                          const Data& data,
+                          bool doByteSwap);
     NewMemoryWriteHandler(const NITFSegmentInfo& info,
-			  std::span<const uint8_t> buffer,
-			  size_t firstRow, const Data& data, bool doByteSwap);
+                          std::span<const uint8_t> buffer,
+                          size_t firstRow,
+                          const Data& data,
+                          bool doByteSwap);
     NewMemoryWriteHandler(const NITFSegmentInfo& info,
-			  std::span<const uint16_t> buffer,
-			  size_t firstRow, const Data& data, bool doByteSwap);
+                          std::span<const uint16_t> buffer,
+                          size_t firstRow,
+                          const Data& data,
+                          bool doByteSwap);
     NewMemoryWriteHandler(const NITFSegmentInfo& info,
-			  std::span<const six::zfloat> buffer,
-			  size_t firstRow, const Data& data, bool doByteSwap);
+                          std::span<const six::zfloat> buffer,
+                          size_t firstRow,
+                          const Data& data,
+                          bool doByteSwap);
     NewMemoryWriteHandler(const NITFSegmentInfo& info,
-			  std::span<const six::zint16_t> buffer,
-			  size_t firstRow, const Data& data, bool doByteSwap);
+                          std::span<const six::zint16_t> buffer,
+                          size_t firstRow,
+                          const Data& data,
+                          bool doByteSwap);
     NewMemoryWriteHandler(const NITFSegmentInfo& info,
-			  std::span<const AMP8I_PHS8I_t> buffer,
-			  size_t firstRow, const Data& data, bool doByteSwap);
+                          std::span<const AMP8I_PHS8I_t> buffer,
+                          size_t firstRow,
+                          const Data& data,
+                          bool doByteSwap);
 };
-
 
 /*!
  *  \class StreamWriteHandler
@@ -189,11 +202,11 @@ public:
  *  is always 1, so there is no byte swapping (this may not necessarily always
  *  remain this way).
  *
- *  For SICD data, we do have 2 channels, one for I and one for Q.  
+ *  For SICD data, we do have 2 channels, one for I and one for Q.
  *  Additionally the channel size is 4 or 2.
  *
  */
-struct StreamWriteHandler: public nitf::WriteHandler
+struct StreamWriteHandler : public nitf::WriteHandler
 {
     StreamWriteHandler(const NITFSegmentInfo& info,
                        io::InputStream* is,
@@ -202,10 +215,11 @@ struct StreamWriteHandler: public nitf::WriteHandler
                        size_t pixelSize,
                        bool doByteSwap);
     StreamWriteHandler(const NITFSegmentInfo& info,
-                       io::InputStream* is, const Data&, bool doByteSwap);
+                       io::InputStream* is,
+                       const Data&,
+                       bool doByteSwap);
 };
 
 }
 
 #endif
-

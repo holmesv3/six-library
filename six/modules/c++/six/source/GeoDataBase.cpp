@@ -19,9 +19,9 @@
  * see <http://www.gnu.org/licenses/>.
  *
  */
-#include <memory>
-
 #include "six/GeoDataBase.h"
+
+#include <memory>
 
 namespace six
 {
@@ -29,9 +29,7 @@ namespace six
 
 bool GeoDataBase::operator==(const GeoDataBase& rhs) const
 {
-    return (earthModel == rhs.earthModel &&
-            imageCorners == rhs.imageCorners &&
-            validData == rhs.validData &&
-            geoInfos == rhs.geoInfos);
+    return (earthModel == rhs.earthModel && imageCorners == rhs.imageCorners &&
+            validData == rhs.validData && geoInfos == rhs.geoInfos);
 }
 }

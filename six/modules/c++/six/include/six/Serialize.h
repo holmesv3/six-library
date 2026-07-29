@@ -23,13 +23,12 @@
 #define __SIX_SERIALIZE_H__
 #pragma once
 
-#include <vector>
+#include <scene/sys_Conf.h>
+
 #include <algorithm>
 #include <iterator>
-
-#include <std/cstddef> // std::byte
-
-#include <scene/sys_Conf.h>
+#include <std/cstddef>  // std::byte
+#include <vector>
 
 namespace six
 {
@@ -39,7 +38,7 @@ namespace six
  * \brief Implements serialization and deserialization for scalar
  *  types
  */
-template<typename T>
+template <typename T>
 struct Serializer
 {
     /*!
@@ -48,10 +47,10 @@ struct Serializer
      * \param swapBytes Should byte-swapping be applied?
      * \param[out] values The serialized data.
      */
-    template<typename U>
+    template <typename U>
     static void serializeImpl_(const T& val,
-                              bool swapBytes,
-                              std::vector<U>& buffer)
+                               bool swapBytes,
+                               std::vector<U>& buffer)
     {
         constexpr size_t length = sizeof(T);
         const void* pVal = &val;
@@ -66,7 +65,8 @@ struct Serializer
         }
         else
         {
-            auto data = static_cast<typename std::vector<U>::const_pointer>(pVal);
+            auto data =
+                    static_cast<typename std::vector<U>::const_pointer>(pVal);
             std::copy(data, data + length, std::back_inserter(buffer));
         }
     }
@@ -90,7 +90,9 @@ struct Serializer
      * \param swapBytes Should byte-swapping be applied?
      * \param[out] val The value to deserialize into.
      */
-    static void deserializeImpl(const sys::byte*& buffer, bool swapBytes, T& val)
+    static void deserializeImpl(const sys::byte*& buffer,
+                                bool swapBytes,
+                                T& val)
     {
         constexpr size_t length = sizeof(T);
         void* pVal = &val;
@@ -98,12 +100,16 @@ struct Serializer
         std::copy(buffer, buffer + length, data);
         if (swapBytes)
         {
-            sys::byteSwap(static_cast<T*>(pVal), static_cast<unsigned short>(length), 1);
+            sys::byteSwap(static_cast<T*>(pVal),
+                          static_cast<unsigned short>(length),
+                          1);
         }
 
         buffer += length;
     }
-    static void deserializeImpl(const std::byte*& buffer, bool swapBytes, T& val)
+    static void deserializeImpl(const std::byte*& buffer,
+                                bool swapBytes,
+                                T& val)
     {
         const void* pBuffer = buffer;
         auto buffer_ = static_cast<const sys::byte*>(pBuffer);
@@ -121,8 +127,8 @@ struct Serializer
  * \brief Implements serialization and deserialization for vectors of
  *  scalar types
  */
-template<typename T>
-struct Serializer<std::vector<T> >
+template <typename T>
+struct Serializer<std::vector<T>>
 {
     /*!
      * Serialize a vector of values into a byte buffer.
@@ -130,10 +136,10 @@ struct Serializer<std::vector<T> >
      * \param swapBytes Should byte-swapping be applied?
      * \param[out] values The serialized data.
      */
-    template<typename U>
+    template <typename U>
     static void serializeImpl_(const std::vector<T>& val,
-                              bool swapBytes,
-                              std::vector<U>& buffer)
+                               bool swapBytes,
+                               std::vector<U>& buffer)
     {
         const size_t length = val.size();
 
@@ -174,8 +180,9 @@ struct Serializer<std::vector<T> >
 
         for (size_t ii = 0; ii < length; ++ii)
         {
-            Serializer<T>::deserializeImpl(buffer, swapBytes,
-                val[currentVectorLength + ii]);
+            Serializer<T>::deserializeImpl(buffer,
+                                           swapBytes,
+                                           val[currentVectorLength + ii]);
         }
     }
     static void deserializeImpl(const std::byte*& buffer,
@@ -201,15 +208,16 @@ struct Serializer<std::string>
      * \param swapBytes Should byte-swapping be applied?
      * \param[out] buffer The serialized data.
      */
-    template<typename T>
+    template <typename T>
     static void serializeImpl_(const std::string& val,
-                              bool swapBytes,
-                              std::vector<T>& buffer)
+                               bool swapBytes,
+                               std::vector<T>& buffer)
     {
         const size_t length = val.size();
         Serializer<size_t>::serializeImpl(length, swapBytes, buffer);
         const void* pVal_ = val.c_str();
-        const auto begin = static_cast<typename std::vector<T>::const_pointer>(pVal_);
+        const auto begin =
+                static_cast<typename std::vector<T>::const_pointer>(pVal_);
         const auto end = begin + val.size();
         std::copy(begin, end, std::back_inserter(buffer));
     }
@@ -263,17 +271,17 @@ struct Serializer<std::string>
  * \param swapBytes Should the bytes be swapped?
  * \param[out] buffer Byte array to serialize into
  */
-template<typename T, typename U>
+template <typename T, typename U>
 void serialize_(const T& val, bool swapBytes, std::vector<U>& buffer)
 {
     Serializer<T>::serializeImpl(val, swapBytes, buffer);
 }
-template<typename T>
+template <typename T>
 void serialize(const T& val, bool swapBytes, std::vector<sys::byte>& buffer)
 {
     serialize_(val, swapBytes, buffer);
 }
-template<typename T>
+template <typename T>
 void serialize(const T& val, bool swapBytes, std::vector<std::byte>& buffer)
 {
     serialize_(val, swapBytes, buffer);
@@ -289,12 +297,12 @@ void serialize(const T& val, bool swapBytes, std::vector<std::byte>& buffer)
  * \param swapBytes Should bytes be swapped?
  * \param[out] Value(s) to deserialize into.
  */
-template<typename T>
+template <typename T>
 void deserialize(const sys::byte*& buffer, bool swapBytes, T& val)
 {
     Serializer<T>::deserializeImpl(buffer, swapBytes, val);
 }
-template<typename T>
+template <typename T>
 void deserialize(const std::byte*& buffer, bool swapBytes, T& val)
 {
     auto& buffer_ = reinterpret_cast<const sys::byte*&>(buffer);

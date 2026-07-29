@@ -24,8 +24,8 @@
 #ifndef __SIX_SI_COMPLEX_COMMON_XML_PARSER_01X_H__
 #define __SIX_SI_COMPLEX_COMMON_XML_PARSER_01X_H__
 
-#include <six/SICommonXMLParser.h>
 #include <six/Exports.h>
+#include <six/SICommonXMLParser.h>
 
 namespace six
 {
@@ -43,35 +43,27 @@ public:
     SICommonXMLParser01x& operator=(const SICommonXMLParser01x&) = delete;
     SICommonXMLParser01x& operator=(SICommonXMLParser01x&&) = delete;
 
-    XMLElem convertRadiometryToXML(
-        const Radiometric *obj,
-        XMLElem parent = nullptr) const override;
+    XMLElem convertRadiometryToXML(const Radiometric* obj,
+                                   XMLElem parent = nullptr) const override;
 
-    void parseRadiometryFromXML(
-        const xml::lite::Element* radiometricXML,
-        Radiometric *obj) const override;
+    void parseRadiometryFromXML(const xml::lite::Element* radiometricXML,
+                                Radiometric* obj) const override;
 
-    XMLElem convertMatchInformationToXML(
-        const MatchInformation& matchInfo,
-        XMLElem parent) const override;
+    XMLElem convertMatchInformationToXML(const MatchInformation& matchInfo,
+                                         XMLElem parent) const override;
 
-    void parseMatchInformationFromXML(
-        const xml::lite::Element* matchInfoXML,
-        MatchInformation* info) const override;
+    void parseMatchInformationFromXML(const xml::lite::Element* matchInfoXML,
+                                      MatchInformation* info) const override;
 
 protected:
-
-    XMLElem convertCompositeSCPToXML(
-        const ErrorStatistics* errorStatistics,
-        XMLElem parent = nullptr) const override;
+    XMLElem convertCompositeSCPToXML(const ErrorStatistics* errorStatistics,
+                                     XMLElem parent = nullptr) const override;
 
     void parseCompositeSCPFromXML(
-        const xml::lite::Element* errorStatsXML,
-        ErrorStatistics* errorStatistics) const override;
-
+            const xml::lite::Element* errorStatsXML,
+            ErrorStatistics* errorStatistics) const override;
 };
 
 }
 
 #endif
-

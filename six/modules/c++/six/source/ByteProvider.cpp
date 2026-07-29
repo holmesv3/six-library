@@ -21,12 +21,11 @@
  */
 
 #include <assert.h>
-
-#include <string>
-
-#include <str/Convert.h>
 #include <logging/NullLogger.h>
 #include <six/ByteProvider.h>
+#include <str/Convert.h>
+
+#include <string>
 
 #undef min
 #undef max
@@ -44,60 +43,60 @@ ByteProvider::ByteProvider(const six::NITFHeaderCreator& headerCreator,
 {
     initialize(headerCreator, schemaPaths, desBuffers);
 }
-ByteProvider::ByteProvider(const std::unique_ptr<six::NITFHeaderCreator>& headerCreator,
-    const std::vector<std::string>& schemaPaths,
-    const std::vector<PtrAndLength>& desBuffers)
-    : ByteProvider(*headerCreator, schemaPaths, desBuffers)
+ByteProvider::ByteProvider(
+        const std::unique_ptr<six::NITFHeaderCreator>& headerCreator,
+        const std::vector<std::string>& schemaPaths,
+        const std::vector<PtrAndLength>& desBuffers) :
+    ByteProvider(*headerCreator, schemaPaths, desBuffers)
 {
 }
 
-void ByteProvider::populateOptions(
-        std::shared_ptr<Container> container,
-        size_t maxProductSize,
-        size_t numRowsPerBlock,
-        size_t numColsPerBlock,
-        Options& options)
+void ByteProvider::populateOptions(std::shared_ptr<Container> container,
+                                   size_t maxProductSize,
+                                   size_t numRowsPerBlock,
+                                   size_t numColsPerBlock,
+                                   Options& options)
 {
     if (container->size() != 1)
     {
-        throw except::Exception(Ctxt("Expected data of size 1 in container but got " + std::to_string(container->size())));
+        throw except::Exception(
+                Ctxt("Expected data of size 1 in container but got " +
+                     std::to_string(container->size())));
     }
 
     const six::Data* const data = container->getData(0);
     assert(data != nullptr);
 
-
     if (maxProductSize != 0)
     {
-        options.setParameter(
-                six::NITFHeaderCreator::OPT_MAX_PRODUCT_SIZE,
-                maxProductSize);
+        options.setParameter(six::NITFHeaderCreator::OPT_MAX_PRODUCT_SIZE,
+                             maxProductSize);
     }
 
     const auto extent = getExtent(*data);
     if (numRowsPerBlock != 0)
     {
         numRowsPerBlock = std::min(numRowsPerBlock, extent.row);
-        options.setParameter(six::NITFHeaderCreator::OPT_NUM_ROWS_PER_BLOCK, numRowsPerBlock);
+        options.setParameter(six::NITFHeaderCreator::OPT_NUM_ROWS_PER_BLOCK,
+                             numRowsPerBlock);
     }
 
     if (numColsPerBlock != 0)
     {
         numColsPerBlock = std::min(numColsPerBlock, extent.col);
-        options.setParameter(six::NITFHeaderCreator::OPT_NUM_COLS_PER_BLOCK, numColsPerBlock);
+        options.setParameter(six::NITFHeaderCreator::OPT_NUM_COLS_PER_BLOCK,
+                             numColsPerBlock);
     }
 }
 
-void ByteProvider::populateInitArgs(
-        const NITFWriteControl& writer,
-        const std::vector<std::string>& schemaPaths,
-        std::vector<std::u8string>& xmlStrings,
-        std::vector<PtrAndLength>& desData,
-        size_t& numRowsPerBlock,
-        size_t& numColsPerBlock)
+void ByteProvider::populateInitArgs(const NITFWriteControl& writer,
+                                    const std::vector<std::string>& schemaPaths,
+                                    std::vector<std::u8string>& xmlStrings,
+                                    std::vector<PtrAndLength>& desData,
+                                    size_t& numRowsPerBlock,
+                                    size_t& numColsPerBlock)
 {
-    const NITFHeaderCreator* headerCreator =
-        writer.getNITFHeaderCreator();
+    const NITFHeaderCreator* headerCreator = writer.getNITFHeaderCreator();
     if (headerCreator)
     {
         populateInitArgs(*headerCreator,
@@ -113,20 +112,20 @@ void ByteProvider::populateInitArgs(
     }
 }
 
-void ByteProvider::populateInitArgs(
-        const NITFHeaderCreator& headerCreator,
-        const std::vector<std::string>& schemaPaths,
-        std::vector<std::u8string>& xmlStrings,
-        std::vector<PtrAndLength>& desData,
-        size_t& numRowsPerBlock,
-        size_t& numColsPerBlock)
+void ByteProvider::populateInitArgs(const NITFHeaderCreator& headerCreator,
+                                    const std::vector<std::string>& schemaPaths,
+                                    std::vector<std::u8string>& xmlStrings,
+                                    std::vector<PtrAndLength>& desData,
+                                    size_t& numRowsPerBlock,
+                                    size_t& numColsPerBlock)
 {
     // Sanity check the container
-   auto container = headerCreator.getContainer();
+    auto container = headerCreator.getContainer();
 
     if (container->empty())
     {
-        throw except::Exception(Ctxt("Write control must be initialized first"));
+        throw except::Exception(
+                Ctxt("Write control must be initialized first"));
     }
 
     // We currently do not support the case where there are 2+ unrelated SIDDs
@@ -160,10 +159,11 @@ void ByteProvider::populateInitArgs(
     for (size_t ii = 0; ii < xmlStrings.size(); ++ii)
     {
         auto& xmlString(xmlStrings[ii]);
-        xmlString = six::toValidXMLString(container->getData(ii),
-                                          schemaPaths,
-                                          &logger,
-                                          headerCreator.getXMLControlRegistry());
+        xmlString =
+                six::toValidXMLString(container->getData(ii),
+                                      schemaPaths,
+                                      &logger,
+                                      headerCreator.getXMLControlRegistry());
         desData[ii].first = xmlString.c_str();
         desData[ii].second = xmlString.length();
     }
@@ -189,8 +189,11 @@ void ByteProvider::initialize(std::shared_ptr<Container> container,
                               size_t numColsPerBlock)
 {
     Options options;
-    populateOptions(container, maxProductSize, numRowsPerBlock,
-            numColsPerBlock, options);
+    populateOptions(container,
+                    maxProductSize,
+                    numRowsPerBlock,
+                    numColsPerBlock,
+                    options);
     NITFWriteControl writer(options, container, &xmlRegistry);
     initialize(writer, schemaPaths);
 }
@@ -261,9 +264,10 @@ void ByteProvider::initialize(const six::NITFHeaderCreator& headerCreator,
                                    numRowsPerBlock,
                                    numColsPerBlock);
 }
-void ByteProvider::initialize(const std::unique_ptr<six::NITFHeaderCreator>& headerCreator_,
-    const std::vector<std::string>& schemaPaths,
-    const std::vector<PtrAndLength>& desBuffers)
+void ByteProvider::initialize(
+        const std::unique_ptr<six::NITFHeaderCreator>& headerCreator_,
+        const std::vector<std::string>& schemaPaths,
+        const std::vector<PtrAndLength>& desBuffers)
 {
     const auto& headerCreator = *headerCreator_;
     initialize(headerCreator, schemaPaths, desBuffers);

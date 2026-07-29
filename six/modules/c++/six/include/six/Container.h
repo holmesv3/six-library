@@ -23,15 +23,15 @@
 #ifndef __SIX_CONTAINER_H__
 #define __SIX_CONTAINER_H__
 
-#include <memory>
-#include <vector>
-#include <utility>
-
-#include <scene/sys_Conf.h>
 #include <mem/ScopedCloneablePtr.h>
-#include <six/Legend.h>
+#include <scene/sys_Conf.h>
 #include <six/Data.h>
 #include <six/Exports.h>
+#include <six/Legend.h>
+
+#include <memory>
+#include <utility>
+#include <vector>
 
 namespace six
 {
@@ -69,10 +69,13 @@ public:
      *  or DERIVED (for SIDD products).
      *
      */
-    Container(DataType dataType);    
-    Container(Data*); // Note that the container takes ownership of the data, so the caller should not delete it.
+    Container(DataType dataType);
+    Container(Data*);  // Note that the container takes ownership of the data,
+                       // so the caller should not delete it.
     Container(std::unique_ptr<Data>&& data);
-    Container(std::unique_ptr<Data>&& data, std::unique_ptr<Legend>&& legend) noexcept(false); // Only valid for derived data.
+    Container(std::unique_ptr<Data>&& data,
+              std::unique_ptr<Legend>&&
+                      legend) noexcept(false);  // Only valid for derived data.
 
     //! Destructor
     virtual ~Container() = default;
@@ -98,7 +101,8 @@ public:
      * Same as above but also supports passing in a legend.  Only valid for
      * derived data.
      */
-    void addData(std::unique_ptr<Data>&& data, std::unique_ptr<Legend>&& legend);
+    void addData(std::unique_ptr<Data>&& data,
+                 std::unique_ptr<Legend>&& legend);
 
     /*!
      *  Set the data item at location i.  If there is an item in the
@@ -143,12 +147,18 @@ public:
      */
     Data* getData(const std::string& iid, size_t numImages);
 
-    size_t size() const { return mData.size(); }
+    size_t size() const
+    {
+        return mData.size();
+    }
     size_t getNumData() const
     {
         return size();
     }
-    bool empty() const { return mData.empty(); }
+    bool empty() const
+    {
+        return mData.empty();
+    }
 
     /*!
      * Removes data from the container that matches this pointer
@@ -171,7 +181,8 @@ public:
 
 protected:
     typedef std::pair<mem::ScopedCloneablePtr<Data>,
-                      mem::ScopedCopyablePtr<Legend> > DataPair;
+                      mem::ScopedCopyablePtr<Legend>>
+            DataPair;
 
     typedef std::vector<DataPair> DataVec;
 
@@ -180,8 +191,7 @@ protected:
     std::vector<nitf::SegmentSource> mDESSources;
 
 private:
-    static
-    mem::ScopedCopyablePtr<Legend> nullLegend()
+    static mem::ScopedCopyablePtr<Legend> nullLegend()
     {
         return mem::ScopedCopyablePtr<Legend>(nullptr);
     }
@@ -192,4 +202,3 @@ private:
 }
 
 #endif
-

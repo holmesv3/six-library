@@ -23,24 +23,23 @@
 #ifndef __SIX_COMPRESSED_BYTE_PROVIDER_H__
 #define __SIX_COMPRESSED_BYTE_PROVIDER_H__
 
-#include <memory>
-
-#include <nitf/CompressedByteProvider.hpp>
-
 #include <six/Container.h>
-#include <six/NITFWriteControl.h>
-#include <six/NITFSegmentInfo.h>
-#include <six/XMLControlFactory.h>
 #include <six/Exports.h>
+#include <six/NITFSegmentInfo.h>
+#include <six/NITFWriteControl.h>
+#include <six/XMLControlFactory.h>
+
+#include <memory>
+#include <nitf/CompressedByteProvider.hpp>
 
 namespace six
 {
 /*!
  * \class CompressedByteProvider
  * \brief Used to provide corresponding compressed NITF bytes
- * (and uncompressed NITF headers) when provided with some AOI of the pixel data.
- * The idea is that if getBytes() is called multiple times, eventually for the
- * entire image, the raw bytes provided back will be the entire NITF file.
+ * (and uncompressed NITF headers) when provided with some AOI of the pixel
+ * data. The idea is that if getBytes() is called multiple times, eventually for
+ * the entire image, the raw bytes provided back will be the entire NITF file.
  * This abstraction is useful if separate threads, processes, or even machines
  * have only portions of the SICD/SIDD pixel data and are all trying to write
  * out a single file; in that scenario, this class provides all the raw bytes
@@ -74,7 +73,7 @@ protected:
     void initialize(std::shared_ptr<Container> container,
                     const XMLControlRegistry& xmlRegistry,
                     const std::vector<std::string>& schemaPaths,
-                    const std::vector<std::vector<size_t> >& bytesPerBlock,
+                    const std::vector<std::vector<size_t>>& bytesPerBlock,
                     bool isNumericallyLossless,
                     size_t maxProductSize,
                     size_t numRowsPerBlock = 0,
@@ -94,7 +93,7 @@ protected:
      */
     void initialize(const NITFWriteControl& writer,
                     const std::vector<std::string>& schemaPaths,
-                    const std::vector<std::vector<size_t> >& bytesPerBlock);
+                    const std::vector<std::vector<size_t>>& bytesPerBlock);
 };
 }
 

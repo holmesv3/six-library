@@ -28,17 +28,16 @@ CollectionInformation::CollectionInformation()
     radarMode = Init::undefined<RadarModeType>();
 }
 
-  bool CollectionInformation::operator==(const CollectionInformation& rhs) const
+bool CollectionInformation::operator==(const CollectionInformation& rhs) const
 {
     const auto& lhs = *this;
     return lhs.collectorName == rhs.collectorName &&
-        lhs.collectType == rhs.collectType &&
-        lhs.illuminatorName == rhs.illuminatorName &&
-        lhs.coreName == rhs.coreName &&
-        lhs.radarMode == rhs.radarMode &&
-        lhs.radarModeID == rhs.radarModeID &&
-        lhs.releaseInfo == rhs.releaseInfo &&
-        lhs.getClassificationLevel() == rhs.getClassificationLevel();
+            lhs.collectType == rhs.collectType &&
+            lhs.illuminatorName == rhs.illuminatorName &&
+            lhs.coreName == rhs.coreName && lhs.radarMode == rhs.radarMode &&
+            lhs.radarModeID == rhs.radarModeID &&
+            lhs.releaseInfo == rhs.releaseInfo &&
+            lhs.getClassificationLevel() == rhs.getClassificationLevel();
 }
 
 CollectionInformation* CollectionInformation::clone() const
@@ -54,15 +53,16 @@ void CollectionInformation::getClassificationLevel(std::u8string& result) const
 {
     result = mClassification;
 }
-void CollectionInformation::setClassificationLevel(const std::u8string& classification)
+void CollectionInformation::setClassificationLevel(
+        const std::u8string& classification)
 {
     mClassification = classification;
 }
 
-std::ostream& operator<< (std::ostream& os, const six::CollectionInformation& c)
+std::ostream& operator<<(std::ostream& os, const six::CollectionInformation& c)
 {
     os << "CollectionID:: \n"
-        << "  CollectorName    : " << c.collectorName << "\n";
+       << "  CollectorName    : " << c.collectorName << "\n";
     if (!six::Init::isUndefined(c.illuminatorName))
     {
         os << "  IlluminatorName  : " << c.illuminatorName << "\n";

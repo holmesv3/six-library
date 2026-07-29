@@ -23,11 +23,12 @@
 #ifndef __SIX_VERSION_UPDATER_H__
 #define __SIX_VERSION_UPDATER_H__
 
-#include <string>
-#include <vector>
 #include <logging/Logger.h>
 #include <six/Data.h>
 #include <six/Exports.h>
+
+#include <string>
+#include <vector>
 
 namespace six
 {
@@ -47,7 +48,8 @@ public:
      * \param[in,out] data Metadata to update
      * \param targetVersion Version to update `data` to.
      *                      Must be greater than current version of `data`.
-     * \param versions All the allowable version strings for this type of metadata
+     * \param versions All the allowable version strings for this type of
+     * metadata
      * \param[out] log Warnings will be emitting for fields that were populated
      *                 with either bad data or guesses
      * \throws If `targetVersion` is invalid

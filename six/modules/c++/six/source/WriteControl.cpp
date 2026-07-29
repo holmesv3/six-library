@@ -23,4 +23,3 @@
 
 const char six::WriteControl::OPT_BYTE_SWAP[] = "ByteSwap";
 const char six::WriteControl::OPT_BUFFER_SIZE[] = "BufferSize";
-

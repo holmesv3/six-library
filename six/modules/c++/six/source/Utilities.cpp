@@ -20,22 +20,23 @@
  *
  */
 
-#include <iomanip>
-#include <sstream>
-#include <algorithm>
-#include <iterator>
+#include "six/Utilities.h"
 
 #include <logging/NullLogger.h>
 #include <math/Utilities.h>
-#include <nitf/PluginRegistry.hpp>
+#include <six/XmlLite.h>
 #include <sys/FileFinder.h>
 #include <sys/Path.h>
 
-#include "six/Init.h"
-#include "six/Utilities.h"
-#include "six/XMLControl.h"
+#include <algorithm>
+#include <iomanip>
+#include <iterator>
+#include <nitf/PluginRegistry.hpp>
+#include <sstream>
+
 #include "six/Data.h"
-#include <six/XmlLite.h>
+#include "six/Init.h"
+#include "six/XMLControl.h"
 
 namespace
 {
@@ -244,19 +245,20 @@ std::string six::toString(const DateTime& dateTime)
     return strDate;
 }
 
-template<typename T>
+template <typename T>
 inline T toType_(std::string s, const except::Exception& ex)
 {
     str::trim(s);
     const auto result = T::toType(s, std::nothrow);
-    auto retval = nitf::details::value(result, ex); // throw our exception rather than a default one
+    auto retval = nitf::details::value(
+            result, ex);  // throw our exception rather than a default one
     if (retval == T::NOT_SET)
     {
         throw ex;
     }
     return retval;
 }
-template<typename T>
+template <typename T>
 inline T toType_(std::string s)
 {
     str::trim(s);
@@ -268,7 +270,7 @@ inline T toType_(std::string s)
     return T::NOT_SET;
 }
 
-template<typename T>
+template <typename T>
 inline std::string toString_(const T& t, const except::Exception& ex)
 {
     if (t == T::NOT_SET)
@@ -276,17 +278,20 @@ inline std::string toString_(const T& t, const except::Exception& ex)
         throw ex;
     }
     const auto result = t.toString(std::nothrow);
-    return nitf::details::value(result, ex); // throw our exception rather than a default one
+    return nitf::details::value(
+            result, ex);  // throw our exception rather than a default one
 }
 
 template <>
 std::string six::toString(const RadarModeType& type)
 {
-    auto result = toString_(type, except::Exception(Ctxt("Radar mode not set!")));
-    static const auto strDYNAMIC_STRIPMAP = RadarModeType(RadarModeType::DYNAMIC_STRIPMAP).toString();
+    auto result =
+            toString_(type, except::Exception(Ctxt("Radar mode not set!")));
+    static const auto strDYNAMIC_STRIPMAP =
+            RadarModeType(RadarModeType::DYNAMIC_STRIPMAP).toString();
     if (result == strDYNAMIC_STRIPMAP)
     {
-        return "DYNAMIC STRIPMAP"; // no "_"
+        return "DYNAMIC STRIPMAP";  // no "_"
     }
     return result;
 }
@@ -295,13 +300,15 @@ RadarModeType six::toType<RadarModeType>(const std::string& s)
 {
     std::string type(s);
     str::trim(type);
-    if (type == "DYNAMIC STRIPMAP") // no "_"
+    if (type == "DYNAMIC STRIPMAP")  // no "_"
         return RadarModeType::DYNAMIC_STRIPMAP;
 
-    static const auto strDYNAMIC_STRIPMAP = RadarModeType(RadarModeType::DYNAMIC_STRIPMAP).toString();
+    static const auto strDYNAMIC_STRIPMAP =
+            RadarModeType(RadarModeType::DYNAMIC_STRIPMAP).toString();
     if (type == strDYNAMIC_STRIPMAP)
     {
-        return RadarModeType::NOT_SET; // "DYNAMIC_STRIPMAP" (with '_') doesn't convert
+        return RadarModeType::NOT_SET;  // "DYNAMIC_STRIPMAP" (with '_') doesn't
+                                        // convert
     }
     return toType_<RadarModeType>(type);
 }
@@ -325,7 +332,8 @@ PixelType six::toType<PixelType>(const std::string& s)
 {
     auto p = PixelType::toType(s);
     if (p == PixelType::NOT_SET)
-        throw except::Exception(Ctxt(str::Format("Type not understood [%s]", s)));
+        throw except::Exception(
+                Ctxt(str::Format("Type not understood [%s]", s)));
     return p;
 }
 
@@ -340,17 +348,35 @@ std::string six::toString(const PixelType& type)
 }
 
 // There's a lot of boiler-plate code that can be hidden behind a few macros
-#define SIX_define_six_toType_(T) template <> T six::toType<T>(const std::string& s) { return toType_<T>(s); }
-#define SIX_define_six_toTypeEx_(T, message) template <> T six::toType<T>(const std::string& s) { \
-    return toType_<T>(s,  except::Exception(Ctxt(message + s + "'"))); }
-#define SIX_define_six_toString_(T, message) template <> std::string six::toString(const T& s) { \
-    return toString_(s, except::Exception(Ctxt(message))); }
+#define SIX_define_six_toType_(T)          \
+    template <>                            \
+    T six::toType<T>(const std::string& s) \
+    {                                      \
+        return toType_<T>(s);              \
+    }
+#define SIX_define_six_toTypeEx_(T, message)                              \
+    template <>                                                           \
+    T six::toType<T>(const std::string& s)                                \
+    {                                                                     \
+        return toType_<T>(s, except::Exception(Ctxt(message + s + "'"))); \
+    }
+#define SIX_define_six_toString_(T, message)                   \
+    template <>                                                \
+    std::string six::toString(const T& s)                      \
+    {                                                          \
+        return toString_(s, except::Exception(Ctxt(message))); \
+    }
 
-#define SIX_define_six_toType_toString_(T, message) SIX_define_six_toType_(T); SIX_define_six_toString_(T, message)
+#define SIX_define_six_toType_toString_(T, message) \
+    SIX_define_six_toType_(T);                      \
+    SIX_define_six_toString_(T, message)
 #define SIX_define_six_toTypeEx_toString_(T, toTypeMessage, toStringMessage) \
-    SIX_define_six_toTypeEx_(T, toTypeMessage); SIX_define_six_toString_(T, toStringMessage)
-#define SIX_define_six_toType_toString(T) SIX_define_six_toType_toString_(T, "Unsupported " #T)
-#define SIX_define_six_toTypeEx_toString(T) SIX_define_six_toTypeEx_toString_(T, "Unsupported " #T, "Unsupported " #T)
+    SIX_define_six_toTypeEx_(T, toTypeMessage);                              \
+    SIX_define_six_toString_(T, toStringMessage)
+#define SIX_define_six_toType_toString(T) \
+    SIX_define_six_toType_toString_(T, "Unsupported " #T)
+#define SIX_define_six_toTypeEx_toString(T) \
+    SIX_define_six_toTypeEx_toString_(T, "Unsupported " #T, "Unsupported " #T)
 
 SIX_define_six_toType_toString(MagnificationMethod);
 SIX_define_six_toType_toString(DecimationMethod);
@@ -376,13 +402,28 @@ std::string six::toString(const EarthModelType& t)
     }
 }
 
-SIX_define_six_toTypeEx_toString(OrientationType); // "Unsupported orientation type '", "Unsupported orientation"
-SIX_define_six_toTypeEx_toString(DemodType); // "Unsupported demod type '", "Unsupported demod type"
-SIX_define_six_toTypeEx_toString(ImageFormationType); // "Unsupported image formation type '", "Unsupported image formation type"
-SIX_define_six_toTypeEx_toString(SlowTimeBeamCompensationType); // "Unsupported slow time beam compensation type  '", "Unsupported slow time beam compensation type"
-SIX_define_six_toTypeEx_toString(ImageBeamCompensationType); // "Unsupported image beam compensation type  '", "Unsupported image beam compensation type"
-SIX_define_six_toTypeEx_toString(AutofocusType); // "Unsupported autofocus type  '", "Unsupported autofocus type"
-SIX_define_six_toTypeEx_toString(RMAlgoType); // "Unsupported RM algorithm type  '", "Unsupported RM algorithm type"
+SIX_define_six_toTypeEx_toString(
+        OrientationType);  // "Unsupported orientation type '", "Unsupported
+                           // orientation"
+SIX_define_six_toTypeEx_toString(
+        DemodType);  // "Unsupported demod type '", "Unsupported demod type"
+SIX_define_six_toTypeEx_toString(
+        ImageFormationType);  // "Unsupported image formation type '",
+                              // "Unsupported image formation type"
+SIX_define_six_toTypeEx_toString(
+        SlowTimeBeamCompensationType);  // "Unsupported slow time beam
+                                        // compensation type  '", "Unsupported
+                                        // slow time beam compensation type"
+SIX_define_six_toTypeEx_toString(
+        ImageBeamCompensationType);  // "Unsupported image beam compensation
+                                     // type  '", "Unsupported image beam
+                                     // compensation type"
+SIX_define_six_toTypeEx_toString(
+        AutofocusType);  // "Unsupported autofocus type  '", "Unsupported
+                         // autofocus type"
+SIX_define_six_toTypeEx_toString(
+        RMAlgoType);  // "Unsupported RM algorithm type  '", "Unsupported RM
+                      // algorithm type"
 
 template <>
 SideOfTrackType six::toType<SideOfTrackType>(const std::string& s)
@@ -410,8 +451,12 @@ std::string six::toString(const SideOfTrackType& t)
     }
 }
 
-SIX_define_six_toTypeEx_toString(ComplexImagePlaneType); // "Unsupported complex image plane   '", "Unsupported complex image plane"
-SIX_define_six_toTypeEx_toString(ComplexImageGridType); // "Unsupported complex image grid '", "Unsupported complex image grid"
+SIX_define_six_toTypeEx_toString(
+        ComplexImagePlaneType);  // "Unsupported complex image plane   '",
+                                 // "Unsupported complex image plane"
+SIX_define_six_toTypeEx_toString(
+        ComplexImageGridType);  // "Unsupported complex image grid '",
+                                // "Unsupported complex image grid"
 
 template <>
 FFTSign six::toType<FFTSign>(const std::string& s)
@@ -484,7 +529,8 @@ std::string six::toString(const AppliedType& value)
     }
 }
 
-SIX_define_six_toTypeEx_toString(CollectType); // "Unsupported collect type '", "Unsupported collect type"
+SIX_define_six_toTypeEx_toString(CollectType);  // "Unsupported collect type '",
+                                                // "Unsupported collect type"
 
 template <>
 std::string six::toString(const six::FrameType& value)
@@ -557,9 +603,10 @@ void six::loadPluginDir(const std::string& pluginDir)
 
 void six::loadXmlDataContentHandler(FILE* log)
 {
-    // This can generate output from implicitConstruct() complaining about NITF_PLUGIN_PATH
-    // not being set; often the warning is benign and is just confusing.  Provide a way to turn
-    // it off (FILE* log = NULL) without upsetting existing code.
+    // This can generate output from implicitConstruct() complaining about
+    // NITF_PLUGIN_PATH not being set; often the warning is benign and is just
+    // confusing.  Provide a way to turn it off (FILE* log = NULL) without
+    // upsetting existing code.
     if (!nitf::PluginRegistry::treHandlerExists("XML_DATA_CONTENT", log))
     {
         nitf::PluginRegistry::registerTREHandler(XML_DATA_CONTENT_init,
@@ -568,36 +615,45 @@ void six::loadXmlDataContentHandler(FILE* log)
 }
 void six::loadXmlDataContentHandler()
 {
-    loadXmlDataContentHandler(stderr); // existing/legacy behavior
+    loadXmlDataContentHandler(stderr);  // existing/legacy behavior
 }
 
-std::unique_ptr<Data> six::parseData(const XMLControlRegistry& xmlReg,
-    ::io::InputStream& xmlStream,
-    const std::vector<std::string>& schemaPaths,
-    logging::Logger& log)
+std::unique_ptr<Data> six::parseData(
+        const XMLControlRegistry& xmlReg,
+        ::io::InputStream& xmlStream,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger& log)
 {
     return parseData(xmlReg, xmlStream, DataType::NOT_SET, schemaPaths, log);
 }
-std::unique_ptr<Data> six::parseData(const XMLControlRegistry& xmlReg,
-    ::io::InputStream& xmlStream,
-    const std::vector<std::filesystem::path>* pSchemaPaths,
-    logging::Logger& log)
+std::unique_ptr<Data> six::parseData(
+        const XMLControlRegistry& xmlReg,
+        ::io::InputStream& xmlStream,
+        const std::vector<std::filesystem::path>* pSchemaPaths,
+        logging::Logger& log)
 {
     DataParser dataParser(pSchemaPaths, &log);
-    dataParser.preserveCharacterData(false); // existing behavior
+    dataParser.preserveCharacterData(false);  // existing behavior
     return dataParser.fromXML(xmlStream, xmlReg, DataType::NOT_SET);
 }
 
-inline std::unique_ptr<Data> fromXML_(const xml::lite::Document& doc, XMLControl& xmlControl, const std::vector<std::string>& schemaPaths)
+inline std::unique_ptr<Data> fromXML_(
+        const xml::lite::Document& doc,
+        XMLControl& xmlControl,
+        const std::vector<std::string>& schemaPaths)
 {
     return std::unique_ptr<Data>(xmlControl.fromXML(&doc, schemaPaths));
 }
-inline std::unique_ptr<Data> fromXML_(const xml::lite::Document& doc, XMLControl& xmlControl, const std::vector<std::filesystem::path>* pSchemaPaths)
+inline std::unique_ptr<Data> fromXML_(
+        const xml::lite::Document& doc,
+        XMLControl& xmlControl,
+        const std::vector<std::filesystem::path>* pSchemaPaths)
 {
     return xmlControl.fromXML(doc, pSchemaPaths);
 }
 
-static auto parseInputStream(::io::InputStream& xmlStream, bool preserveCharacterData = false)
+static auto parseInputStream(::io::InputStream& xmlStream,
+                             bool preserveCharacterData = false)
 {
     six::MinidomParser xmlParser;
     xmlParser.preserveCharacterData(preserveCharacterData);
@@ -612,12 +668,12 @@ static auto parseInputStream(::io::InputStream& xmlStream, bool preserveCharacte
     return xmlParser;
 }
 
-template<typename TReturn, typename TSchemaPaths>
+template <typename TReturn, typename TSchemaPaths>
 TReturn six_parseData(const XMLControlRegistry& xmlReg,
-                                   six::MinidomParser& xmlParser,
-                                   DataType dataType,
-                                   const TSchemaPaths& schemaPaths,
-                                   logging::Logger& log)
+                      six::MinidomParser& xmlParser,
+                      DataType dataType,
+                      const TSchemaPaths& schemaPaths,
+                      logging::Logger& log)
 {
     const auto& doc = getDocument(xmlParser);
 
@@ -638,35 +694,41 @@ TReturn six_parseData(const XMLControlRegistry& xmlReg,
     }
 
     //! Create the correct type of XMLControl
-    const std::unique_ptr<XMLControl> xmlControl(xmlReg.newXMLControl(xmlDataType, &log));
+    const std::unique_ptr<XMLControl> xmlControl(
+            xmlReg.newXMLControl(xmlDataType, &log));
     return fromXML_(doc, *xmlControl, schemaPaths);
 }
-std::unique_ptr<Data> six::parseData(const XMLControlRegistry& xmlReg,
-    ::io::InputStream& xmlStream,
-    DataType dataType,
-    const std::vector<std::string>& schemaPaths,
-    logging::Logger& log)
+std::unique_ptr<Data> six::parseData(
+        const XMLControlRegistry& xmlReg,
+        ::io::InputStream& xmlStream,
+        DataType dataType,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger& log)
 {
     auto xmlParser = parseInputStream(xmlStream);
-    return six_parseData<std::unique_ptr<Data>>(xmlReg, xmlParser, dataType, schemaPaths, log);
+    return six_parseData<std::unique_ptr<Data>>(
+            xmlReg, xmlParser, dataType, schemaPaths, log);
 }
-std::unique_ptr<Data> six::parseData(const XMLControlRegistry& xmlReg,
-    ::io::InputStream& xmlStream,
-    DataType dataType,
-    const std::vector<std::filesystem::path>* pSchemaPaths,
-    logging::Logger& log)
+std::unique_ptr<Data> six::parseData(
+        const XMLControlRegistry& xmlReg,
+        ::io::InputStream& xmlStream,
+        DataType dataType,
+        const std::vector<std::filesystem::path>* pSchemaPaths,
+        logging::Logger& log)
 {
     DataParser dataParser(pSchemaPaths, &log);
-    dataParser.preserveCharacterData(false); // existing behavior
+    dataParser.preserveCharacterData(false);  // existing behavior
     return dataParser.fromXML(xmlStream, xmlReg, dataType);
 }
 
-std::unique_ptr<Data>  six::parseDataFromFile(const XMLControlRegistry& xmlReg,
-    const std::string& pathname,
-    const std::vector<std::string>& schemaPaths,
-    logging::Logger& log)
+std::unique_ptr<Data> six::parseDataFromFile(
+        const XMLControlRegistry& xmlReg,
+        const std::string& pathname,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger& log)
 {
-    return parseDataFromFile(xmlReg, pathname, DataType::NOT_SET, schemaPaths, log);
+    return parseDataFromFile(
+            xmlReg, pathname, DataType::NOT_SET, schemaPaths, log);
 }
 std::unique_ptr<Data> six::parseDataFromFile(
         const XMLControlRegistry& xmlReg,
@@ -679,21 +741,24 @@ std::unique_ptr<Data> six::parseDataFromFile(
     return parseData(xmlReg, inStream, dataType, schemaPaths, log);
 }
 
-std::unique_ptr<Data> six::parseDataFromString(const XMLControlRegistry& xmlReg,
-    const std::u8string& xmlStr,
-    const std::vector<std::filesystem::path>* pSchemaPaths,
-    logging::Logger* pLogger)
+std::unique_ptr<Data> six::parseDataFromString(
+        const XMLControlRegistry& xmlReg,
+        const std::u8string& xmlStr,
+        const std::vector<std::filesystem::path>* pSchemaPaths,
+        logging::Logger* pLogger)
 {
     DataParser dataParser(pSchemaPaths, pLogger);
-    dataParser.preserveCharacterData(false); // existing behavior
+    dataParser.preserveCharacterData(false);  // existing behavior
     return dataParser.fromXML(xmlStr, xmlReg, DataType::NOT_SET);
 }
-std::unique_ptr<Data> six::parseDataFromString(const XMLControlRegistry& xmlReg,
-    const std::string& xmlStr,
-    const std::vector<std::string>& schemaPaths,
-    logging::Logger& log)
+std::unique_ptr<Data> six::parseDataFromString(
+        const XMLControlRegistry& xmlReg,
+        const std::string& xmlStr,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger& log)
 {
-    return parseDataFromString(xmlReg, xmlStr, DataType::NOT_SET, schemaPaths, log);
+    return parseDataFromString(
+            xmlReg, xmlStr, DataType::NOT_SET, schemaPaths, log);
 }
 
 std::unique_ptr<Data> six::parseDataFromString(
@@ -704,17 +769,19 @@ std::unique_ptr<Data> six::parseDataFromString(
         logging::Logger* pLogger)
 {
     DataParser dataParser(pSchemaPaths, pLogger);
-    dataParser.preserveCharacterData(false); // existing behavior
+    dataParser.preserveCharacterData(false);  // existing behavior
     return dataParser.fromXML(xmlStr, xmlReg, dataType);
 }
-std::unique_ptr<Data> six::parseDataFromString(const XMLControlRegistry& xmlReg,
-    const std::string& xmlStr,
-    DataType dataType,
-    const std::vector<std::string>& schemaPaths_,
-    logging::Logger& log)
+std::unique_ptr<Data> six::parseDataFromString(
+        const XMLControlRegistry& xmlReg,
+        const std::string& xmlStr,
+        DataType dataType,
+        const std::vector<std::string>& schemaPaths_,
+        logging::Logger& log)
 {
     const auto schemaPaths = sys::convertPaths(schemaPaths_);
-    auto result = parseDataFromString(xmlReg, str::u8FromNative(xmlStr), dataType, &schemaPaths, &log);
+    auto result = parseDataFromString(
+            xmlReg, str::u8FromNative(xmlStr), dataType, &schemaPaths, &log);
     return std::unique_ptr<Data>(result.release());
 }
 
@@ -765,7 +832,8 @@ void six::getErrors(const ErrorStatistics* errorStats,
 
                 if (has_value(radarSensor.rangeBiasDecorr))
                 {
-                    const auto& rangeBiasDecorr = value(radarSensor.rangeBiasDecorr);
+                    const auto& rangeBiasDecorr =
+                            value(radarSensor.rangeBiasDecorr);
                     errors.mRangeCorrCoefZero = rangeBiasDecorr.corrCoefZero;
                     errors.mRangeDecorrRate = rangeBiasDecorr.decorrRate;
                 }
@@ -789,7 +857,8 @@ void six::getErrors(const ErrorStatistics* errorStats,
 
                 if (has_value(posVelError.positionDecorr))
                 {
-                    const auto& positionDecorr = value(posVelError.positionDecorr);
+                    const auto& positionDecorr =
+                            value(posVelError.positionDecorr);
                     errors.mPositionCorrCoefZero = positionDecorr.corrCoefZero;
                     errors.mPositionDecorrRate = positionDecorr.decorrRate;
                 }
@@ -801,19 +870,21 @@ void six::getErrors(const ErrorStatistics* errorStats,
                 if (has_value(ionoError.ionoRangeVertical))
                 {
                     errors.mIonoErrorCovar(0, 0) =
-                        math::square(value(ionoError.ionoRangeVertical));
+                            math::square(value(ionoError.ionoRangeVertical));
                 }
                 if (has_value(ionoError.ionoRangeRateVertical))
                 {
-                    errors.mIonoErrorCovar(1, 1) =
-                        math::square(value(ionoError.ionoRangeRateVertical));
+                    errors.mIonoErrorCovar(1, 1) = math::square(
+                            value(ionoError.ionoRangeRateVertical));
                 }
-                if (has_value(ionoError.ionoRangeVertical) && has_value(ionoError.ionoRangeRateVertical))
+                if (has_value(ionoError.ionoRangeVertical) &&
+                    has_value(ionoError.ionoRangeRateVertical))
                 {
-                    errors.mIonoErrorCovar(0, 1) = errors.mIonoErrorCovar(1, 0) =
-                        value(ionoError.ionoRangeVertical) *
-                        value(ionoError.ionoRangeRateVertical) *
-                        value(ionoError.ionoRgRgRateCC);
+                    errors.mIonoErrorCovar(0, 1) =
+                            errors.mIonoErrorCovar(1, 0) =
+                                    value(ionoError.ionoRangeVertical) *
+                            value(ionoError.ionoRangeRateVertical) *
+                            value(ionoError.ionoRgRgRateCC);
                 }
             }
 
@@ -828,13 +899,15 @@ void six::getErrors(const ErrorStatistics* errorStats,
         {
             if (compositeSCP->scpType == CompositeSCP::RG_AZ)
             {
-                const types::RgAz<double> composite(compositeSCP->xErr, compositeSCP->yErr);
+                const types::RgAz<double> composite(compositeSCP->xErr,
+                                                    compositeSCP->yErr);
                 const double corr = compositeSCP->xyErr;
 
                 auto& unmodeledErrorCovar = errors.mUnmodeledErrorCovar;
                 unmodeledErrorCovar(0, 0) = math::square(composite.rg);
                 unmodeledErrorCovar(1, 1) = math::square(composite.az);
-                unmodeledErrorCovar(0, 1) = unmodeledErrorCovar(1, 0) = corr * (composite.rg * composite.az);
+                unmodeledErrorCovar(0, 1) = unmodeledErrorCovar(1, 0) =
+                        corr * (composite.rg * composite.az);
             }
         }
         else if (has_value(errorStats->unmodeled))
@@ -852,7 +925,8 @@ void six::getErrors(const ErrorStatistics* errorStats,
             //    [1][0] = [0][1] = XrowYcol * Xrow * Ycol
             unmodeledErrorCovar(0, 0) = math::square(Xrow);
             unmodeledErrorCovar(1, 1) = math::square(Ycol);
-            unmodeledErrorCovar(0, 1) = unmodeledErrorCovar(1, 0) = XrowYcol * Xrow * Ycol;
+            unmodeledErrorCovar(0, 1) = unmodeledErrorCovar(1, 0) =
+                    XrowYcol * Xrow * Ycol;
         }
     }
 }
@@ -863,7 +937,8 @@ static bool is_six_root(const std::filesystem::path& dir)
     const auto six_sln = dir / "six.sln";
     return is_directory(six) && is_regular_file(six_sln);
 }
-std::filesystem::path six::testing::findRootDir(const std::filesystem::path& dir)
+std::filesystem::path six::testing::findRootDir(
+        const std::filesystem::path& dir)
 {
     // <dir>/six.sln
     if (is_six_root(dir))
@@ -872,7 +947,7 @@ std::filesystem::path six::testing::findRootDir(const std::filesystem::path& dir
     }
 
     // <dir>/externals/six/six.sln
-    const auto externals = dir / "externals" / "six"; // not "six-library"
+    const auto externals = dir / "externals" / "six";  // not "six-library"
     if (is_six_root(externals))
     {
         return externals;
@@ -882,13 +957,15 @@ std::filesystem::path six::testing::findRootDir(const std::filesystem::path& dir
     return findRootDir(parent);
 }
 
-std::filesystem::path six::testing::buildRootDir(const std::filesystem::path& argv0)
+std::filesystem::path six::testing::buildRootDir(
+        const std::filesystem::path& argv0)
 {
-    auto platform = sys::Platform; // "conditional expression is constant"
+    auto platform = sys::Platform;  // "conditional expression is constant"
     if (platform == sys::PlatformType::Windows)
     {
         // On Windows ... in Visual Studio or stand-alone?
-        if ((argv0.filename() == "Test.exe") || (argv0.filename() == "testhost.exe")) // Visual Studio
+        if ((argv0.filename() == "Test.exe") ||
+            (argv0.filename() == "testhost.exe"))  // Visual Studio
         {
             const auto cwd = std::filesystem::current_path();
             const auto root_dir = cwd.parent_path().parent_path();
@@ -900,48 +977,63 @@ std::filesystem::path six::testing::buildRootDir(const std::filesystem::path& ar
     return six::testing::findRootDir(argv0);
 }
 
-std::filesystem::path six::testing::getNitroPath(const std::filesystem::path& filename)
+std::filesystem::path six::testing::getNitroPath(
+        const std::filesystem::path& filename)
 {
-    static const auto unittests = std::filesystem::path("modules") / "c++" / "nitf" / "unittests";
+    static const auto unittests =
+            std::filesystem::path("modules") / "c++" / "nitf" / "unittests";
     return sys::test::findGITModuleFile("nitro", unittests, filename);
 }
 
-std::filesystem::path six::testing::getModuleFile(const std::filesystem::path& modulePath, const  std::filesystem::path& filename)
+std::filesystem::path six::testing::getModuleFile(
+        const std::filesystem::path& modulePath,
+        const std::filesystem::path& filename)
 {
     return sys::test::findGITModuleFile("six", modulePath, filename);
 }
 
-std::filesystem::path six::testing::getNitfPath(const std::filesystem::path& filename)
+std::filesystem::path six::testing::getNitfPath(
+        const std::filesystem::path& filename)
 {
-    static const auto tests_nitf = std::filesystem::path("six") / "modules" / "c++" / "six" / "tests" / "nitf";
+    static const auto tests_nitf = std::filesystem::path("six") / "modules" /
+            "c++" / "six" / "tests" / "nitf";
     return getModuleFile(tests_nitf, filename);
 }
 
 std::vector<std::filesystem::path> six::testing::getSchemaPaths()
 {
-    static const auto modulePath = std::filesystem::path("six") / "modules" / "c++" / "six.sicd" / "conf" / "schema";
-    static const auto filename = getModuleFile(modulePath, "SICD_schema_V1.3.0.xsd");
+    static const auto modulePath = std::filesystem::path("six") / "modules" /
+            "c++" / "six.sicd" / "conf" / "schema";
+    static const auto filename =
+            getModuleFile(modulePath, "SICD_schema_V1.3.0.xsd");
     static const auto schemaPath = filename.parent_path();
-    return std::vector<std::filesystem::path> { schemaPath };
+    return std::vector<std::filesystem::path>{schemaPath};
 }
 
-std::filesystem::path six::testing::getSampleXmlPath(const std::filesystem::path& moduleName, const  std::filesystem::path& filename)
+std::filesystem::path six::testing::getSampleXmlPath(
+        const std::filesystem::path& moduleName,
+        const std::filesystem::path& filename)
 {
-    const auto modulePath = std::filesystem::path("six") / "modules" / "c++" / moduleName;
+    const auto modulePath =
+            std::filesystem::path("six") / "modules" / "c++" / moduleName;
     return getModuleFile(modulePath, filename);
 }
 
-six::DataParser::DataParser(const std::vector<std::filesystem::path>* pSchemaPaths, logging::Logger* pLog)
-    : mpSchemaPaths(pSchemaPaths),
-    mLog(pLog == nullptr ? mNullLogger : *pLog)
+six::DataParser::DataParser(
+        const std::vector<std::filesystem::path>* pSchemaPaths,
+        logging::Logger* pLog) :
+    mpSchemaPaths(pSchemaPaths), mLog(pLog == nullptr ? mNullLogger : *pLog)
 {
 }
 
-std::unique_ptr<six::Data> six::DataParser::DataParser::fromXML(::io::InputStream& xmlStream,
-    const XMLControlRegistry& xmlReg, DataType dataType) const
+std::unique_ptr<six::Data> six::DataParser::DataParser::fromXML(
+        ::io::InputStream& xmlStream,
+        const XMLControlRegistry& xmlReg,
+        DataType dataType) const
 {
     auto xmlParser = parseInputStream(xmlStream, mPreserveCharacterData);
-    return six_parseData<std::unique_ptr<Data>>(xmlReg, xmlParser, dataType, mpSchemaPaths, mLog);
+    return six_parseData<std::unique_ptr<Data>>(
+            xmlReg, xmlParser, dataType, mpSchemaPaths, mLog);
 }
 
 std::unique_ptr<six::Data> six::DataParser::DataParser::fromXML(
@@ -953,19 +1045,22 @@ std::unique_ptr<six::Data> six::DataParser::DataParser::fromXML(
     return fromXML(inStream, xmlReg, dataType);
 }
 
-std::unique_ptr<six::Data> six::DataParser::DataParser::fromXML(const std::u8string& xmlStr,
-    const XMLControlRegistry& xmlReg, DataType dataType) const
+std::unique_ptr<six::Data> six::DataParser::DataParser::fromXML(
+        const std::u8string& xmlStr,
+        const XMLControlRegistry& xmlReg,
+        DataType dataType) const
 {
     io::U8StringStream inStream;
     inStream.write(xmlStr);
     return fromXML(inStream, xmlReg, dataType);
 }
 
-std::u8string  six::DataParser::DataParser::toXML(const Data& data, const XMLControlRegistry& xmlReg) const
+std::u8string six::DataParser::DataParser::toXML(
+        const Data& data, const XMLControlRegistry& xmlReg) const
 {
     return ::six::toValidXMLString(data, mpSchemaPaths, &mLog, &xmlReg);
 }
-std::u8string  six::DataParser::DataParser::toXML(const Data& data) const
+std::u8string six::DataParser::DataParser::toXML(const Data& data) const
 {
     return toXML(data, mXmlRegistry);
 }

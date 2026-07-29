@@ -19,16 +19,15 @@
  * see <http://www.gnu.org/licenses/>.
  *
  */
-#include <six/CompressedByteProvider.h>
-
-#include <str/Convert.h>
 #include <logging/NullLogger.h>
 #include <six/ByteProvider.h>
+#include <six/CompressedByteProvider.h>
+#include <str/Convert.h>
 
 namespace
 {
 size_t countCompressedBytes(
-        const std::vector<std::vector<size_t> >& bytesPerBlock)
+        const std::vector<std::vector<size_t>>& bytesPerBlock)
 {
     size_t sum = 0;
     for (size_t ii = 0; ii < bytesPerBlock.size(); ++ii)
@@ -53,23 +52,26 @@ void CompressedByteProvider::initialize(
         std::shared_ptr<Container> container,
         const XMLControlRegistry& xmlRegistry,
         const std::vector<std::string>& schemaPaths,
-        const std::vector<std::vector<size_t> >& bytesPerBlock,
+        const std::vector<std::vector<size_t>>& bytesPerBlock,
         bool isNumericallyLossless,
         size_t maxProductSize,
         size_t numRowsPerBlock,
         size_t numColsPerBlock)
 {
     const auto byterate =
-        static_cast<double>(countCompressedBytes(bytesPerBlock)) /
-        static_cast<double>(countUncompressedPixels(*container->getData(0)));
+            static_cast<double>(countCompressedBytes(bytesPerBlock)) /
+            static_cast<double>(
+                    countUncompressedPixels(*container->getData(0)));
     Options options;
-    options.setParameter(
-            six::NITFHeaderCreator::OPT_J2K_COMPRESSION_BYTERATE, byterate);
-    options.setParameter(
-            six::NITFHeaderCreator::OPT_J2K_COMPRESSION_LOSSLESS,
-            isNumericallyLossless);
+    options.setParameter(six::NITFHeaderCreator::OPT_J2K_COMPRESSION_BYTERATE,
+                         byterate);
+    options.setParameter(six::NITFHeaderCreator::OPT_J2K_COMPRESSION_LOSSLESS,
+                         isNumericallyLossless);
     six::ByteProvider::populateOptions(container,
-            maxProductSize, numRowsPerBlock, numColsPerBlock, options);
+                                       maxProductSize,
+                                       numRowsPerBlock,
+                                       numColsPerBlock,
+                                       options);
 
     NITFWriteControl writer(options, container, &xmlRegistry);
 
@@ -79,28 +81,23 @@ void CompressedByteProvider::initialize(
 void CompressedByteProvider::initialize(
         const NITFWriteControl& writer,
         const std::vector<std::string>& schemaPaths,
-        const std::vector<std::vector<size_t> >& bytesPerBlock)
+        const std::vector<std::vector<size_t>>& bytesPerBlock)
 
 {
     std::vector<std::u8string> xmlStrings;
     std::vector<PtrAndLength> desData;
     size_t numRowsPerBlock;
     size_t numColsPerBlock;
-    six::ByteProvider::populateInitArgs(
-            writer,
-            schemaPaths,
-            xmlStrings,
-            desData,
-            numRowsPerBlock,
-            numColsPerBlock);
+    six::ByteProvider::populateInitArgs(writer,
+                                        schemaPaths,
+                                        xmlStrings,
+                                        desData,
+                                        numRowsPerBlock,
+                                        numColsPerBlock);
 
     // Do the full initialization
     nitf::Record record = writer.getRecord();
     nitf::CompressedByteProvider::initialize(
-            record,
-            bytesPerBlock,
-            desData,
-            numRowsPerBlock,
-            numColsPerBlock);
+            record, bytesPerBlock, desData, numRowsPerBlock, numColsPerBlock);
 }
 }

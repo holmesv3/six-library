@@ -39,7 +39,8 @@ VersionUpdater::VersionUpdater(Data& data,
 
 void VersionUpdater::validateTargetVersion() const
 {
-    const auto targetIt = std::find(mVersions.begin(), mVersions.end(), mTarget);
+    const auto targetIt =
+            std::find(mVersions.begin(), mVersions.end(), mTarget);
     if (targetIt == mVersions.end())
     {
         std::ostringstream msg;
@@ -47,8 +48,8 @@ void VersionUpdater::validateTargetVersion() const
         throw except::Exception(Ctxt(msg));
     }
 
-    const auto currentIt = std::find(mVersions.begin(), mVersions.end(),
-                                     mData.getVersion());
+    const auto currentIt =
+            std::find(mVersions.begin(), mVersions.end(), mData.getVersion());
     if (std::distance(currentIt, targetIt) <= 0)
     {
         std::ostringstream msg;

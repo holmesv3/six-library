@@ -24,9 +24,9 @@
 #define __SIX_XML_CONTROL_FACTORY_H__
 
 #include <memory>
-#include <vector>
 #include <std/filesystem>
 #include <std/string>
+#include <vector>
 
 #ifdef SWIGPYTHON
 #include <mem/AutoPtr.h>
@@ -34,8 +34,8 @@
 
 #include <scene/sys_Conf.h>
 
-#include "six/XMLControl.h"
 #include "six/Exports.h"
+#include "six/XMLControl.h"
 
 namespace six
 {
@@ -55,7 +55,9 @@ struct XMLControlCreator
     XMLControlCreator() = default;
 
     //!  Destructor
-    virtual ~XMLControlCreator() {}
+    virtual ~XMLControlCreator()
+    {
+    }
 
     /*!
      *  This method creates a new XMLControl object of derived type
@@ -63,7 +65,6 @@ struct XMLControlCreator
      *
      */
     virtual six::XMLControl* newXMLControl(logging::Logger* log) const = 0;
-
 };
 
 /*!
@@ -75,11 +76,14 @@ struct XMLControlCreator
  *  need
  *
  */
-template <typename T> struct XMLControlCreatorT : public XMLControlCreator
+template <typename T>
+struct XMLControlCreatorT : public XMLControlCreator
 {
-    ~XMLControlCreatorT() {}
-    six::XMLControl* newXMLControl(logging::Logger* log) const 
-    { 
+    ~XMLControlCreatorT()
+    {
+    }
+    six::XMLControl* newXMLControl(logging::Logger* log) const
+    {
         return new T(log, false);
     }
 };
@@ -99,39 +103,38 @@ struct SIX_SIX_API XMLControlRegistry
     virtual ~XMLControlRegistry();
 
     void addCreator(const std::string& identifier,
-        std::unique_ptr<XMLControlCreator>&& creator);
-    #ifdef SWIGPYTHON
+                    std::unique_ptr<XMLControlCreator>&& creator);
+#ifdef SWIGPYTHON
     void addCreator_(const std::string& identifier,
-        mem::AutoPtr<XMLControlCreator> creator)
+                     mem::AutoPtr<XMLControlCreator> creator)
     {
         std::unique_ptr<XMLControlCreator> scopedCreator(creator.release());
         addCreator(identifier, std::move(scopedCreator));
     }
-    #endif
+#endif
 
     /*!
      * Takes ownership of creator
      */
-    void addCreator(const std::string& identifier,
-                    XMLControlCreator* creator)
+    void addCreator(const std::string& identifier, XMLControlCreator* creator)
     {
         std::unique_ptr<XMLControlCreator> scopedCreator(creator);
         addCreator(identifier, std::move(scopedCreator));
     }
 
     void addCreator(DataType dataType,
-        std::unique_ptr<XMLControlCreator>&& creator)
+                    std::unique_ptr<XMLControlCreator>&& creator)
     {
         addCreator(dataType.toString(), std::move(creator));
     }
-    #ifdef SWIGPYTHON
+#ifdef SWIGPYTHON
     void addCreator_(DataType dataType,
-                    mem::AutoPtr<XMLControlCreator> creator_)
+                     mem::AutoPtr<XMLControlCreator> creator_)
     {
         std::unique_ptr<XMLControlCreator> creator(creator_.release());
         addCreator(dataType, std::move(creator));
     }
-    #endif
+#endif
 
     /*!
      * Takes ownership of creator
@@ -142,10 +145,11 @@ struct SIX_SIX_API XMLControlRegistry
         addCreator(dataType, std::move(scopedCreator));
     }
 
-    template<typename TXMLControlCreator>
+    template <typename TXMLControlCreator>
     void addCreator()
     {
-        auto scopedCreator = std::make_unique<XMLControlCreatorT<TXMLControlCreator>>();
+        auto scopedCreator =
+                std::make_unique<XMLControlCreatorT<TXMLControlCreator>>();
         addCreator(TXMLControlCreator::dataType, std::move(scopedCreator));
     }
 
@@ -160,8 +164,7 @@ struct SIX_SIX_API XMLControlRegistry
     XMLControl* newXMLControl(const std::string& identifier,
                               logging::Logger* log) const;
 
-    XMLControl* newXMLControl(DataType dataType,
-                              logging::Logger* log) const
+    XMLControl* newXMLControl(DataType dataType, logging::Logger* log) const
     {
         return newXMLControl(dataType.toString(), log);
     }
@@ -180,9 +183,9 @@ private:
  *
  */
 std::u8string toXMLString(const Data* data,
-                        const XMLControlRegistry *xmlRegistry = nullptr);
-SIX_SIX_API std::string toXMLString_(const Data* data,
-    const XMLControlRegistry* xmlRegistry = nullptr);
+                          const XMLControlRegistry* xmlRegistry = nullptr);
+SIX_SIX_API std::string toXMLString_(
+        const Data* data, const XMLControlRegistry* xmlRegistry = nullptr);
 
 /*!
  *  Additionally performs schema validation --
@@ -192,23 +195,28 @@ SIX_SIX_API std::u8string toValidXMLString(
         const Data* data,
         const std::vector<std::string>& schemaPaths,
         logging::Logger* log,
-        const XMLControlRegistry *xmlRegistry = nullptr);
-SIX_SIX_API std::u8string toValidXMLString(const Data&,
-    const std::vector<std::string>& schemaPaths, logging::Logger*, const XMLControlRegistry* xmlRegistry = nullptr);
-SIX_SIX_API std::u8string toValidXMLString(const Data&,
-    const std::vector<std::filesystem::path>*, logging::Logger*, const XMLControlRegistry* xmlRegistry = nullptr);
+        const XMLControlRegistry* xmlRegistry = nullptr);
+SIX_SIX_API std::u8string toValidXMLString(
+        const Data&,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger*,
+        const XMLControlRegistry* xmlRegistry = nullptr);
+SIX_SIX_API std::u8string toValidXMLString(
+        const Data&,
+        const std::vector<std::filesystem::path>*,
+        logging::Logger*,
+        const XMLControlRegistry* xmlRegistry = nullptr);
 
 //!  Singleton declaration of our XMLControlRegistry
 SIX_SIX_API XMLControlRegistry& getXMLControlFactory();
 namespace XMLControlFactory
 {
-  inline auto& getInstance()
-  {
+inline auto& getInstance()
+{
     return getXMLControlFactory();
-  }
+}
 }
 
 }
 
 #endif
-

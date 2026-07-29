@@ -24,17 +24,16 @@
 #define SIX_six_ErrorStatistics_h_INCLUDED_
 
 #include <assert.h>
+#include <mem/ScopedCopyablePtr.h>
 
 #include <std/optional>
 
-#include <mem/ScopedCopyablePtr.h>
-
-#include "six/Types.h"
+#include "six/Exports.h"
 #include "six/Init.h"
 #include "six/Parameter.h"
 #include "six/ParameterCollection.h"
+#include "six/Types.h"
 #include "six/XsElement.h"
-#include "six/Exports.h"
 
 namespace six
 {
@@ -50,7 +49,8 @@ struct SIX_SIX_API CorrCoefs
 {
     CorrCoefs() = default;
 
-    // From Bill: "Volume 3: States if correlation coefficients omitted then set to 0."
+    // From Bill: "Volume 3: States if correlation coefficients omitted then set
+    // to 0."
     double p1p2 = 0.0;
     double p1p3 = 0.0;
     double p1v1 = 0.0;
@@ -122,22 +122,26 @@ struct SIX_SIX_API PosVelError
 struct SIX_SIX_API RadarSensor
 {
     /*!
-     *  Range bias error standard deviation. 
+     *  Range bias error standard deviation.
      *  Range bias at zero range
      */
-    double rangeBias = 0.0; // From Bill: "... all of those values can be safely set to 0."
+    double rangeBias = 0.0;  // From Bill: "... all of those values can be
+                             // safely set to 0."
 
     /*!
      *  (Optional) Payload clock frequency scale factor
      *  standard deviation.
      */
-    double clockFreqSF = 0.0; // From Bill: "Volume 3: States if ClockFreqSF is omitted then set to 0."
+    double clockFreqSF = 0.0;  // From Bill: "Volume 3: States if ClockFreqSF is
+                               // omitted then set to 0."
 
     /*!
      * (Optional) Transmit frequency scale factor
      *  standard deviation.
      */
-    double transmitFreqSF = Init::undefined<double>(); // Set to undefined so that it skips population instead of setting to 0
+    double transmitFreqSF =
+            Init::undefined<double>();  // Set to undefined so that it skips
+                                        // population instead of setting to 0
 
     /*!
      *  (Optional) Range bias decorrelated rate
@@ -151,7 +155,8 @@ struct SIX_SIX_API RadarSensor
     bool operator==(const RadarSensor& rhs) const
     {
         return (rangeBias == rhs.rangeBias && clockFreqSF == rhs.clockFreqSF &&
-            transmitFreqSF == rhs.transmitFreqSF && rangeBiasDecorr == rhs.rangeBiasDecorr);
+                transmitFreqSF == rhs.transmitFreqSF &&
+                rangeBiasDecorr == rhs.rangeBiasDecorr);
     }
     bool operator!=(const RadarSensor& rhs) const
     {
@@ -172,14 +177,16 @@ struct SIX_SIX_API TropoError
      *  incidence standard deviation.  Expressed as a
      *  two-range error
      */
-    double tropoRangeVertical = 0.0; // From Bill: "... all of those values can be safely set to 0."
+    double tropoRangeVertical = 0.0;  // From Bill: "... all of those values can
+                                      // be safely set to 0."
 
     /*!
      *  (Optional) Troposphere two-way delay error for SCP COA
      *  incidence angle standard deviation.  Expressed
      *  as a two-way range error
      */
-    double tropoRangeSlant = 0.0; // From Bill: "... all of those values can be safely set to 0."
+    double tropoRangeSlant = 0.0;  // From Bill: "... all of those values can be
+                                   // safely set to 0."
 
     /*!
      *  (Optional)
@@ -191,8 +198,9 @@ struct SIX_SIX_API TropoError
 
     bool operator==(const TropoError& rhs) const
     {
-        return (tropoRangeVertical == rhs.tropoRangeVertical && tropoRangeSlant == rhs.tropoRangeSlant &&
-            tropoRangeDecorr == rhs.tropoRangeDecorr);
+        return (tropoRangeVertical == rhs.tropoRangeVertical &&
+                tropoRangeSlant == rhs.tropoRangeSlant &&
+                tropoRangeDecorr == rhs.tropoRangeDecorr);
     }
 
     bool operator!=(const TropoError& rhs) const
@@ -214,22 +222,25 @@ struct SIX_SIX_API IonoError
      *  incidence standard deviation.  Expressed as a
      *  two-way range error
      */
-    double ionoRangeVertical = 0.0; // From Bill: "... all of those values can be safely set to 0."
+    double ionoRangeVertical = 0.0;  // From Bill: "... all of those values can
+                                     // be safely set to 0."
 
     /*!
      *  (Optional) Ionosphere two-way delay rate of change
      *  error for normal incidence standard deviation.
      *  Expressed as a two-way range error
      */
-    double ionoRangeRateVertical = 0.0; // From Bill: "... all of those values can be safely set to 0."
+    double ionoRangeRateVertical = 0.0;  // From Bill: "... all of those values
+                                         // can be safely set to 0."
 
     /*!
      *  Ionosphere range error and range rate error correlation
      *  coefficient.
      *
      */
-    double ionoRgRgRateCC = 0.0; // From Bill: "... all of those values can be safely set to 0."
-    
+    double ionoRgRgRateCC = 0.0;  // From Bill: "... all of those values can be
+                                  // safely set to 0."
+
     /*!
      *  Ionosphere range error decorrelation ratio
      */
@@ -240,8 +251,10 @@ struct SIX_SIX_API IonoError
     //! Equality operator
     bool operator==(const IonoError& rhs) const
     {
-        return (ionoRangeRateVertical == rhs.ionoRangeRateVertical && ionoRangeVertical == ionoRangeVertical &&
-            ionoRgRgRateCC == rhs.ionoRgRgRateCC && ionoRangeVertDecorr == rhs.ionoRangeVertDecorr);
+        return (ionoRangeRateVertical == rhs.ionoRangeRateVertical &&
+                ionoRangeVertical == ionoRangeVertical &&
+                ionoRgRgRateCC == rhs.ionoRgRgRateCC &&
+                ionoRangeVertDecorr == rhs.ionoRangeVertDecorr);
     }
 
     bool operator!=(const IonoError& rhs) const
@@ -252,51 +265,50 @@ struct SIX_SIX_API IonoError
 
 /*!
  *  \struct Unmodeled
- *  \brief (Optional) Unmodeled error statistics 
+ *  \brief (Optional) Unmodeled error statistics
  *
- *  Contains Unmodeled error statistics 
+ *  Contains Unmodeled error statistics
  */
 struct SIX_SIX_API Unmodeled final
 {
-    XsElement<double> Xrow{ "Xrow" };
-    XsElement<double> Ycol{ "Ycol" };
-    XsElement<double> XrowYcol{ "XrowYcol" };
+    XsElement<double> Xrow{"Xrow"};
+    XsElement<double> Ycol{"Ycol"};
+    XsElement<double> XrowYcol{"XrowYcol"};
 
     struct Decorr final
     {
         struct Xrow_Ycol final
         {
-            XsElement<double> corrCoefZero{ "CorrCoefZero" };
-            XsElement<double> decorrRate{ "DecorrRate" };
+            XsElement<double> corrCoefZero{"CorrCoefZero"};
+            XsElement<double> decorrRate{"DecorrRate"};
         };
-        XsElement<Xrow_Ycol> Xrow{ "Xrow" };
-        XsElement<Xrow_Ycol> Ycol{ "Ycol" };
+        XsElement<Xrow_Ycol> Xrow{"Xrow"};
+        XsElement<Xrow_Ycol> Ycol{"Ycol"};
     };
-    XsElement_minOccurs0<Decorr> unmodeledDecorr{ "UnmodeledDecorr" };
+    XsElement_minOccurs0<Decorr> unmodeledDecorr{"UnmodeledDecorr"};
 };
-inline bool operator==(const Unmodeled::Decorr& lhs, const Unmodeled::Decorr& rhs)
+inline bool operator==(const Unmodeled::Decorr& lhs,
+                       const Unmodeled::Decorr& rhs)
 {
     auto&& lhs_Xrow = value(lhs.Xrow);
     auto&& rhs_Xrow = value(rhs.Xrow);
     auto&& lhs_Ycol = value(lhs.Ycol);
     auto&& rhs_Ycol = value(rhs.Ycol);
-    return (lhs_Xrow.corrCoefZero == rhs_Xrow.corrCoefZero)
-        && (lhs_Xrow.decorrRate == rhs_Xrow.decorrRate)
-        && (lhs_Ycol.corrCoefZero == rhs_Ycol.corrCoefZero)
-        && (lhs_Ycol.decorrRate == rhs_Ycol.decorrRate)
-        ;
+    return (lhs_Xrow.corrCoefZero == rhs_Xrow.corrCoefZero) &&
+            (lhs_Xrow.decorrRate == rhs_Xrow.decorrRate) &&
+            (lhs_Ycol.corrCoefZero == rhs_Ycol.corrCoefZero) &&
+            (lhs_Ycol.decorrRate == rhs_Ycol.decorrRate);
 }
-inline bool operator!=(const Unmodeled::Decorr& lhs, const Unmodeled::Decorr& rhs)
+inline bool operator!=(const Unmodeled::Decorr& lhs,
+                       const Unmodeled::Decorr& rhs)
 {
     return !(lhs == rhs);
 }
 inline bool operator==(const Unmodeled& lhs, const Unmodeled& rhs)
 {
-    return (lhs.Xrow == rhs.Xrow)
-        && (lhs.Ycol == rhs.Ycol)
-        && (lhs.XrowYcol == rhs.XrowYcol)
-        && (lhs.unmodeledDecorr == rhs.unmodeledDecorr)
-        ;
+    return (lhs.Xrow == rhs.Xrow) && (lhs.Ycol == rhs.Ycol) &&
+            (lhs.XrowYcol == rhs.XrowYcol) &&
+            (lhs.unmodeledDecorr == rhs.unmodeledDecorr);
 }
 inline bool operator!=(const Unmodeled& lhs, const Unmodeled& rhs)
 {
@@ -322,8 +334,9 @@ struct SIX_SIX_API Components
     //! Equality operator
     bool operator==(const Components& rhs) const
     {
-        return (posVelError == rhs.posVelError && radarSensor == rhs.radarSensor &&
-            tropoError == rhs.tropoError && ionoError == rhs.ionoError);
+        return (posVelError == rhs.posVelError &&
+                radarSensor == rhs.radarSensor &&
+                tropoError == rhs.tropoError && ionoError == rhs.ionoError);
     }
     bool operator!=(const Components& rhs) const
     {
@@ -353,13 +366,13 @@ struct SIX_SIX_API CompositeSCP
     //!  Types
     enum SCPType
     {
-        ROW_COL, RG_AZ
+        ROW_COL,
+        RG_AZ
     };
 
     //!  Constructor
     CompositeSCP() = default;
-    CompositeSCP(SCPType scpTypeIn) :
-        scpType(scpTypeIn)
+    CompositeSCP(SCPType scpTypeIn) : scpType(scpTypeIn)
     {
     }
 
@@ -377,8 +390,8 @@ struct SIX_SIX_API CompositeSCP
     //! Equality operators
     bool operator==(const CompositeSCP& rhs) const
     {
-        return (xErr == rhs.xErr && yErr == rhs.yErr &&
-            xyErr == rhs.xyErr && scpType == rhs.scpType);
+        return (xErr == rhs.xErr && yErr == rhs.yErr && xyErr == rhs.xyErr &&
+                scpType == rhs.scpType);
     }
     bool operator!=(const CompositeSCP& rhs) const
     {
@@ -411,7 +424,7 @@ struct SIX_SIX_API ErrorStatistics
      *  (Optional) Unmodeled
      *
      */
-    XsElement_minOccurs0<Unmodeled> unmodeled{ "Unmodeled" };
+    XsElement_minOccurs0<Unmodeled> unmodeled{"Unmodeled"};
 
     /*!
      *  Additional parameters
@@ -422,11 +435,10 @@ struct SIX_SIX_API ErrorStatistics
     //! Equality operators
     bool operator==(const ErrorStatistics& rhs) const
     {
-        return (compositeSCP == rhs.compositeSCP)
-            && (components == rhs.components)
-            && (additionalParameters == rhs.additionalParameters)
-            && (unmodeled == rhs.unmodeled)
-            ;
+        return (compositeSCP == rhs.compositeSCP) &&
+                (components == rhs.components) &&
+                (additionalParameters == rhs.additionalParameters) &&
+                (unmodeled == rhs.unmodeled);
     }
     bool operator!=(const ErrorStatistics& rhs) const
     {
@@ -435,4 +447,4 @@ struct SIX_SIX_API ErrorStatistics
 };
 }
 
-#endif // SIX_six_ErrorStatistics_h_INCLUDED_
+#endif  // SIX_six_ErrorStatistics_h_INCLUDED_

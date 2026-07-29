@@ -23,31 +23,29 @@
 #ifndef SIX_six_Types_h_INCLUDED_
 #define SIX_six_Types_h_INCLUDED_
 
-#include <stdint.h>
-
-#include <vector>
-#include <limits>
-#include <string>
-#include <stdexcept>
-#include <memory>
-
-#include <types/Complex.h>
 #include <import/except.h>
+#include <import/io.h>
+#include <import/math/linear.h>
+#include <import/math/poly.h>
 #include <import/mem.h>
 #include <import/str.h>
 #include <import/sys.h>
-#include <import/math/linear.h>
-#include <import/math/poly.h>
-#include <import/io.h>
+#include <scene/sys_Conf.h>
+#include <stdint.h>
+#include <types/Complex.h>
 
 #include <import/nitf.hpp>
+#include <limits>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
-#include <scene/sys_Conf.h>
-#include "scene/Types.h"
 #include "scene/FrameType.h"
-#include "six/Enums.h"
-#include "six/Complex.h"
+#include "scene/Types.h"
 #include "six/AmplitudeTable.h"
+#include "six/Complex.h"
+#include "six/Enums.h"
 #include "six/Exports.h"
 
 namespace six
@@ -55,7 +53,8 @@ namespace six
 static const char SCHEMA_PATH[] = "SIX_SCHEMA_PATH";
 // Gets the value of SIX_SCHEMA_PATH, or the compiled default if not set.
 // If the resulting path doesn't exist, an exception is thrown.
-SIX_SIX_API std::string getSchemaPath(std::vector<std::string>&, bool tryToExpandIfNotFound = false);
+SIX_SIX_API std::string getSchemaPath(std::vector<std::string>&,
+                                      bool tryToExpandIfNotFound = false);
 
 /*!
  * \class DESValidationException
@@ -107,12 +106,11 @@ typedef scene::FrameType FrameType;
 struct SIX_SIX_API DecorrType
 {
     DecorrType() = default;
-        DecorrType(double ccz, double dr = 0.0) :
-        corrCoefZero(ccz), decorrRate(dr)
+    DecorrType(double ccz, double dr = 0.0) : corrCoefZero(ccz), decorrRate(dr)
     {
     }
 
-    DecorrType(const DecorrType& dt) : 
+    DecorrType(const DecorrType& dt) :
         DecorrType(dt.corrCoefZero, dt.decorrRate)
     {
     }
@@ -147,7 +145,7 @@ typedef types::RowCol<LatLon> RowColLatLon;
 struct SIX_SIX_API Constants final
 {
     //!  This is the upper bound of a NITF segment
-    static const uint64_t IS_SIZE_MAX; // = 9999999998LL;
+    static const uint64_t IS_SIZE_MAX;  // = 9999999998LL;
     static const uint64_t GT_SIZE_MAX;
     static const size_t ILOC_MAX;
 
@@ -181,28 +179,33 @@ struct SIX_SIX_API Constants final
         {
         case PixelType::RE32F_IM32F:
         {
-            // Each pixel is stored as a pair of numbers that represent the realand imaginary
-            // components. Each component is stored in a 32-bit IEEE floating point format (4
-            // bytes per component, 8 bytes per pixel).
-            static_assert(sizeof(six::zfloat) == 8, "RE32F_IM32F should be two floats");
+            // Each pixel is stored as a pair of numbers that represent the
+            // realand imaginary components. Each component is stored in a
+            // 32-bit IEEE floating point format (4 bytes per component, 8 bytes
+            // per pixel).
+            static_assert(sizeof(six::zfloat) == 8,
+                          "RE32F_IM32F should be two floats");
             return 8;
         }
 
         case PixelType::RE16I_IM16I:
         {
-            // Each pixel is stored as a pair of numbers that represent the real and imaginary 
-            // components. Each component is stored in a 16-bit signed integer in 2's 
-            // complement format (2 bytes per component, 4 bytes per pixel). 
-            static_assert(sizeof(six::zint16_t) == 4, "RE16I_IM16I should be two 16-bit integers");
+            // Each pixel is stored as a pair of numbers that represent the real
+            // and imaginary components. Each component is stored in a 16-bit
+            // signed integer in 2's complement format (2 bytes per component, 4
+            // bytes per pixel).
+            static_assert(sizeof(six::zint16_t) == 4,
+                          "RE16I_IM16I should be two 16-bit integers");
             return 4;
         }
 
         case PixelType::AMP8I_PHS8I:
         {
-            // Each pixel is stored as a pair of numbers that represent the amplitude and phase
-            // components. Each component is stored in an 8-bit unsigned integer (1 byte per 
-            // component, 2 bytes per pixel). 
-            static_assert(sizeof(AMP8I_PHS8I_t) == 2, "AMP8I_PHS8I should be two 8-bit integers");
+            // Each pixel is stored as a pair of numbers that represent the
+            // amplitude and phase components. Each component is stored in an
+            // 8-bit unsigned integer (1 byte per component, 2 bytes per pixel).
+            static_assert(sizeof(AMP8I_PHS8I_t) == 2,
+                          "AMP8I_PHS8I should be two 8-bit integers");
             return 2;
         }
 
@@ -216,10 +219,10 @@ struct SIX_SIX_API Constants final
             return 3;
 
         default:
-            throw except::Exception(Ctxt(str::Format("Unknown pixel type [%d]", (int) type)));
+            throw except::Exception(
+                    Ctxt(str::Format("Unknown pixel type [%d]", (int)type)));
         }
     }
-
 };
 
 /*!
@@ -236,13 +239,16 @@ struct SIX_SIX_API ReferencePoint final
     Vector3 ecef;
 
     //!  Row col pixel location of point
-    RowColDouble rowCol{ 0.0, 0.0 };
+    RowColDouble rowCol{0.0, 0.0};
 
     //!  (Optional) name.  Leave it blank if you don't need it
     std::string name;
 
     //!  Construct, init all fields at once (except optional name)
-    ReferencePoint(double x = 0, double y = 0, double z = 0, double row = 0,
+    ReferencePoint(double x = 0,
+                   double y = 0,
+                   double z = 0,
+                   double row = 0,
                    double col = 0) noexcept :
         rowCol(row, col)
     {
@@ -251,8 +257,7 @@ struct SIX_SIX_API ReferencePoint final
         ecef[2] = z;
     }
     //!  Alternate construct, still init all fields at once
-    ReferencePoint(Vector3 xyz, RowColDouble rcd) :
-        ecef(xyz), rowCol(rcd)
+    ReferencePoint(Vector3 xyz, RowColDouble rcd) : ecef(xyz), rowCol(rcd)
     {
     }
 
@@ -335,8 +340,8 @@ struct Corners
         case LOWER_LEFT:
             return lowerLeft;
         default:
-            throw except::Exception(Ctxt("Invalid index " +
-                                             std::to_string(idx)));
+            throw except::Exception(
+                    Ctxt("Invalid index " + std::to_string(idx)));
         }
     }
 
@@ -354,17 +359,15 @@ struct Corners
         case LOWER_LEFT:
             return lowerLeft;
         default:
-            throw except::Exception(Ctxt("Invalid index " +
-                                             std::to_string(idx)));
+            throw except::Exception(
+                    Ctxt("Invalid index " + std::to_string(idx)));
         }
     }
 
     bool operator==(const Corners& rhs) const
     {
-        return (upperLeft == rhs.upperLeft &&
-            upperRight == rhs.upperRight &&
-            lowerRight == rhs.lowerRight &&
-            lowerLeft == rhs.lowerLeft);
+        return (upperLeft == rhs.upperLeft && upperRight == rhs.upperRight &&
+                lowerRight == rhs.lowerRight && lowerLeft == rhs.lowerLeft);
     }
 
     bool operator!=(const Corners& rhs) const
@@ -378,15 +381,24 @@ struct Corners
     LatLonT lowerLeft;
 };
 
-template <typename LatLonT> const size_t Corners<LatLonT>::NUM_CORNERS;
-template <typename LatLonT> const size_t Corners<LatLonT>::UPPER_LEFT;
-template <typename LatLonT> const size_t Corners<LatLonT>::FIRST_ROW_FIRST_COL;
-template <typename LatLonT> const size_t Corners<LatLonT>::UPPER_RIGHT;
-template <typename LatLonT> const size_t Corners<LatLonT>::FIRST_ROW_LAST_COL;
-template <typename LatLonT> const size_t Corners<LatLonT>::LOWER_RIGHT;
-template <typename LatLonT> const size_t Corners<LatLonT>::LAST_ROW_LAST_COL;
-template <typename LatLonT> const size_t Corners<LatLonT>::LOWER_LEFT;
-template <typename LatLonT> const size_t Corners<LatLonT>::LAST_ROW_FIRST_COL;
+template <typename LatLonT>
+const size_t Corners<LatLonT>::NUM_CORNERS;
+template <typename LatLonT>
+const size_t Corners<LatLonT>::UPPER_LEFT;
+template <typename LatLonT>
+const size_t Corners<LatLonT>::FIRST_ROW_FIRST_COL;
+template <typename LatLonT>
+const size_t Corners<LatLonT>::UPPER_RIGHT;
+template <typename LatLonT>
+const size_t Corners<LatLonT>::FIRST_ROW_LAST_COL;
+template <typename LatLonT>
+const size_t Corners<LatLonT>::LOWER_RIGHT;
+template <typename LatLonT>
+const size_t Corners<LatLonT>::LAST_ROW_LAST_COL;
+template <typename LatLonT>
+const size_t Corners<LatLonT>::LOWER_LEFT;
+template <typename LatLonT>
+const size_t Corners<LatLonT>::LAST_ROW_FIRST_COL;
 
 typedef Corners<LatLon> LatLonCorners;
 typedef Corners<LatLonAlt> LatLonAltCorners;
@@ -418,4 +430,4 @@ SIX_SIX_API ImageMode getImageMode(RadarModeType radarMode);
 DECLARE_EXCEPTION(MissingRequired);
 }
 
-#endif // SIX_six_Types_h_INCLUDED_
+#endif  // SIX_six_Types_h_INCLUDED_

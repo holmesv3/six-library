@@ -24,13 +24,11 @@
 #define SIX_six_Region_h_INCLUDED_
 
 #include <assert.h>
+#include <gsl/gsl.h>
+#include <scene/sys_Conf.h>
 
 #include <memory>
-
 #include <std/memory>
-#include <gsl/gsl.h>
-
-#include <scene/sys_Conf.h>
 
 #include "six/Types.h"
 
@@ -61,6 +59,7 @@ class Region final
     ptrdiff_t numRows = -1;
     ptrdiff_t startCol = 0;
     ptrdiff_t numCols = -1;
+
 public:
     //!  Constructor.  Sets params for full window size, and buffer is nullptr
     Region() = default;
@@ -86,12 +85,12 @@ public:
      */
 
     void setStartCol(ptrdiff_t col) noexcept
-    { 
+    {
         startCol = col;
     }
 
     /*!
-     *  Set the number of rows to read.  Valid values are between 1 and 
+     *  Set the number of rows to read.  Valid values are between 1 and
      *  numRows, or -1 to request numRows without querying the
      *  actual rows
      */
@@ -101,7 +100,7 @@ public:
     }
 
     /*!
-     *  Set the number of cols to read.  Valid values are between 1 and 
+     *  Set the number of cols to read.  Valid values are between 1 and
      *  numRows, or -1 to request numRows without querying the
      *  actual rows
      */
@@ -185,7 +184,8 @@ public:
     }
 
     /*!
-     *  Create a buffer of the given size, call setBuffer() and return the buffer.
+     *  Create a buffer of the given size, call setBuffer() and return the
+     * buffer.
      */
     std::unique_ptr<UByte[]> setBuffer(size_t size)
     {
@@ -216,7 +216,8 @@ inline void setDims(Region& r, const types::RowCol<size_t>& aoiDims) noexcept
     r.setNumCols(gsl::narrow<ptrdiff_t>(aoiDims.col));
 }
 
-inline void setOffset(Region& r, const types::RowCol<size_t>& aoiOffset) noexcept
+inline void setOffset(Region& r,
+                      const types::RowCol<size_t>& aoiOffset) noexcept
 {
     r.setStartRow(gsl::narrow<ptrdiff_t>(aoiOffset.row));
     r.setStartCol(gsl::narrow<ptrdiff_t>(aoiOffset.col));
@@ -224,4 +225,4 @@ inline void setOffset(Region& r, const types::RowCol<size_t>& aoiOffset) noexcep
 
 }
 
-#endif // SIX_six_Region_h_INCLUDED_
+#endif  // SIX_six_Region_h_INCLUDED_

@@ -32,7 +32,7 @@
 // SIX 3.1.11	2022-May-13
 // SIX 3.1.12	2022-Jun-29
 // SIX 3.1.13	2022-Aug-02
-// SIX 3.1.14	2022-Aug-30 
+// SIX 3.1.14	2022-Aug-30
 // SIX 3.2.0	2022-Aug-30 (C++14)
 // SIX 3.2.1	2022-Nov-04
 // SIX 3.2.2	2022-Dec-14
@@ -41,20 +41,25 @@
 // SIX 3.2.5	2023-Oct-23
 // SIX 3.3.0	2024-Mar-18
 
-#define SIX_VERSION_MAJOR	3
-#define SIX_VERSION_MINOR	3
-#define SIX_VERSION_PATCH	0 // a.k.a. "point," but that's too similar to "patch."
-//#define SIX_VERSION_BUILD	0 // a.k.a. "patch," but that's too similar to "point."
-//#define SIX_VERSION CODA_OSS_MAKE_VERSION_MMPB(SIX_VERSION_MAJOR, SIX_VERSION_MINOR, SIX_VERSION_PATCH, SIX_VERSION_BUILD)
-#define SIX_VERSION CODA_OSS_MAKE_VERSION_MMP(SIX_VERSION_MAJOR, SIX_VERSION_MINOR, SIX_VERSION_PATCH)
+#define SIX_VERSION_MAJOR 3
+#define SIX_VERSION_MINOR 3
+#define SIX_VERSION_PATCH \
+    0  // a.k.a. "point," but that's too similar to "patch."
+// #define SIX_VERSION_BUILD	0 // a.k.a. "patch," but that's too similar to
+// "point." #define SIX_VERSION CODA_OSS_MAKE_VERSION_MMPB(SIX_VERSION_MAJOR,
+// SIX_VERSION_MINOR, SIX_VERSION_PATCH, SIX_VERSION_BUILD)
+#define SIX_VERSION                              \
+    CODA_OSS_MAKE_VERSION_MMP(SIX_VERSION_MAJOR, \
+                              SIX_VERSION_MINOR, \
+                              SIX_VERSION_PATCH)
 
 namespace six
 {
-	constexpr auto version = SIX_VERSION;
-	constexpr auto version_major = CODA_OSS_GET_VERSION_MAJOR(SIX_VERSION);
-	constexpr auto version_minor = CODA_OSS_GET_VERSION_MINOR(SIX_VERSION);
-	constexpr auto version_patch = CODA_OSS_GET_VERSION_PATCH(SIX_VERSION);
-	//constexpr auto version_build = CODA_OSS_GET_VERSION_BUILD(SIX_VERSION);
+constexpr auto version = SIX_VERSION;
+constexpr auto version_major = CODA_OSS_GET_VERSION_MAJOR(SIX_VERSION);
+constexpr auto version_minor = CODA_OSS_GET_VERSION_MINOR(SIX_VERSION);
+constexpr auto version_patch = CODA_OSS_GET_VERSION_PATCH(SIX_VERSION);
+// constexpr auto version_build = CODA_OSS_GET_VERSION_BUILD(SIX_VERSION);
 }
 
-#endif // SIX_six_Version_h_INCLUDED_
+#endif  // SIX_six_Version_h_INCLUDED_

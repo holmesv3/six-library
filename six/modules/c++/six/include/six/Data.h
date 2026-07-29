@@ -25,20 +25,18 @@
 
 #include <assert.h>
 
-#include <vector>
 #include <memory>
-#include <std/span>
 #include <std/cstddef>
+#include <std/span>
+#include <vector>
 
-#include "six/Types.h"
 #include "six/Classification.h"
-#include "six/Utilities.h"
 #include "six/Exports.h"
+#include "six/Types.h"
+#include "six/Utilities.h"
 
 namespace six
 {
-
-
 
 /*!
  *  \class Data
@@ -55,7 +53,9 @@ struct SIX_SIX_API Data
     Data() = default;
 
     //!  Destructor
-    virtual ~Data() {}
+    virtual ~Data()
+    {
+    }
 
     /*!
      *  Contract that subclasses must provide a deep copy of
@@ -83,12 +83,17 @@ struct SIX_SIX_API Data
     virtual PixelType getPixelType() const = 0;
     virtual void setPixelType(PixelType pixelType) = 0;
 
-    virtual bool convertPixels_(std::span<const std::byte>, std::vector<AMP8I_PHS8I_t>&) const { return false; }
-    template<typename T>
-    bool convertPixels(std::span<const T> from, std::vector<AMP8I_PHS8I_t>& to) const
+    virtual bool convertPixels_(std::span<const std::byte>,
+                                std::vector<AMP8I_PHS8I_t>&) const
+    {
+        return false;
+    }
+    template <typename T>
+    bool convertPixels(std::span<const T> from,
+                       std::vector<AMP8I_PHS8I_t>& to) const
     {
         return convertPixels_(std::as_bytes(from), to);
-    }   
+    }
 
     /*!
      *  Maps to: /SICD/ImageData/NumRows,/SICD/ImageData/FullImage/Row
@@ -107,7 +112,6 @@ struct SIX_SIX_API Data
      *  /SIDD/Measurement/PixelFootprint/Col
      */
     virtual size_t getNumCols() const = 0;
-
 
     /*!
      *  Maps to: /SICD/ImageData/NumCols,/SICD/ImageData/FullImage/Col
@@ -191,7 +195,10 @@ struct SIX_SIX_API Data
 
     virtual const mem::ScopedCopyablePtr<LUT>& getDisplayLUT() const = 0;
     virtual void setDisplayLUT(std::unique_ptr<AmplitudeTable>&&) = 0;
-    virtual AmplitudeTable* getAmplitudeTable() const { return nullptr; }
+    virtual AmplitudeTable* getAmplitudeTable() const
+    {
+        return nullptr;
+    }
 
     /*!
      * Returns an identifier of the Vendor supplying the implementation code.
@@ -235,4 +242,3 @@ inline void setExtent(Data& data, const types::RowCol<size_t>& extent)
 }
 
 #endif
-

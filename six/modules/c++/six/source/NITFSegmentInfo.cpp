@@ -20,11 +20,11 @@
  *
  */
 
-#include <limits>
-#include <algorithm>
-
 #include <nitf/ImageSegmentComputer.h>
 #include <six/NITFSegmentInfo.h>
+
+#include <algorithm>
+#include <limits>
 
 namespace six
 {
@@ -34,7 +34,11 @@ bool NITFSegmentInfo::isInRange(size_t rangeStartRow,
                                 size_t& numRowsInThisSegment) const
 {
     return nitf::ImageSegmentComputer::Segment::isInRange(
-            getFirstRow(), endRow(), rangeStartRow, rangeNumRows,
-            firstGlobalRowInThisSegment, numRowsInThisSegment);
+            getFirstRow(),
+            endRow(),
+            rangeStartRow,
+            rangeNumRows,
+            firstGlobalRowInThisSegment,
+            numRowsInThisSegment);
 }
 }

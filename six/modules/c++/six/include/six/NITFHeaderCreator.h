@@ -23,17 +23,17 @@
 #ifndef __SIX_NITF_HEADER_CREATOR_H__
 #define __SIX_NITF_HEADER_CREATOR_H__
 
+#include <import/logging.h>
+
 #include <map>
 #include <memory>
 
-#include "six/Container.h"
-
-#include "six/Types.h"
-#include "six/NITFImageInfo.h"
 #include "six/Adapters.h"
-#include "six/Logger.h"
+#include "six/Container.h"
 #include "six/Exports.h"
-#include <import/logging.h>
+#include "six/Logger.h"
+#include "six/NITFImageInfo.h"
+#include "six/Types.h"
 
 namespace six
 {
@@ -64,11 +64,14 @@ struct SIX_SIX_API NITFHeaderCreator
      * \param options Initialization options
      * \param container The data container
      */
-    NITFHeaderCreator(const six::Options& options, std::shared_ptr<Container> container,
-        FILE* log = stderr);
+    NITFHeaderCreator(const six::Options& options,
+                      std::shared_ptr<Container> container,
+                      FILE* log = stderr);
 
     //!  Destructor.
-    virtual ~NITFHeaderCreator() {}
+    virtual ~NITFHeaderCreator()
+    {
+    }
 
     //!  Keys that allow us to override the ILOC rules for tests
     static const char OPT_MAX_PRODUCT_SIZE[];
@@ -127,9 +130,12 @@ struct SIX_SIX_API NITFHeaderCreator
      * \param copyData TBD
      * \param[out] record The record to modify.
      */
-    static void addSegmentData(const char* data, size_t size, nitf::Off start,
-            int byteSkip, bool copyData,
-            nitf::Record& record);
+    static void addSegmentData(const char* data,
+                               size_t size,
+                               nitf::Off start,
+                               int byteSkip,
+                               bool copyData,
+                               nitf::Record& record);
 
     /* !
      *  Add a SegmentWriter for writing an extra DES. Writer must
@@ -163,7 +169,7 @@ struct SIX_SIX_API NITFHeaderCreator
     }
 
     //! Get the infos.
-    std::vector<std::shared_ptr<NITFImageInfo> > getInfos() const
+    std::vector<std::shared_ptr<NITFImageInfo>> getInfos() const
     {
         return mInfos;
     }
@@ -193,7 +199,7 @@ struct SIX_SIX_API NITFHeaderCreator
     }
 
     // Get the record that was generated during initialization
-    std::vector<std::shared_ptr<nitf::SegmentWriter> > getSegmentWriters() const
+    std::vector<std::shared_ptr<nitf::SegmentWriter>> getSegmentWriters() const
     {
         return mSegmentWriters;
     }
@@ -223,7 +229,7 @@ struct SIX_SIX_API NITFHeaderCreator
      * \param ownLog Flag for whether the class takes ownership of the
      *  logger. Default is false.
      */
-    template<typename TLogger>
+    template <typename TLogger>
     void setLogger(TLogger&& logger)
     {
         mLogger.setLogger(std::forward<TLogger>(logger));
@@ -239,10 +245,10 @@ struct SIX_SIX_API NITFHeaderCreator
      * \param meshBuffer The vector of byte-serialized mesh buffers.
      * \param classification The classification of the information.
      */
-    template<typename T>
+    template <typename T>
     void loadMeshSegment_(const std::string& meshName,
-                         const std::vector<T>& meshBuffer,
-                         const six::Classification& classification);
+                          const std::vector<T>& meshBuffer,
+                          const six::Classification& classification);
     void loadMeshSegment(const std::string& meshName,
                          const std::vector<sys::byte>& meshBuffer,
                          const six::Classification& classification);
@@ -257,8 +263,8 @@ struct SIX_SIX_API NITFHeaderCreator
      * \param numImageSegments The number of image segments.
      * \return Sub-header identifier.
      */
-    static
-    std::string getComplexIID(size_t segmentNum, size_t numImageSegments);
+    static std::string getComplexIID(size_t segmentNum,
+                                     size_t numImageSegments);
 
     /*!
      * Construct detected image sub-header identifier.
@@ -267,8 +273,7 @@ struct SIX_SIX_API NITFHeaderCreator
      * \param productNum The product number.
      * \return Sub-header identifier.
      */
-    static
-    std::string getDerivedIID(size_t segmentNum, size_t productNum);
+    static std::string getDerivedIID(size_t segmentNum, size_t productNum);
 
     /*!
      * Construct image sub-header identifier.
@@ -298,8 +303,8 @@ struct SIX_SIX_API NITFHeaderCreator
                      const types::RowCol<size_t>& segmentDims,
                      nitf::ImageSubheader& subheader);
     void setBlocking(nitf::BlockingMode imode,
-        const types::RowCol<size_t>& segmentDims,
-        nitf::ImageSubheader& subheader);
+                     const types::RowCol<size_t>& segmentDims,
+                     nitf::ImageSubheader& subheader);
 
     /*!
      *  This function sets the image security fields in the
@@ -311,7 +316,7 @@ struct SIX_SIX_API NITFHeaderCreator
      */
     void setImageSecurity(const six::Classification& classification,
                           nitf::ImageSubheader& subheader);
- 
+
     /*!
      *  This function sets the image security fields in the
      *  given DE subheader using the parameters in the
@@ -344,8 +349,7 @@ struct SIX_SIX_API NITFHeaderCreator
      * \param data The data object.
      * \return The DES type identifier.
      */
-    static
-    std::string getDesTypeID(const six::Data& data);
+    static std::string getDesTypeID(const six::Data& data);
 
     /*!
      * Determine if a user-defined sub-header if required.
@@ -353,8 +357,7 @@ struct SIX_SIX_API NITFHeaderCreator
      * \param data The data object.
      * \return Boolean true if a user-defined sub-header is required.
      */
-    static
-    bool needUserDefinedSubheader(const six::Data& data);
+    static bool needUserDefinedSubheader(const six::Data& data);
 
     /*!
      * Add a user-defined sub-header.
@@ -380,8 +383,8 @@ struct SIX_SIX_API NITFHeaderCreator
 
 protected:
     nitf::Record mRecord = NITF_VER_21;
-    std::vector<std::shared_ptr<NITFImageInfo> > mInfos;
-    std::vector<std::shared_ptr<nitf::SegmentWriter> > mSegmentWriters;
+    std::vector<std::shared_ptr<NITFImageInfo>> mInfos;
+    std::vector<std::shared_ptr<nitf::SegmentWriter>> mSegmentWriters;
     std::shared_ptr<six::Container> mContainer;
     six::Options mOptions;
     const XMLControlRegistry* mXMLRegistry = nullptr;
@@ -390,7 +393,7 @@ protected:
     //  to be cleaned up elsewhere. There is no access
     //  to deallocation in NITFHeaderCreator directly
     virtual void createCompressionOptions(
-        std::map<std::string, void*>& /*options*/)
+            std::map<std::string, void*>& /*options*/)
     {
     }
 

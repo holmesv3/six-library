@@ -23,22 +23,21 @@
 #ifndef __SIX_XML_CONTROL_H__
 #define __SIX_XML_CONTROL_H__
 
-#include <vector>
-#include <std/filesystem>
-#include <memory>
-
+#include <import/xml/lite.h>
+#include <logging/Logger.h>
 #include <scene/sys_Conf.h>
 
-#include <logging/Logger.h>
-#include <import/xml/lite.h>
+#include <memory>
+#include <std/filesystem>
+#include <vector>
 
-#include "six/Types.h"
-#include "six/Logger.h"
 #include "six/Exports.h"
+#include "six/Logger.h"
+#include "six/Types.h"
 
 namespace six
 {
-    struct Data; // forward
+struct Data;  // forward
 
 /*!
  *  \class XMLControl
@@ -64,11 +63,11 @@ namespace six
  */
 class SIX_SIX_API XMLControl
 {
-    public:
+public:
     //!  Constructor
-        XMLControl(logging::Logger* log = nullptr, bool ownLog = false);
-        XMLControl(std::unique_ptr<logging::Logger>&&);
-        XMLControl(logging::Logger&);
+    XMLControl(logging::Logger* log = nullptr, bool ownLog = false);
+    XMLControl(std::unique_ptr<logging::Logger>&&);
+    XMLControl(logging::Logger&);
 
     //!  Destructor
     virtual ~XMLControl();
@@ -78,7 +77,7 @@ class SIX_SIX_API XMLControl
     XMLControl(XMLControl&&) = delete;
     XMLControl& operator=(XMLControl&&) = delete;
 
-    template<typename TLogger>
+    template <typename TLogger>
     void setLogger(TLogger&& logger)
     {
         mLogger.setLogger(std::forward<TLogger>(logger));
@@ -104,8 +103,8 @@ class SIX_SIX_API XMLControl
                          const std::vector<std::string>& schemaPaths,
                          logging::Logger* log);
     static void validate(const xml::lite::Document&,
-        const std::vector<std::filesystem::path>* pSchemaPaths,
-        logging::Logger* log);
+                         const std::vector<std::filesystem::path>* pSchemaPaths,
+                         logging::Logger* log);
 
     /*!
      * Retrieve the proper schema paths for validation.
@@ -122,7 +121,8 @@ class SIX_SIX_API XMLControl
      *                Otherwise, we can just use what's already there.
      */
     static void loadSchemaPaths(std::vector<std::string>& schemaPaths);
-    static std::vector<std::filesystem::path> loadSchemaPaths(const std::vector<std::filesystem::path>*);
+    static std::vector<std::filesystem::path> loadSchemaPaths(
+            const std::vector<std::filesystem::path>*);
 
     /*!
      *  Convert the Data model into an XML DOM.
@@ -132,8 +132,10 @@ class SIX_SIX_API XMLControl
      */
     xml::lite::Document* toXML(const Data* data,
                                const std::vector<std::string>& schemaPaths);
-    std::unique_ptr<xml::lite::Document> toXML(const Data&, const std::vector<std::string>&);
-    std::unique_ptr<xml::lite::Document> toXML(const Data&, const std::vector<std::filesystem::path>*);
+    std::unique_ptr<xml::lite::Document> toXML(const Data&,
+                                               const std::vector<std::string>&);
+    std::unique_ptr<xml::lite::Document> toXML(
+            const Data&, const std::vector<std::filesystem::path>*);
 
     /*!
      *  Convert a document from a DOM into a Data model
@@ -144,7 +146,7 @@ class SIX_SIX_API XMLControl
     Data* fromXML(const xml::lite::Document* doc,
                   const std::vector<std::string>& schemaPaths);
     std::unique_ptr<Data> fromXML(const xml::lite::Document&,
-        const std::vector<std::filesystem::path>*);
+                                  const std::vector<std::filesystem::path>*);
 
     /*!
      *  Provides a mapping from COMPLEX --> SICD and DERIVED --> SIDD
@@ -161,7 +163,7 @@ class SIX_SIX_API XMLControl
     static void splitVersion(const std::string& versionStr,
                              std::vector<std::string>& version);
 
-    protected:
+protected:
     logging::Logger* mLog = nullptr;
     bool mOwnLog = false;
 
@@ -171,13 +173,17 @@ class SIX_SIX_API XMLControl
      *  \return a Data model
      */
     virtual Data* fromXMLImpl(const xml::lite::Document* doc) = 0;
-    virtual std::unique_ptr<Data> fromXMLImpl(const xml::lite::Document&) const; // = 0;, would break existing code
+    virtual std::unique_ptr<Data> fromXMLImpl(const xml::lite::Document&)
+            const;  // = 0;, would break existing code
 
-    virtual std::unique_ptr<Data> validateXMLImpl(const xml::lite::Document&,
-        const std::vector<std::filesystem::path>&, logging::Logger&) const; // = 0;, would break existing code
-    std::unique_ptr<Data> validateXMLImpl_(const xml::lite::Document&,
-        const std::vector<std::filesystem::path>&, logging::Logger&) const;
-
+    virtual std::unique_ptr<Data> validateXMLImpl(
+            const xml::lite::Document&,
+            const std::vector<std::filesystem::path>&,
+            logging::Logger&) const;  // = 0;, would break existing code
+    std::unique_ptr<Data> validateXMLImpl_(
+            const xml::lite::Document&,
+            const std::vector<std::filesystem::path>&,
+            logging::Logger&) const;
 
     /*!
      *  Convert the Data model into an XML DOM.
@@ -185,7 +191,8 @@ class SIX_SIX_API XMLControl
      *  \return An XML DOM
      */
     virtual xml::lite::Document* toXMLImpl(const Data* data) = 0;
-    virtual std::unique_ptr<xml::lite::Document> toXMLImpl(const Data&) const; // = 0;, would break existing code
+    virtual std::unique_ptr<xml::lite::Document> toXMLImpl(
+            const Data&) const;  // = 0;, would break existing code
 
     static std::string getDefaultURI(const Data& data);
 

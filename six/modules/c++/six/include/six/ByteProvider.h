@@ -23,17 +23,17 @@
 #ifndef __SIX_BYTE_PROVIDER_H__
 #define __SIX_BYTE_PROVIDER_H__
 
-#include <memory>
-#include <std/string>
-
 #include <scene/sys_Conf.h>
-#include <nitf/ByteProvider.hpp>
 #include <six/Container.h>
-#include <six/NITFWriteControl.h>
+#include <six/Exports.h>
 #include <six/NITFHeaderCreator.h>
 #include <six/NITFSegmentInfo.h>
+#include <six/NITFWriteControl.h>
 #include <six/XMLControlFactory.h>
-#include <six/Exports.h>
+
+#include <memory>
+#include <nitf/ByteProvider.hpp>
+#include <std/string>
 
 namespace six
 {
@@ -81,12 +81,11 @@ public:
      *        num cols in image
      * \param[out] options Options to populate
      */
-    static void populateOptions(
-            std::shared_ptr<Container> container,
-            size_t maxProductSize,
-            size_t numRowsPerBlock,
-            size_t numColsPerBlock,
-            Options& options);
+    static void populateOptions(std::shared_ptr<Container> container,
+                                size_t maxProductSize,
+                                size_t numRowsPerBlock,
+                                size_t numColsPerBlock,
+                                Options& options);
 
     /*!
      * Compute the XML metadata, data extension segment (DES) buffers,
@@ -103,13 +102,12 @@ public:
      * \param[out] numColsPerBlock Number of image columns per NITF
      *  block
      */
-    static void populateInitArgs(
-            const NITFWriteControl& writer,
-            const std::vector<std::string>& schemaPaths,
-            std::vector<std::u8string>& xmlStrings,
-            std::vector<PtrAndLength>& desData,
-            size_t& numRowsPerBlock,
-            size_t& numColsPerBlock);
+    static void populateInitArgs(const NITFWriteControl& writer,
+                                 const std::vector<std::string>& schemaPaths,
+                                 std::vector<std::u8string>& xmlStrings,
+                                 std::vector<PtrAndLength>& desData,
+                                 size_t& numRowsPerBlock,
+                                 size_t& numColsPerBlock);
 
     /*!
      * Compute the XML metadata, data extension segment (DES) buffers,
@@ -126,13 +124,12 @@ public:
      * \param[out] numColsPerBlock Number of image columns per NITF
      *  block
      */
-    static void populateInitArgs(
-            const NITFHeaderCreator& headerCreator,
-            const std::vector<std::string>& schemaPaths,
-            std::vector<std::u8string>& xmlStrings,
-            std::vector<PtrAndLength>& desData,
-            size_t& numRowsPerBlock,
-            size_t& numColsPerBlock);
+    static void populateInitArgs(const NITFHeaderCreator& headerCreator,
+                                 const std::vector<std::string>& schemaPaths,
+                                 std::vector<std::u8string>& xmlStrings,
+                                 std::vector<PtrAndLength>& desData,
+                                 size_t& numRowsPerBlock,
+                                 size_t& numColsPerBlock);
 
     /*!
      * Initialize the ByteProvider
@@ -146,9 +143,11 @@ public:
     void initialize(const six::NITFHeaderCreator& headerCreator,
                     const std::vector<std::string>& schemaPaths,
                     const std::vector<PtrAndLength>& desBuffers);
-    void initialize(const std::unique_ptr<six::NITFHeaderCreator>& headerCreator,
-                    const std::vector<std::string>& schemaPaths,
-                    const std::vector<PtrAndLength>& desBuffers);
+    void initialize(
+            const std::unique_ptr<six::NITFHeaderCreator>& headerCreator,
+            const std::vector<std::string>& schemaPaths,
+            const std::vector<PtrAndLength>& desBuffers);
+
 protected:
     /*!
      * Default constructor. Client code must call initialize() to

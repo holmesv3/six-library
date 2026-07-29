@@ -23,35 +23,34 @@
 #ifndef SIX_six_Utilities_h_INCLUDED_
 #define SIX_six_Utilities_h_INCLUDED_
 
-#include <vector>
-#include <memory>
-#include <std/span>
-#include <std/cstddef>
-#include <std/filesystem>
-#include <std/string>
-
-#include <import/io.h>
-#include <import/xml/lite.h>
-#include <import/str.h>
 #include <except/Exception.h>
-#include "logging/Logger.h"
+#include <import/io.h>
+#include <import/str.h>
+#include <import/xml/lite.h>
+#include <scene/Utilities.h>
+#include <scene/sys_Conf.h>
 #include <sys/Span.h>
 
-#include <scene/sys_Conf.h>
-#include "six/Types.h"
-#include "six/Enums.h"
-#include "six/XMLControlFactory.h"
-#include "scene/SceneGeometry.h"
-#include "six/ErrorStatistics.h"
-#include "six/Init.h"
-#include "six/Exports.h"
-#include <scene/Utilities.h>
+#include <memory>
+#include <std/cstddef>
+#include <std/filesystem>
+#include <std/span>
+#include <std/string>
+#include <vector>
 
+#include "logging/Logger.h"
+#include "scene/SceneGeometry.h"
+#include "six/Enums.h"
+#include "six/ErrorStatistics.h"
+#include "six/Exports.h"
+#include "six/Init.h"
+#include "six/Types.h"
+#include "six/XMLControlFactory.h"
 
 namespace six
 {
-    struct Data; // forward
-    struct ErrorStatistics;
+struct Data;  // forward
+struct ErrorStatistics;
 
 /*!
  *  Remaps angles into [0:360]
@@ -67,41 +66,47 @@ namespace six
  *      [-90:90]
  *      [-180:180]
  */
-inline
-double remapZeroTo360(double degree)
+inline double remapZeroTo360(double degree)
 {
     return scene::Utilities::remapZeroTo360(degree);
 }
 
-
 // TODO eventually replace enum toString/toType methods below directly in the
 // Enums.h header - it is currently being generated so we won't change it yet
 
-template<typename T> std::string toString(const T& value)
+template <typename T>
+std::string toString(const T& value)
 {
     if (six::Init::isUndefined(value))
     {
         throw six::UninitializedValueException(
-            Ctxt("Attempted use of uninitialized value"));
+                Ctxt("Attempted use of uninitialized value"));
     }
 
     return str::toString<T>(value);
 }
 
-template<typename T> T toType(const std::string& s)
+template <typename T>
+T toType(const std::string& s)
 {
     return str::toType<T>(s);
 }
 
-#define SIX_toString_(T) template<> SIX_SIX_API std::string toString(const T&)
+#define SIX_toString_(T) \
+    template <>          \
+    SIX_SIX_API std::string toString(const T&)
 
 SIX_toString_(float);
 SIX_toString_(double);
 SIX_toString_(six::Vector3);
 SIX_toString_(six::PolyXYZ);
 
-#define SIX_toType_(T) template<> SIX_SIX_API T toType<T>(const std::string&)
-#define SIX_toString_toType_(T) SIX_toString_(T); SIX_toType_(T)
+#define SIX_toType_(T) \
+    template <>        \
+    SIX_SIX_API T toType<T>(const std::string&)
+#define SIX_toString_toType_(T) \
+    SIX_toString_(T);           \
+    SIX_toType_(T)
 
 SIX_toString_toType_(six::EarthModelType);
 SIX_toString_toType_(six::MagnificationMethod);
@@ -160,7 +165,6 @@ void loadPluginDir(const std::string& pluginDir);
 void loadXmlDataContentHandler();
 void loadXmlDataContentHandler(FILE* log);
 
-
 /*
  * Parses the XML in 'xmlStream' and converts it into a Data object
  *
@@ -173,14 +177,18 @@ void loadXmlDataContentHandler(FILE* log);
  *
  * \return Data representation of 'xmlStream'
  */
-SIX_SIX_API std::unique_ptr<Data> parseData(const XMLControlRegistry& xmlReg,
-                              ::io::InputStream& xmlStream, 
-                              DataType dataType,
-                              const std::vector<std::string>& schemaPaths,
-                              logging::Logger& log);
-SIX_SIX_API std::unique_ptr<Data> parseData(const XMLControlRegistry& xmlReg,
-    ::io::InputStream& xmlStream, DataType dataType,
-    const std::vector<std::filesystem::path>*, logging::Logger&);
+SIX_SIX_API std::unique_ptr<Data> parseData(
+        const XMLControlRegistry& xmlReg,
+        ::io::InputStream& xmlStream,
+        DataType dataType,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger& log);
+SIX_SIX_API std::unique_ptr<Data> parseData(
+        const XMLControlRegistry& xmlReg,
+        ::io::InputStream& xmlStream,
+        DataType dataType,
+        const std::vector<std::filesystem::path>*,
+        logging::Logger&);
 
 /*
  * Parses the XML in 'xmlStream' and converts it into a Data object.  Same as
@@ -193,12 +201,16 @@ SIX_SIX_API std::unique_ptr<Data> parseData(const XMLControlRegistry& xmlReg,
  *
  * \return Data representation of 'xmlStream'
  */
-SIX_SIX_API std::unique_ptr<Data> parseData(const XMLControlRegistry& xmlReg,
-                              ::io::InputStream& xmlStream,
-                              const std::vector<std::string>& schemaPaths,
-                              logging::Logger& log);
-SIX_SIX_API std::unique_ptr<Data> parseData(const XMLControlRegistry&, ::io::InputStream&,
-    const std::vector<std::filesystem::path>*, logging::Logger&);
+SIX_SIX_API std::unique_ptr<Data> parseData(
+        const XMLControlRegistry& xmlReg,
+        ::io::InputStream& xmlStream,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger& log);
+SIX_SIX_API std::unique_ptr<Data> parseData(
+        const XMLControlRegistry&,
+        ::io::InputStream&,
+        const std::vector<std::filesystem::path>*,
+        logging::Logger&);
 
 /*
  * Parses the XML in 'pathname' and converts it into a Data object.
@@ -212,11 +224,12 @@ SIX_SIX_API std::unique_ptr<Data> parseData(const XMLControlRegistry&, ::io::Inp
  *
  * \return Data representation of the contents of 'pathname'
  */
-SIX_SIX_API std::unique_ptr<Data> parseDataFromFile(const XMLControlRegistry& xmlReg,
-    const std::string& pathname,
-    DataType dataType,
-    const std::vector<std::string>& schemaPaths,
-    logging::Logger& log);
+SIX_SIX_API std::unique_ptr<Data> parseDataFromFile(
+        const XMLControlRegistry& xmlReg,
+        const std::string& pathname,
+        DataType dataType,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger& log);
 
 /*
  * Parses the XML in 'pathname' and converts it into a Data object.  Same as
@@ -229,10 +242,11 @@ SIX_SIX_API std::unique_ptr<Data> parseDataFromFile(const XMLControlRegistry& xm
  *
  * \return Data representation of the contents of 'pathname'
  */
-SIX_SIX_API std::unique_ptr<Data> parseDataFromFile(const XMLControlRegistry& xmlReg,
-    const std::string& pathname,
-    const std::vector<std::string>& schemaPaths,
-    logging::Logger& log);
+SIX_SIX_API std::unique_ptr<Data> parseDataFromFile(
+        const XMLControlRegistry& xmlReg,
+        const std::string& pathname,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger& log);
 
 /*
  * Parses the XML in 'xmlStr' and converts it into a Data object.
@@ -246,16 +260,18 @@ SIX_SIX_API std::unique_ptr<Data> parseDataFromFile(const XMLControlRegistry& xm
  *
  * \return Data representation of 'xmlStr'
  */
-std::unique_ptr<Data> parseDataFromString(const XMLControlRegistry& xmlReg,
-    const std::string& xmlStr,
-    DataType dataType,
-    const std::vector<std::string>& schemaPaths,
-    logging::Logger& log);
-std::unique_ptr<Data> parseDataFromString(const XMLControlRegistry& xmlReg,
-    const std::u8string& xmlStr,
-    DataType dataType,
-    const std::vector<std::filesystem::path>* pSchemaPaths,
-    logging::Logger* pLogger = nullptr);
+std::unique_ptr<Data> parseDataFromString(
+        const XMLControlRegistry& xmlReg,
+        const std::string& xmlStr,
+        DataType dataType,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger& log);
+std::unique_ptr<Data> parseDataFromString(
+        const XMLControlRegistry& xmlReg,
+        const std::u8string& xmlStr,
+        DataType dataType,
+        const std::vector<std::filesystem::path>* pSchemaPaths,
+        logging::Logger* pLogger = nullptr);
 
 /*
  * Parses the XML in 'xmlStr' and converts it into a Data object.  Same as
@@ -268,18 +284,20 @@ std::unique_ptr<Data> parseDataFromString(const XMLControlRegistry& xmlReg,
  *
  * \return Data representation of 'xmlStr'
  */
-std::unique_ptr<Data> parseDataFromString(const XMLControlRegistry& xmlReg,
-    const std::string& xmlStr,
-    const std::vector<std::string>& schemaPaths,
-    logging::Logger& log);
-std::unique_ptr<Data> parseDataFromString(const XMLControlRegistry& xmlReg,
-    const std::u8string& xmlStr,
-    const std::vector<std::filesystem::path>* pSchemaPaths,
-    logging::Logger* pLogger = nullptr);
+std::unique_ptr<Data> parseDataFromString(
+        const XMLControlRegistry& xmlReg,
+        const std::string& xmlStr,
+        const std::vector<std::string>& schemaPaths,
+        logging::Logger& log);
+std::unique_ptr<Data> parseDataFromString(
+        const XMLControlRegistry& xmlReg,
+        const std::u8string& xmlStr,
+        const std::vector<std::filesystem::path>* pSchemaPaths,
+        logging::Logger* pLogger = nullptr);
 
 SIX_SIX_API void getErrors(const ErrorStatistics* errorStats,
-               const types::RgAz<double>& sampleSpacing,
-               scene::Errors& errors);
+                           const types::RgAz<double>& sampleSpacing,
+                           scene::Errors& errors);
 
 /*
  * Try to find schema directory from given location.
@@ -298,21 +316,23 @@ class SIX_SIX_API DataParser final
     XMLControlRegistry mXmlRegistry;
 
     // The default is `true` because:
-    // * many (most?) other parts of SIX unconditionally set `preserveCharacterData(true)`.
-    // * this is new code; if you're using it, you likely want different behavior than that
+    // * many (most?) other parts of SIX unconditionally set
+    // `preserveCharacterData(true)`.
+    // * this is new code; if you're using it, you likely want different
+    // behavior than that
     //   of existing code; otherwise, why change?
     bool mPreserveCharacterData = true;
 
 public:
-
     /* Parses the XML and converts it into a ComplexData object.
-    * Throws if the underlying type is not complex.
-    *
-    * \param xmlStream Input stream containing XML
-    * \param schemaPaths Schema path(s)
-    * \param log Logger
-    */
-    DataParser(const std::vector<std::filesystem::path>* pSchemaPaths = nullptr, logging::Logger* pLog = nullptr);
+     * Throws if the underlying type is not complex.
+     *
+     * \param xmlStream Input stream containing XML
+     * \param schemaPaths Schema path(s)
+     * \param log Logger
+     */
+    DataParser(const std::vector<std::filesystem::path>* pSchemaPaths = nullptr,
+               logging::Logger* pLog = nullptr);
     ~DataParser() = default;
 
     DataParser(const DataParser&) = delete;
@@ -321,25 +341,27 @@ public:
     DataParser& operator=(DataParser&&) = delete;
 
     /*!
-    * If set to true, whitespaces will be preserved in the parsed
-    * character data. Otherwise, it will be trimmed.
-    */
+     * If set to true, whitespaces will be preserved in the parsed
+     * character data. Otherwise, it will be trimmed.
+     */
     void preserveCharacterData(bool preserve);
 
-    template<typename TXMLControlCreator>
+    template <typename TXMLControlCreator>
     void addCreator()
     {
         mXmlRegistry.addCreator<TXMLControlCreator>();
     }
 
     /* Parses the XML in 'xmlStream'.
-    *
-    * \param xmlStream Input stream containing XML
-    *
-    * \return Data representation of 'xmlStr'
-    */
-    std::unique_ptr<Data> fromXML(::io::InputStream& xmlStream, const XMLControlRegistry&, DataType) const;
-    template<typename TData>
+     *
+     * \param xmlStream Input stream containing XML
+     *
+     * \return Data representation of 'xmlStr'
+     */
+    std::unique_ptr<Data> fromXML(::io::InputStream& xmlStream,
+                                  const XMLControlRegistry&,
+                                  DataType) const;
+    template <typename TData>
     std::unique_ptr<TData> fromXML(::io::InputStream& xmlStream) const
     {
         auto pData = fromXML(xmlStream, mXmlRegistry, DataType::NOT_SET);
@@ -347,22 +369,26 @@ public:
     }
 
     /*
-    * Parses the XML in 'pathname'.
-    *
-    * \param pathname File containing plain text XML (not a NITF)
-    *
-    * \return Data representation of the contents of 'pathname'
-    */
-    std::unique_ptr<Data> fromXML(const std::filesystem::path&, const XMLControlRegistry&, DataType) const;
+     * Parses the XML in 'pathname'.
+     *
+     * \param pathname File containing plain text XML (not a NITF)
+     *
+     * \return Data representation of the contents of 'pathname'
+     */
+    std::unique_ptr<Data> fromXML(const std::filesystem::path&,
+                                  const XMLControlRegistry&,
+                                  DataType) const;
 
     /*
-    * Parses the XML in 'xmlStr'.
-    *
-    * \param xmlStr XML document as a string
-    *
-    * \return Data representation of 'xmlStr'
-    */
-    std::unique_ptr<Data> fromXML(const std::u8string& xmlStr, const XMLControlRegistry&, DataType) const;
+     * Parses the XML in 'xmlStr'.
+     *
+     * \param xmlStr XML document as a string
+     *
+     * \return Data representation of 'xmlStr'
+     */
+    std::unique_ptr<Data> fromXML(const std::u8string& xmlStr,
+                                  const XMLControlRegistry&,
+                                  DataType) const;
 
     /*!
      *  Additionally performs schema validation --
@@ -373,125 +399,132 @@ public:
 
 namespace testing
 {
-    SIX_SIX_API std::filesystem::path findRootDir(const std::filesystem::path& dir);
-    SIX_SIX_API std::filesystem::path buildRootDir(const std::filesystem::path& argv0);
+SIX_SIX_API std::filesystem::path findRootDir(const std::filesystem::path& dir);
+SIX_SIX_API std::filesystem::path buildRootDir(
+        const std::filesystem::path& argv0);
 
-    SIX_SIX_API std::filesystem::path getNitfPath(const  std::filesystem::path& filename);
-    SIX_SIX_API std::filesystem::path getNitroPath(const  std::filesystem::path& filename);
+SIX_SIX_API std::filesystem::path getNitfPath(
+        const std::filesystem::path& filename);
+SIX_SIX_API std::filesystem::path getNitroPath(
+        const std::filesystem::path& filename);
 
-    SIX_SIX_API std::vector<std::filesystem::path> getSchemaPaths();
-    SIX_SIX_API std::filesystem::path getModuleFile(const std::filesystem::path& modulePath, const  std::filesystem::path& filename);
-    SIX_SIX_API std::filesystem::path getSampleXmlPath(const std::filesystem::path& module /*"six.sicd"*/, const  std::filesystem::path& filename);
+SIX_SIX_API std::vector<std::filesystem::path> getSchemaPaths();
+SIX_SIX_API std::filesystem::path getModuleFile(
+        const std::filesystem::path& modulePath,
+        const std::filesystem::path& filename);
+SIX_SIX_API std::filesystem::path getSampleXmlPath(
+        const std::filesystem::path& module /*"six.sicd"*/,
+        const std::filesystem::path& filename);
 
-    /// @brief CRTP Base class to allow toggling profiling code based on ENV vars
-    /// @tparam DerivedProfiler
-    template <typename DerivedProfiler>
-    struct SIX_SIX_API BaseEnvProfiler
-    {
-        BaseEnvProfiler(const char* envVar,
-                        const std::string& testName,
-                        std::ostream& stream) :
-            mEnvVar(envVar), mTestName(testName), mStream(stream)
-        {
-            sys::OS os;
-            mEnabled = os.isEnvSet(mEnvVar);
-            mNumIters = mEnabled ? str::toType<int>(os.getEnv(mEnvVar)) : 1;
-        }
-        ~BaseEnvProfiler() = default;
-
-        template <typename TFunc>
-        void operator()(TFunc f)
-        {
-            if (mEnabled)
-            {
-                static_cast<DerivedProfiler*>(this)->opImpl(f);
-            }
-            else
-            {
-                f();
-            }
-        }
-
-        const std::string mEnvVar;
-        const std::string& mTestName;
-        std::ostream& mStream;
-        int mNumIters;
-        int mEnabled;
-    };
-
-    /// @brief Toggle runtime profiling based on env var
-    struct SIX_SIX_API EnvProfiler : BaseEnvProfiler<EnvProfiler>
-    {
-        EnvProfiler(const char* envVar,
+/// @brief CRTP Base class to allow toggling profiling code based on ENV vars
+/// @tparam DerivedProfiler
+template <typename DerivedProfiler>
+struct SIX_SIX_API BaseEnvProfiler
+{
+    BaseEnvProfiler(const char* envVar,
                     const std::string& testName,
                     std::ostream& stream) :
-            BaseEnvProfiler(envVar, testName, stream)
-        {
-        }
-        ~EnvProfiler() = default;
-
-        template <typename TFunc>
-        void opImpl(TFunc f)
-        {
-            double mean(0.0);
-            double mn(std::numeric_limits<double>::infinity());
-            double mx(-std::numeric_limits<double>::infinity());
-            for (int i = 0; i < mNumIters; ++i)
-            {
-                sys::RealTimeStopWatch sw;
-                sw.start();
-
-                f();
-
-                auto elapsed = sw.stop();
-
-                mean += elapsed;
-                mn = std::min(elapsed, mn);
-                mx = std::max(elapsed, mx);
-            }
-
-            mean /= mNumIters;
-            mStream << mTestName << " runtime (mean/min/max)ms: " << mean << "/"
-                    << mn << "/" << mx << std::endl;
-        }
-    };
-
-    /// @brief Toggle profiling of exception sizes based on env var
-    /// @tparam TExcept
-    template <typename TExcept>
-    struct SIX_SIX_API StackTraceSizeEnvProfiler
-        : BaseEnvProfiler<StackTraceSizeEnvProfiler<TExcept>>
+        mEnvVar(envVar), mTestName(testName), mStream(stream)
     {
-        StackTraceSizeEnvProfiler(const char* envVar,
-                                  const std::string& testName,
-                                  std::ostream& stream) :
-            BaseEnvProfiler<StackTraceSizeEnvProfiler<TExcept>>(envVar,
-                                                                testName,
-                                                                stream)
-        {
-        }
-        ~StackTraceSizeEnvProfiler() = default;
+        sys::OS os;
+        mEnabled = os.isEnvSet(mEnvVar);
+        mNumIters = mEnabled ? str::toType<int>(os.getEnv(mEnvVar)) : 1;
+    }
+    ~BaseEnvProfiler() = default;
 
-        template <typename TFunc>
-        void opImpl(TFunc f)
+    template <typename TFunc>
+    void operator()(TFunc f)
+    {
+        if (mEnabled)
         {
-            try
-            {
-                f();
-            }
-            catch (const TExcept& ex)
-            {
-                // log size of the exception message
-                this->mStream << this->mTestName
-                              << ": exception size (bytes): " << strlen(ex.what())
-                              << std::endl;
-
-                throw;
-            }
+            static_cast<DerivedProfiler*>(this)->opImpl(f);
         }
-    };
+        else
+        {
+            f();
+        }
+    }
+
+    const std::string mEnvVar;
+    const std::string& mTestName;
+    std::ostream& mStream;
+    int mNumIters;
+    int mEnabled;
+};
+
+/// @brief Toggle runtime profiling based on env var
+struct SIX_SIX_API EnvProfiler : BaseEnvProfiler<EnvProfiler>
+{
+    EnvProfiler(const char* envVar,
+                const std::string& testName,
+                std::ostream& stream) :
+        BaseEnvProfiler(envVar, testName, stream)
+    {
+    }
+    ~EnvProfiler() = default;
+
+    template <typename TFunc>
+    void opImpl(TFunc f)
+    {
+        double mean(0.0);
+        double mn(std::numeric_limits<double>::infinity());
+        double mx(-std::numeric_limits<double>::infinity());
+        for (int i = 0; i < mNumIters; ++i)
+        {
+            sys::RealTimeStopWatch sw;
+            sw.start();
+
+            f();
+
+            auto elapsed = sw.stop();
+
+            mean += elapsed;
+            mn = std::min(elapsed, mn);
+            mx = std::max(elapsed, mx);
+        }
+
+        mean /= mNumIters;
+        mStream << mTestName << " runtime (mean/min/max)ms: " << mean << "/"
+                << mn << "/" << mx << std::endl;
+    }
+};
+
+/// @brief Toggle profiling of exception sizes based on env var
+/// @tparam TExcept
+template <typename TExcept>
+struct SIX_SIX_API StackTraceSizeEnvProfiler
+    : BaseEnvProfiler<StackTraceSizeEnvProfiler<TExcept>>
+{
+    StackTraceSizeEnvProfiler(const char* envVar,
+                              const std::string& testName,
+                              std::ostream& stream) :
+        BaseEnvProfiler<StackTraceSizeEnvProfiler<TExcept>>(envVar,
+                                                            testName,
+                                                            stream)
+    {
+    }
+    ~StackTraceSizeEnvProfiler() = default;
+
+    template <typename TFunc>
+    void opImpl(TFunc f)
+    {
+        try
+        {
+            f();
+        }
+        catch (const TExcept& ex)
+        {
+            // log size of the exception message
+            this->mStream << this->mTestName
+                          << ": exception size (bytes): " << strlen(ex.what())
+                          << std::endl;
+
+            throw;
+        }
+    }
+};
 
 }
 }
 
-#endif // SIX_six_Utilities_h_INCLUDED_
+#endif  // SIX_six_Utilities_h_INCLUDED_

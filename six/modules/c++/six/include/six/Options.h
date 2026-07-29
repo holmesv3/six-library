@@ -25,9 +25,9 @@
 
 #include <map>
 
-#include "six/Types.h"
-#include "six/Parameter.h"
 #include "six/Exports.h"
+#include "six/Parameter.h"
+#include "six/Types.h"
 
 namespace six
 {
@@ -63,8 +63,8 @@ public:
      *  If we fail to find that option, supplement it with defaultValue
      *  that is passed in
      */
-    virtual Parameter
-            getParameter(const std::string& option, Parameter defaultValue) const;
+    virtual Parameter getParameter(const std::string& option,
+                                   Parameter defaultValue) const;
 
     /*!
      *  Set a parameter with key given in option parameter
@@ -77,10 +77,16 @@ public:
     virtual bool hasParameter(const std::string& option) const;
 
     //!  Allows us to iterate a parameter list
-    ParameterIter begin() const { return mParameters.begin(); }
+    ParameterIter begin() const
+    {
+        return mParameters.begin();
+    }
 
     //!  Allows us to compare an iterator against end
-    ParameterIter end() const { return mParameters.end(); }
+    ParameterIter end() const
+    {
+        return mParameters.end();
+    }
 
     bool operator==(const Options& rhs) const;
     bool operator!=(const Options& rhs) const
@@ -94,4 +100,3 @@ private:
 }
 
 #endif
-

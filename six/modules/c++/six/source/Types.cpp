@@ -21,14 +21,15 @@
  */
 #include "six/Types.h"
 
-#include "six/Init.h"
-#include "six/Exports.h"
 #include <nitf/ImageSegmentComputer.h>
+
+#include "six/Exports.h"
+#include "six/Init.h"
 
 std::ostream& operator<<(std::ostream& os, const scene::LatLonAlt& latLonAlt)
 {
     os << '(' << latLonAlt.getLat() << ',' << latLonAlt.getLon() << ','
-            << latLonAlt.getAlt() << ')';
+       << latLonAlt.getAlt() << ')';
     return os;
 }
 
@@ -76,13 +77,13 @@ ImageMode getImageMode(RadarModeType radarMode)
     case RadarModeType::NOT_SET:
         throw except::Exception(Ctxt("Radar mode not set"));
     case RadarModeType::SPOTLIGHT:
-    default: // TODO: Not sure what to do for SCANSAR
+    default:  // TODO: Not sure what to do for SCANSAR
         return FRAME_MODE;
     }
 }
 
-template<> SIX_SIX_API
-LatLonCorners::Corners() :
+template <>
+SIX_SIX_API LatLonCorners::Corners() :
     upperLeft(Init::undefined<LatLon>()),
     upperRight(Init::undefined<LatLon>()),
     lowerRight(Init::undefined<LatLon>()),
@@ -90,8 +91,8 @@ LatLonCorners::Corners() :
 {
 }
 
-template<> SIX_SIX_API
-LatLonAltCorners::Corners() :
+template <>
+SIX_SIX_API LatLonAltCorners::Corners() :
     upperLeft(Init::undefined<LatLonAlt>()),
     upperRight(Init::undefined<LatLonAlt>()),
     lowerRight(Init::undefined<LatLonAlt>()),
@@ -99,11 +100,8 @@ LatLonAltCorners::Corners() :
 {
 }
 
-SCP::SCP() :
-   ecf(Init::undefined<Vector3>()),
-   llh(Init::undefined<LatLonAlt>())
+SCP::SCP() : ecf(Init::undefined<Vector3>()), llh(Init::undefined<LatLonAlt>())
 {
 }
 
 }
-

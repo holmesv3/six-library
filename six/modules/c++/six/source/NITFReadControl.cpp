@@ -21,28 +21,26 @@
  */
 
 #include <assert.h>
+#include <gsl/gsl.h>
+#include <six/NITFReadControl.h>
+#include <six/Utilities.h>
+#include <six/XMLControlFactory.h>
 
 #include <sstream>
+#include <std/memory>
 #include <stdexcept>
 #include <string>
-#include <std/memory>
-
-#include <gsl/gsl.h>
-
-#include <six/NITFReadControl.h>
-#include <six/XMLControlFactory.h>
-#include <six/Utilities.h>
 
 #undef min
 #undef max
 
 #ifndef SIX_ENABLE_DED
-    // set to 1 for DEM support
-    #define SIX_ENABLE_DED 0
+// set to 1 for DEM support
+#define SIX_ENABLE_DED 0
 #endif
 namespace six
 {
-    constexpr auto enable_ded = SIX_ENABLE_DED ? true : false;
+constexpr auto enable_ded = SIX_ENABLE_DED ? true : false;
 }
 
 namespace
@@ -59,8 +57,7 @@ types::RowCol<size_t> parseILOC(const std::string& str)
 
 void assignLUT(const nitf::ImageSubheader& subheader, six::Legend& legend)
 {
-    nitf::LookupTable lut =
-            subheader.getBandInfo(0).getLookupTable();
+    nitf::LookupTable lut = subheader.getBandInfo(0).getLookupTable();
 
     legend.mLUT.reset(new six::LUT(lut.getEntries(), lut.getTables()));
 
@@ -72,8 +69,7 @@ void assignLUT(const nitf::ImageSubheader& subheader, six::Legend& legend)
         for (size_t jj = 0; jj < lut.getTables(); ++jj, ++kk)
         {
             // Need to transpose the lookup table entries
-            legend.mLUT->getTable()[kk] =
-                    table[jj * lut.getEntries() + ii];
+            legend.mLUT->getTable()[kk] = table[jj * lut.getEntries() + ii];
         }
     }
 }
@@ -89,7 +85,8 @@ six::PixelType getPixelType(const nitf::ImageSubheader& subheader)
     {
         return six::PixelType::RGB8LU;
     }
-    throw except::Exception(Ctxt("Unexpected image representation '" + to_string(iRep) + "'"));
+    throw except::Exception(
+            Ctxt("Unexpected image representation '" + to_string(iRep) + "'"));
 }
 }
 
@@ -101,11 +98,12 @@ NITFReadControl::NITFReadControl(FILE* log)
     // singleton PluginRegistry
     loadXmlDataContentHandler(log);
 }
-// This can generate output from implicitConstruct() complaining about NITF_PLUGIN_PATH
-// not being set; often the warning is benign and is just confusing.  Provide a way to turn
-// it off (FILE* log = NULL) without upsetting existing code.
-NITFReadControl::NITFReadControl()
-    : NITFReadControl(stderr) // existing/legacy behavior
+// This can generate output from implicitConstruct() complaining about
+// NITF_PLUGIN_PATH not being set; often the warning is benign and is just
+// confusing.  Provide a way to turn it off (FILE* log = NULL) without upsetting
+// existing code.
+NITFReadControl::NITFReadControl() :
+    NITFReadControl(stderr)  // existing/legacy behavior
 {
 }
 
@@ -118,13 +116,14 @@ DataType NITFReadControl::getDataType(const nitf::Record& record)
     }
 
     // SICD spec guarantees that the first DES will be the SICD/SIDD DES
-    nitf::DESegment segment = (nitf::DESegment) des.getFirst().getData();
+    nitf::DESegment segment = (nitf::DESegment)des.getFirst().getData();
     return getDataType(segment);
 }
 
 DataType NITFReadControl::getDataType(const std::string& desid,
-        uint64_t subheaderLength, const std::string& desshsiField,
-        const std::string& treTag)
+                                      uint64_t subheaderLength,
+                                      const std::string& desshsiField,
+                                      const std::string& treTag)
 {
     // SICD/SIDD 1.0 specify DESID as XML_DATA_CONTENT
     // Older versions of the spec specified it as SICD_XML/SIDD_XML
@@ -229,14 +228,15 @@ void NITFReadControl::validateSegment(const nitf::ImageSubheader& subheader,
     const auto numBitsPerPixel = subheader.numBitsPerPixel();
     const auto numBytesPerPixel = (numBitsPerPixel + 7) / 8;
     const auto numBytesSeg = numBytesPerPixel * numBandsSeg;
-    //const auto numChannels = info.getData()->getNumChannels();
+    // const auto numChannels = info.getData()->getNumChannels();
     const auto foundBytesPerPixel = numBytesSeg;
 
     const auto expectedBytesPerPixel = info.getData()->getNumBytesPerPixel();
     if (foundBytesPerPixel != expectedBytesPerPixel)
     {
         std::ostringstream ostr;
-        ostr << "Expected [" << expectedBytesPerPixel << "] bytes per pixel, found [" << foundBytesPerPixel << "]";
+        ostr << "Expected [" << expectedBytesPerPixel
+             << "] bytes per pixel, found [" << foundBytesPerPixel << "]";
         throw except::Exception(Ctxt(ostr));
     }
 
@@ -245,19 +245,24 @@ void NITFReadControl::validateSegment(const nitf::ImageSubheader& subheader,
     if (numColsSubheader != numCols)
     {
         std::ostringstream ostr;
-        ostr << "Invalid column width: was expecting [" << numCols << "], got [" << numColsSubheader << "]";
+        ostr << "Invalid column width: was expecting [" << numCols << "], got ["
+             << numColsSubheader << "]";
         throw except::Exception(Ctxt(ostr));
     }
 }
 
-void NITFReadControl::load(const std::string& fromFile, const std::vector<std::string>* pSchemaPaths)
+void NITFReadControl::load(const std::string& fromFile,
+                           const std::vector<std::string>* pSchemaPaths)
 {
     auto handle(std::make_shared<nitf::IOHandle>(fromFile));
     load(handle, pSchemaPaths);
 }
-void NITFReadControl::load(const std::filesystem::path& fromFile, const std::vector<std::filesystem::path>* pSchemaPaths)
+void NITFReadControl::load(
+        const std::filesystem::path& fromFile,
+        const std::vector<std::filesystem::path>* pSchemaPaths)
 {
-    std::shared_ptr<nitf::IOInterface> handle(std::make_shared<nitf::IOHandle>(fromFile.string()));
+    std::shared_ptr<nitf::IOInterface> handle(
+            std::make_shared<nitf::IOHandle>(fromFile.string()));
     load(handle, pSchemaPaths);
 }
 
@@ -277,17 +282,23 @@ static std::vector<six::NITFImageInfo*> getImageInfos(six::Container& container)
     {
         if (container.size() != 1)
         {
-            throw except::Exception(Ctxt("SICD file must have exactly 1 SICD DES but got " + std::to_string(container.size())));
+            throw except::Exception(
+                    Ctxt("SICD file must have exactly 1 SICD DES but got " +
+                         std::to_string(container.size())));
         }
 
-        return std::vector<six::NITFImageInfo*> { new NITFImageInfo(container.getData(0)) };
+        return std::vector<six::NITFImageInfo*>{
+                new NITFImageInfo(container.getData(0))};
     }
 
     // We will validate that we got a SIDD DES per image product in the
     // for loop below
     if (container.getDataType() != DataType::DERIVED)
     {
-        throw except::Exception(Ctxt("Unrecognized Data Extension Segment")); // N.B. not assert(), calling code can catch an exception
+        throw except::Exception(Ctxt(
+                "Unrecognized Data Extension Segment"));  // N.B. not assert(),
+                                                          // calling code can
+                                                          // catch an exception
     }
 
     std::vector<six::NITFImageInfo*> retval;
@@ -302,25 +313,28 @@ static std::vector<six::NITFImageInfo*> getImageInfos(six::Container& container)
     return retval;
 }
 
-inline std::unique_ptr<Data> parseData_(const XMLControlRegistry& xmlReg,
-    ::io::InputStream& xmlStream,
-    DataType dataType,
-    const std::vector<std::string>* pSchemaPaths,
-    logging::Logger& log)
+inline std::unique_ptr<Data> parseData_(
+        const XMLControlRegistry& xmlReg,
+        ::io::InputStream& xmlStream,
+        DataType dataType,
+        const std::vector<std::string>* pSchemaPaths,
+        logging::Logger& log)
 {
     return six::parseData(xmlReg, xmlStream, dataType, *pSchemaPaths, log);
 }
-inline std::unique_ptr<Data> parseData_(const XMLControlRegistry& xmlReg,
-    ::io::InputStream& xmlStream,
-    DataType dataType,
-    const std::vector<std::filesystem::path>* pSchemaPaths,
-    logging::Logger& log)
+inline std::unique_ptr<Data> parseData_(
+        const XMLControlRegistry& xmlReg,
+        ::io::InputStream& xmlStream,
+        DataType dataType,
+        const std::vector<std::filesystem::path>* pSchemaPaths,
+        logging::Logger& log)
 {
     return six::parseData(xmlReg, xmlStream, dataType, pSchemaPaths, log);
 }
 
-template<typename TSchemaPath>
-void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, const std::vector<TSchemaPath>* pSchemaPaths)
+template <typename TSchemaPath>
+void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface,
+                            const std::vector<TSchemaPath>* pSchemaPaths)
 {
     reset();
     mInterface = ioInterface;
@@ -335,7 +349,7 @@ void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, cons
 
     for (int i = 0, productNum = 0; desIter != des.end(); ++desIter, ++i)
     {
-        nitf::DESegment segment = (nitf::DESegment) *desIter;
+        nitf::DESegment segment = (nitf::DESegment)*desIter;
         nitf::DESubheader subheader = segment.getSubheader();
         nitf::SegmentReader deReader = mReader.newDEReader(i);
 
@@ -346,11 +360,8 @@ void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, cons
         else
         {
             SegmentInputStreamAdapter ioAdapter(deReader);
-            std::unique_ptr<Data> data(parseData_(*mXMLRegistry,
-                                               ioAdapter,
-                                               dataType,
-                                               pSchemaPaths,
-                                               *mLog));
+            std::unique_ptr<Data> data(parseData_(
+                    *mXMLRegistry, ioAdapter, dataType, pSchemaPaths, *mLog));
             if (data.get() == nullptr)
             {
                 throw except::Exception(Ctxt("Unable to transform XML DES"));
@@ -362,7 +373,9 @@ void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, cons
 
             if (data->getDataType() == six::DataType::DERIVED)
             {
-                mContainer->addData(std::move(data), findLegend(gsl::narrow<size_t>(productNum)));
+                mContainer->addData(std::move(data),
+                                    findLegend(
+                                            gsl::narrow<size_t>(productNum)));
             }
             else if (data->getDataType() == six::DataType::COMPLEX)
             {
@@ -377,9 +390,11 @@ void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, cons
         }
     }
 
-    if (mRecord.getNumImages() == 0) // Get the total number of images in the NITF
+    if (mRecord.getNumImages() ==
+        0)  // Get the total number of images in the NITF
     {
-        throw except::Exception(Ctxt("SICD/SIDD files must have at least one image"));
+        throw except::Exception(
+                Ctxt("SICD/SIDD files must have at least one image"));
     }
 
     mInfos = getImageInfos(*mContainer);
@@ -388,11 +403,13 @@ void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, cons
 
     // Now go through every image and figure out what clump it's attached
     // to and use that for the measurements
-    for (size_t nitfSegmentIdx = 0; nitfSegmentIdx < images.getSize(); ++nitfSegmentIdx)
+    for (size_t nitfSegmentIdx = 0; nitfSegmentIdx < images.getSize();
+         ++nitfSegmentIdx)
     {
         // Get a segment ref
-       auto segment_ = static_cast<nitf::ImageSegment>(images_[nitfSegmentIdx]);
-       const auto& segment = segment_;
+        auto segment_ =
+                static_cast<nitf::ImageSegment>(images_[nitfSegmentIdx]);
+        const auto& segment = segment_;
 
         // Get the subheader out
         const auto subheader = segment.getSubheader();
@@ -405,7 +422,9 @@ void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, cons
         getIndices(subheader, imageAndSegment);
         if (imageAndSegment.image >= mInfos.size())
         {
-            throw except::Exception(Ctxt("Image " + std::to_string(imageAndSegment.image) + " is out of bounds"));
+            throw except::Exception(Ctxt("Image " +
+                                         std::to_string(imageAndSegment.image) +
+                                         " is out of bounds"));
         }
 
         const auto& currentInfo = mInfos[imageAndSegment.image];
@@ -417,7 +436,8 @@ void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, cons
         // do with the size of the pixel data
         const bool segIsLegend = isLegend(subheader);
         const bool segIsDed = isDed(subheader);
-        const auto do_validateSegment = six::enable_ded ? !segIsLegend && !segIsDed : !segIsLegend;
+        const auto do_validateSegment =
+                six::enable_ded ? !segIsLegend && !segIsDed : !segIsLegend;
         if (do_validateSegment)
         {
             validateSegment(subheader, *currentInfo);
@@ -426,7 +446,8 @@ void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, cons
         // We are propagating the last segment's
         // security markings through.  This should be okay, since, if you
         // segment, you have the same security markings
-        addImageClassOptions(subheader, currentInfo->getData_()->getClassification());
+        addImageClassOptions(subheader,
+                             currentInfo->getData_()->getClassification());
 
         NITFSegmentInfo si;
         si.numRows = numRowsSeg;
@@ -440,11 +461,13 @@ void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, cons
         {
             const auto imageSegments = currentInfo->getImageSegments();
             si.rowOffset = imageSegments[productSegmentIdx - 1].getNumRows();
-            si.firstRow = imageSegments[productSegmentIdx - 1].getFirstRow() + si.getRowOffset();
+            si.firstRow = imageSegments[productSegmentIdx - 1].getFirstRow() +
+                    si.getRowOffset();
         }
 
         // Legends don't set lat/lons
-        const auto do_setLatLon = six::enable_ded ? !segIsLegend && !segIsDed : !segIsLegend;
+        const auto do_setLatLon =
+                six::enable_ded ? !segIsLegend && !segIsDed : !segIsLegend;
         if (do_setLatLon)
         {
             double corners[4][2]{};
@@ -460,7 +483,8 @@ void NITFReadControl::load_(std::shared_ptr<nitf::IOInterface> ioInterface, cons
         currentInfo->addSegment(si);
     }
 }
-void NITFReadControl::setDisplayLUT(six::NITFImageInfo& currentInfo, const nitf::ImageSubheader& subheader)
+void NITFReadControl::setDisplayLUT(six::NITFImageInfo& currentInfo,
+                                    const nitf::ImageSubheader& subheader)
 {
     // SIDD 2.0 needs to read LUT directly from NITF
     const auto pData = currentInfo.getData();
@@ -471,7 +495,7 @@ void NITFReadControl::setDisplayLUT(six::NITFImageInfo& currentInfo, const nitf:
     }
 
     const auto version = pData->getVersion();
-    if (version == "1.0.0") // TODO: remove this hard-coded SIDD version check
+    if (version == "1.0.0")  // TODO: remove this hard-coded SIDD version check
     {
         // LUTs only with SIDD 2.0 and later
         return;
@@ -480,31 +504,36 @@ void NITFReadControl::setDisplayLUT(six::NITFImageInfo& currentInfo, const nitf:
     // There's no requirement for SIDD 2.0 to have a LUT
     const auto bandInfo0 = subheader.getBandInfo(0);
     const int numLUTs = bandInfo0.getNumLUTs();
-    if (numLUTs > 0) // avoid getLookupTable() creating an empty nitf::LookupTable
+    if (numLUTs >
+        0)  // avoid getLookupTable() creating an empty nitf::LookupTable
     {
         const auto nitfLut = bandInfo0.getLookupTable();
         if (nitfLut.getEntries() > 0)
         {
-            currentInfo.getData_()->setDisplayLUT(std::make_unique<AmplitudeTable>(nitfLut));
+            currentInfo.getData_()->setDisplayLUT(
+                    std::make_unique<AmplitudeTable>(nitfLut));
         }
     }
 }
 
-void NITFReadControl::load(std::shared_ptr<nitf::IOInterface> ioInterface, const std::vector<std::string>* pSchemaPaths_)
+void NITFReadControl::load(std::shared_ptr<nitf::IOInterface> ioInterface,
+                           const std::vector<std::string>* pSchemaPaths_)
 {
     const std::vector<std::string> schemaPaths;
-    const std::vector<std::string>* pSchemaPaths = (pSchemaPaths_ != nullptr) ? pSchemaPaths_ : &schemaPaths;
+    const std::vector<std::string>* pSchemaPaths =
+            (pSchemaPaths_ != nullptr) ? pSchemaPaths_ : &schemaPaths;
     load_(ioInterface, pSchemaPaths);
 }
-void NITFReadControl::load(std::shared_ptr<nitf::IOInterface> ioInterface, const std::vector<std::filesystem::path>* pSchemaPaths)
+void NITFReadControl::load(
+        std::shared_ptr<nitf::IOInterface> ioInterface,
+        const std::vector<std::filesystem::path>* pSchemaPaths)
 {
     load_(ioInterface, pSchemaPaths);
 }
 
-void NITFReadControl::addImageClassOptions(const nitf::ImageSubheader& subheader,
-        six::Classification& c) const
+void NITFReadControl::addImageClassOptions(
+        const nitf::ImageSubheader& subheader, six::Classification& c) const
 {
-
     Parameter p;
     p = subheader.imageSecurityClass();
     c.fileOptions.setParameter("ISCLAS", p);
@@ -512,7 +541,7 @@ void NITFReadControl::addImageClassOptions(const nitf::ImageSubheader& subheader
 }
 
 void NITFReadControl::addDEClassOptions(const nitf::DESubheader& subheader,
-        six::Classification& c) const
+                                        six::Classification& c) const
 {
     Parameter p;
     p = subheader.securityClass();
@@ -525,9 +554,14 @@ class AddSecurityOption final
     const std::string& prefix_;
     six::Options& options_;
     logging::Logger& log_;
+
 public:
-    AddSecurityOption(const std::string& prefix, six::Options& options, logging::Logger& log)
-        : prefix_(prefix), options_(options), log_(log) {}
+    AddSecurityOption(const std::string& prefix,
+                      six::Options& options,
+                      logging::Logger& log) :
+        prefix_(prefix), options_(options), log_(log)
+    {
+    }
 
     AddSecurityOption(const AddSecurityOption&) = delete;
     AddSecurityOption& operator=(const AddSecurityOption&) = delete;
@@ -538,13 +572,15 @@ public:
         Parameter p = parameter.toString();
         const auto k = NITFImageInfo::generateFieldKey(field, prefix_);
         options_.setParameter(k, p);
-        log_.debug(Ctxt(str::Format("Added NITF security option: [%s]->[%s]", k,
-            static_cast<const char*>(p))));
+        log_.debug(Ctxt(str::Format("Added NITF security option: [%s]->[%s]",
+                                    k,
+                                    static_cast<const char*>(p))));
     }
 };
 
 void NITFReadControl::addSecurityOptions(nitf::FileSecurity security,
-        const std::string& prefix, six::Options& options) const
+                                         const std::string& prefix,
+                                         six::Options& options) const
 {
     AddSecurityOption addSecurityOption(prefix, options, *mLog);
 
@@ -554,25 +590,29 @@ void NITFReadControl::addSecurityOptions(nitf::FileSecurity security,
     addSecurityOption(security.getReleasingInstructions(), NITFImageInfo::REL);
     addSecurityOption(security.getDeclassificationType(), NITFImageInfo::DCTP);
     addSecurityOption(security.getDeclassificationDate(), NITFImageInfo::DCDT);
-    addSecurityOption(security.getDeclassificationExemption(), NITFImageInfo::DCXM);
+    addSecurityOption(security.getDeclassificationExemption(),
+                      NITFImageInfo::DCXM);
     addSecurityOption(security.getDowngrade(), NITFImageInfo::DG);
     addSecurityOption(security.getDowngradeDateTime(), NITFImageInfo::DGDT);
     addSecurityOption(security.getClassificationText(), NITFImageInfo::CLTX);
-    addSecurityOption(security.getClassificationAuthorityType(), NITFImageInfo::CATP);
-    addSecurityOption(security.getClassificationAuthority(), NITFImageInfo::CAUT);
+    addSecurityOption(security.getClassificationAuthorityType(),
+                      NITFImageInfo::CATP);
+    addSecurityOption(security.getClassificationAuthority(),
+                      NITFImageInfo::CAUT);
     addSecurityOption(security.getClassificationReason(), NITFImageInfo::CRSN);
     addSecurityOption(security.getSecuritySourceDate(), NITFImageInfo::SRDT);
     addSecurityOption(security.getSecurityControlNumber(), NITFImageInfo::CTLN);
 }
 
-std::pair<size_t, size_t>
-NITFReadControl::getIndices(const nitf::ImageSubheader& subheader) const
+std::pair<size_t, size_t> NITFReadControl::getIndices(
+        const nitf::ImageSubheader& subheader) const
 {
     ImageAndSegment result;
     getIndices(subheader, result);
     return std::make_pair(result.image, result.segment);
 }
-void NITFReadControl::getIndices(const nitf::ImageSubheader& subheader, ImageAndSegment& result) const
+void NITFReadControl::getIndices(const nitf::ImageSubheader& subheader,
+                                 ImageAndSegment& result) const
 {
     const auto imageID = subheader.imageId();
 
@@ -583,7 +623,8 @@ void NITFReadControl::getIndices(const nitf::ImageSubheader& subheader, ImageAnd
     const auto digit_pos = imageID.find_first_of("0123456789");
     if (digit_pos == std::string::npos)
     {
-        throw except::Exception(Ctxt("Can't parse 'iid' from '" + imageID + "'"));
+        throw except::Exception(
+                Ctxt("Can't parse 'iid' from '" + imageID + "'"));
     }
     const auto str_image = imageID.substr(digit_pos, 3);
     const size_t iid = str::toType<size_t>(str_image);
@@ -625,14 +666,16 @@ void NITFReadControl::getIndices(const nitf::ImageSubheader& subheader, ImageAnd
             }
             else
             {
-                throw except::Exception(Ctxt("Can't extract segment # from: " + imageID));
+                throw except::Exception(
+                        Ctxt("Can't extract segment # from: " + imageID));
             }
         }
         segment = str::toType<size_t>(str_segment) - 1;
     }
     else
     {
-        throw except::Exception(Ctxt("Unknown 'DataType' value: " + dataType.toString()));
+        throw except::Exception(
+                Ctxt("Unknown 'DataType' value: " + dataType.toString()));
     }
 }
 
@@ -664,15 +707,18 @@ UByte* NITFReadControl::interleaved(Region& region, size_t imageNumber)
     const auto extentCols = startCol + numColsReq;
 
     if (extentRows > numRowsTotal || startRow > numRowsTotal)
-        throw except::Exception(Ctxt(str::Format("Too many rows requested [%d]", numRowsReq)));
+        throw except::Exception(
+                Ctxt(str::Format("Too many rows requested [%d]", numRowsReq)));
 
     if (extentCols > numColsTotal || startCol > numColsTotal)
-        throw except::Exception(Ctxt(str::Format("Too many cols requested [%d]", numColsReq)));
+        throw except::Exception(
+                Ctxt(str::Format("Too many cols requested [%d]", numColsReq)));
 
     // Allocate one band
     uint32_t bandList(0);
 
-    const auto subWindowSize = regionExtent.area() * thisImage.getData()->getNumBytesPerPixel();
+    const auto subWindowSize =
+            regionExtent.area() * thisImage.getData()->getNumBytesPerPixel();
 
     auto buffer = region.getBuffer();
     if (buffer == nullptr)
@@ -687,14 +733,15 @@ UByte* NITFReadControl::interleaved(Region& region, size_t imageNumber)
     sw.setNumBands(1);
     sw.setBandList(&bandList);
 
-    std::vector < NITFSegmentInfo > imageSegments = thisImage.getImageSegments();
+    std::vector<NITFSegmentInfo> imageSegments = thisImage.getImageSegments();
     const size_t numIS = imageSegments.size();
     size_t startOff = 0;
 
     size_t i;
     for (i = 0; i < numIS; i++)
     {
-        const auto firstRowSeg = gsl::narrow<ptrdiff_t>(imageSegments[i].getFirstRow());
+        const auto firstRowSeg =
+                gsl::narrow<ptrdiff_t>(imageSegments[i].getFirstRow());
 
         if (firstRowSeg <= startRow)
         {
@@ -705,17 +752,15 @@ UByte* NITFReadControl::interleaved(Region& region, size_t imageNumber)
         {
             break;
         }
-
     }
-    --i; // Need to get rid of the last one
+    --i;  // Need to get rid of the last one
     size_t totalRead = 0;
     auto numRowsLeft = numRowsReq;
     sw.setStartRow(static_cast<uint32_t>(startRow - startOff));
 #if DEBUG_OFFSETS
-    std::cout << "startRow: " << startRow
-    << " startOff: " << startOff
-    << " sw.startRow: " << sw.getStartRow()
-    << " i: " << i << std::endl;
+    std::cout << "startRow: " << startRow << " startOff: " << startOff
+              << " sw.startRow: " << sw.getStartRow() << " i: " << i
+              << std::endl;
 #endif
 
     const auto nbpp = thisImage.getData()->getNumBytesPerPixel();
@@ -724,12 +769,13 @@ UByte* NITFReadControl::interleaved(Region& region, size_t imageNumber)
     for (; i < numIS && totalRead < subWindowSize; i++)
     {
         const auto numRowsReqSeg =
-                std::min(gsl::narrow<size_t>(numRowsLeft), imageSegments[i].getNumRows() - sw.getStartRow());
+                std::min(gsl::narrow<size_t>(numRowsLeft),
+                         imageSegments[i].getNumRows() - sw.getStartRow());
 
         sw.setNumRows(static_cast<uint32_t>(numRowsReqSeg));
-        nitf::ImageReader imageReader = mReader.newImageReader(
-                static_cast<int>(startIndex + i),
-                mCompressionOptions);
+        nitf::ImageReader imageReader =
+                mReader.newImageReader(static_cast<int>(startIndex + i),
+                                       mCompressionOptions);
 
         auto bufferPtr = buffer + totalRead;
 
@@ -750,11 +796,10 @@ std::unique_ptr<Legend> NITFReadControl::findLegend(size_t productNum)
     nitf::List images = mRecord.getImages();
     nitf::ListIterator imageIter = images.begin();
 
-    for (size_t imageSeg = 0;
-         imageIter != images.end();
+    for (size_t imageSeg = 0; imageIter != images.end();
          ++imageIter, ++imageSeg)
     {
-        nitf::ImageSegment segment = (nitf::ImageSegment) *imageIter;
+        nitf::ImageSegment segment = (nitf::ImageSegment)*imageIter;
         nitf::ImageSubheader subheader = segment.getSubheader();
 
         if (productNum == getIndices(subheader).first && isLegend(subheader))
@@ -799,8 +844,8 @@ void NITFReadControl::readLegendPixelData(const nitf::ImageSubheader& subheader,
     if (!legend.mImage.empty())
     {
         auto bufferPtr = legend.mImage.data();
-        nitf::ImageReader imageReader = mReader.newImageReader(
-                static_cast<int>(imageSeg));
+        nitf::ImageReader imageReader =
+                mReader.newImageReader(static_cast<int>(imageSeg));
         int padded = 0;
         imageReader.read(sw, &bufferPtr, &padded);
     }
@@ -816,8 +861,8 @@ void NITFReadControl::reset()
     mInterface.reset();
 }
 
-
-void NITFReadControlCreator::newReadControl(std::unique_ptr<six::ReadControl>& result) const
+void NITFReadControlCreator::newReadControl(
+        std::unique_ptr<six::ReadControl>& result) const
 {
     result.reset(new NITFReadControl());
 }
@@ -829,7 +874,7 @@ bool NITFReadControlCreator::supports(const std::string& filename) const
         NITFReadControl control;
         return control.getDataType(filename) != DataType::NOT_SET;
     }
-    catch(const except::Exception&)
+    catch (const except::Exception&)
     {
         return false;
     }

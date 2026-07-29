@@ -26,8 +26,7 @@ using namespace six;
 const char six::Radiometric::NL_ABSOLUTE[] = "ABSOLUTE";
 const char six::Radiometric::NL_RELATIVE[] = "RELATIVE";
 
-NoiseLevel::NoiseLevel() :
-    noisePoly(Init::undefined<Poly2D>())
+NoiseLevel::NoiseLevel() : noisePoly(Init::undefined<Poly2D>())
 {
 }
 
@@ -43,11 +42,10 @@ Radiometric::Radiometric() :
 
 bool Radiometric::operator==(const Radiometric& rhs) const
 {
-    return (noiseLevel == rhs.noiseLevel &&
-        rcsSFPoly == rhs.rcsSFPoly &&
-        betaZeroSFPoly == rhs.betaZeroSFPoly &&
-        sigmaZeroSFPoly == rhs.sigmaZeroSFPoly &&
-        sigmaZeroSFIncidenceMap == rhs.sigmaZeroSFIncidenceMap &&
-        gammaZeroSFPoly == rhs.gammaZeroSFPoly &&
-        gammaZeroSFIncidenceMap == rhs.gammaZeroSFIncidenceMap);
+    return (noiseLevel == rhs.noiseLevel && rcsSFPoly == rhs.rcsSFPoly &&
+            betaZeroSFPoly == rhs.betaZeroSFPoly &&
+            sigmaZeroSFPoly == rhs.sigmaZeroSFPoly &&
+            sigmaZeroSFIncidenceMap == rhs.sigmaZeroSFIncidenceMap &&
+            gammaZeroSFPoly == rhs.gammaZeroSFPoly &&
+            gammaZeroSFIncidenceMap == rhs.gammaZeroSFIncidenceMap);
 }

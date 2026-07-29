@@ -20,14 +20,13 @@
  *
  */
 
-#include <stdexcept>
-#include <sstream>
-
-#include <std/filesystem>
-
-#include <sys/Path.h>
 #include <except/Exception.h>
 #include <six/NITFReadControl.h>
+#include <sys/Path.h>
+
+#include <sstream>
+#include <std/filesystem>
+#include <stdexcept>
 
 namespace fs = std::filesystem;
 
@@ -43,8 +42,8 @@ void testDataType(const fs::path& pathname_, six::DataType expectedDataType)
     if (dataType != expectedDataType)
     {
         std::ostringstream ostr;
-        ostr << "Expected " << pathname << " to be "
-             << expectedDataType << " but got " << dataType;
+        ostr << "Expected " << pathname << " to be " << expectedDataType
+             << " but got " << dataType;
 
         throw except::Exception(Ctxt(ostr));
     }

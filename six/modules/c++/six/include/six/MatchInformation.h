@@ -23,11 +23,11 @@
 #ifndef __SIX_MATCH_INFORMATION_H__
 #define __SIX_MATCH_INFORMATION_H__
 
-#include <six/Types.h>
+#include <six/Exports.h>
 #include <six/Init.h>
 #include <six/Parameter.h>
 #include <six/ParameterCollection.h>
-#include <six/Exports.h>
+#include <six/Types.h>
 
 namespace six
 {
@@ -60,7 +60,7 @@ struct SIX_SIX_API MatchCollect
     bool operator==(const MatchCollect& rhs) const
     {
         return (coreName == rhs.coreName && matchIndex == rhs.matchIndex &&
-            parameters == rhs.parameters);
+                parameters == rhs.parameters);
     }
 
     bool operator!=(const MatchCollect& rhs) const
@@ -148,7 +148,8 @@ public:
     /*
      *  Ostream operators for six::MatchInformation type
      */
-    SIX_SIX_API friend std::ostream& operator<< (std::ostream& os, const MatchInformation& m);
+    SIX_SIX_API friend std::ostream& operator<<(std::ostream& os,
+                                                const MatchInformation& m);
 };
 }
 

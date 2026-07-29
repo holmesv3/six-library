@@ -55,5 +55,3 @@ std::ostream& operator<<(std::ostream& os, const Classification& c)
     }
     return os;
 }
-
-

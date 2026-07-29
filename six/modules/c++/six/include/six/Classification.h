@@ -23,11 +23,11 @@
 #ifndef __SIX_CLASSIFICATION_H__
 #define __SIX_CLASSIFICATION_H__
 
-#include "six/Types.h"
 #include "logging/Logger.h"
 #include "nitf/FileSecurity.h"
-#include "six/Options.h"
 #include "six/Exports.h"
+#include "six/Options.h"
+#include "six/Types.h"
 
 namespace six
 {
@@ -39,7 +39,7 @@ namespace six
  *  to store security information.  Only the SIDD requires this block
  *  to be populated in the XML data, however, we also use it to write
  *  container specific information using the free parameters.
- *  
+ *
  *  SICD writers should be able to create a reasonable classification block
  *  in the NITF by simply populating the base parameters in this structure,
  *  however, occasionally, the developer may need to match a spec. that
@@ -87,5 +87,3 @@ inline bool operator!=(const Classification& lhs, const Classification& rhs)
 std::ostream& operator<<(std::ostream& os, const six::Classification& c);
 
 #endif
-
-

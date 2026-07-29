@@ -23,18 +23,19 @@
 #ifndef __SIX_NITF_READ_CONTROL_H__
 #define __SIX_NITF_READ_CONTROL_H__
 
+#include <io/SeekableStreams.h>
+
+#include <import/nitf.hpp>
 #include <map>
 #include <memory>
+#include <nitf/IOStreamReader.hpp>
 #include <std/filesystem>
 
+#include "six/Adapters.h"
+#include "six/Exports.h"
 #include "six/NITFImageInfo.h"
 #include "six/ReadControl.h"
 #include "six/ReadControlFactory.h"
-#include "six/Adapters.h"
-#include "six/Exports.h"
-#include <io/SeekableStreams.h>
-#include <import/nitf.hpp>
-#include <nitf/IOStreamReader.hpp>
 
 namespace six
 {
@@ -77,36 +78,33 @@ struct SIX_SIX_API NITFReadControl : public ReadControl
     DataType getDataType(const std::string& fromFile) const override;
 
     /*!
-    *  Read whether a Record has COMPLEX or DERIVED data
-    *  \param record the Record in question
-    *  \return datatype of Record contents
-    */
-    static
-    DataType getDataType(const nitf::Record& record);
+     *  Read whether a Record has COMPLEX or DERIVED data
+     *  \param record the Record in question
+     *  \return datatype of Record contents
+     */
+    static DataType getDataType(const nitf::Record& record);
 
     /*!
-    *  Read whether a DESegment has COMPLEX or DERIVED data
-    *  \param segment the DESegment in question
-    *  \return datatype of DESegment contents
-    */
-    static
-    DataType getDataType(const nitf::DESegment& segment);
+     *  Read whether a DESegment has COMPLEX or DERIVED data
+     *  \param segment the DESegment in question
+     *  \return datatype of DESegment contents
+     */
+    static DataType getDataType(const nitf::DESegment& segment);
 
     /*!
-    *  Determine whether specific attribute outline COMPLEX or DERIVED contents
-    *  Interface to allow communication with programs that use different ways
-    *  of storing NITF data
-    *  \param desid SICD_XML, SIDD_XML, XML_DATA_CONTENT, etc.
-    *  \param subheaderLength length of subheader
-    *  \param desshsiField Specification identifier
-    *  \param treTag tag of TRE (e.g. XML_DATA_CONTENT)
-    *  \return datatype
-    */
-    static
-    DataType getDataType(const std::string& desid,
-            uint64_t subheaderLength,
-            const std::string& desshsiField,
-            const std::string& treTag="");
+     *  Determine whether specific attribute outline COMPLEX or DERIVED contents
+     *  Interface to allow communication with programs that use different ways
+     *  of storing NITF data
+     *  \param desid SICD_XML, SIDD_XML, XML_DATA_CONTENT, etc.
+     *  \param subheaderLength length of subheader
+     *  \param desshsiField Specification identifier
+     *  \param treTag tag of TRE (e.g. XML_DATA_CONTENT)
+     *  \return datatype
+     */
+    static DataType getDataType(const std::string& desid,
+                                uint64_t subheaderLength,
+                                const std::string& desshsiField,
+                                const std::string& treTag = "");
 
     /*!
      *  Performs (Basic) validation when a segment is being
@@ -114,8 +112,10 @@ struct SIX_SIX_API NITFReadControl : public ReadControl
      *  segment in question at least follows some of the rules
      *  that its supposed to.
      */
-    void validateSegment(const nitf::ImageSubheader&, const NITFImageInfo*) const;
-    void validateSegment(const nitf::ImageSubheader&, const NITFImageInfo&) const;
+    void validateSegment(const nitf::ImageSubheader&,
+                         const NITFImageInfo*) const;
+    void validateSegment(const nitf::ImageSubheader&,
+                         const NITFImageInfo&) const;
 
     using ReadControl::load;
 
@@ -125,13 +125,17 @@ struct SIX_SIX_API NITFReadControl : public ReadControl
      *  \param fromFile    Input filepath
      *  \param schemaPaths Directories or files of schema locations
      */
-    void load(const std::string& fromFile, const std::vector<std::string>* pSchemaPaths);
-    void load(const std::string& fromFile, const std::vector<std::string>& schemaPaths) override
+    void load(const std::string& fromFile,
+              const std::vector<std::string>* pSchemaPaths);
+    void load(const std::string& fromFile,
+              const std::vector<std::string>& schemaPaths) override
     {
         load(fromFile, &schemaPaths);
     }
-    void load(const std::filesystem::path& fromFile, const std::vector<std::filesystem::path>* pSchemaPaths) override;
-    void load(const std::filesystem::path& fromFile, const std::vector<std::filesystem::path>& schemaPaths)
+    void load(const std::filesystem::path& fromFile,
+              const std::vector<std::filesystem::path>* pSchemaPaths) override;
+    void load(const std::filesystem::path& fromFile,
+              const std::vector<std::filesystem::path>& schemaPaths)
     {
         load(fromFile, &schemaPaths);
     }
@@ -143,23 +147,29 @@ struct SIX_SIX_API NITFReadControl : public ReadControl
      *  \param ioStream The stream to read from.
      *  \param schemaPaths Directories or files of schema locations.
      */
-    template<typename TSchemaPath>
-    void load(io::SeekableInputStream& stream, const std::vector<TSchemaPath>* pSchemaPaths)
+    template <typename TSchemaPath>
+    void load(io::SeekableInputStream& stream,
+              const std::vector<TSchemaPath>* pSchemaPaths)
     {
-        std::shared_ptr<nitf::IOInterface> handle(std::make_shared<nitf::IOStreamReader>(stream));
+        std::shared_ptr<nitf::IOInterface> handle(
+                std::make_shared<nitf::IOStreamReader>(stream));
         load(handle, pSchemaPaths);
     }
-    template<typename TSchemaPath>
-    void load(io::SeekableInputStream& ioStream, const std::vector<TSchemaPath>& schemaPaths)
+    template <typename TSchemaPath>
+    void load(io::SeekableInputStream& ioStream,
+              const std::vector<TSchemaPath>& schemaPaths)
     {
         load(ioStream, &schemaPaths);
     }
 
     void load(std::shared_ptr<nitf::IOInterface>);
-    void load(std::shared_ptr<nitf::IOInterface>, const std::vector<std::string>* pSchemaPaths);
-    void load(std::shared_ptr<nitf::IOInterface>, const std::vector<std::filesystem::path>* pSchemaPaths);
-    template<typename TSchemaPath>
-    void load(std::shared_ptr<nitf::IOInterface> ioInterface, const std::vector<TSchemaPath>& schemaPaths)
+    void load(std::shared_ptr<nitf::IOInterface>,
+              const std::vector<std::string>* pSchemaPaths);
+    void load(std::shared_ptr<nitf::IOInterface>,
+              const std::vector<std::filesystem::path>* pSchemaPaths);
+    template <typename TSchemaPath>
+    void load(std::shared_ptr<nitf::IOInterface> ioInterface,
+              const std::vector<TSchemaPath>& schemaPaths)
     {
         load(ioInterface, &schemaPaths);
     }
@@ -226,23 +236,25 @@ protected:
      *  it is only unique when it's Complex data.
      *
      */
-    std::pair<size_t, size_t>
-    getIndices(const nitf::ImageSubheader& subheader) const;
+    std::pair<size_t, size_t> getIndices(
+            const nitf::ImageSubheader& subheader) const;
     struct ImageAndSegment final
     {
         size_t image = 0;
         size_t segment = 0;
     };
-    void getIndices(const nitf::ImageSubheader& subheader, ImageAndSegment&) const;
+    void getIndices(const nitf::ImageSubheader& subheader,
+                    ImageAndSegment&) const;
 
     void addImageClassOptions(const nitf::ImageSubheader& s,
-            six::Classification& c) const;
+                              six::Classification& c) const;
 
     void addDEClassOptions(const nitf::DESubheader& s,
                            six::Classification& c) const;
 
     void addSecurityOptions(nitf::FileSecurity security,
-            const std::string& prefix, six::Options& options) const;
+                            const std::string& prefix,
+                            six::Options& options) const;
 
     //! Resets the object internals
     void reset();
@@ -250,14 +262,14 @@ protected:
     //! All pointers populated within the options need
     //  to be cleaned up elsewhere. There is no access
     //  to deallocation in NITFReadControl directly
-    virtual void createCompressionOptions(
-            std::map<std::string, void*>& )
+    virtual void createCompressionOptions(std::map<std::string, void*>&)
     {
     }
 
 private:
-    template<typename TSchemaPath>
-    void load_(std::shared_ptr<nitf::IOInterface> ioInterface, const std::vector<TSchemaPath>* pSchemaPaths);
+    template <typename TSchemaPath>
+    void load_(std::shared_ptr<nitf::IOInterface> ioInterface,
+               const std::vector<TSchemaPath>* pSchemaPaths);
 
     std::unique_ptr<Legend> findLegend(size_t productNum);
 
@@ -265,21 +277,21 @@ private:
                              size_t imageSeg,
                              Legend& legend);
 
-    static
-    bool isLegend(const nitf::ImageSubheader& subheader)
+    static bool isLegend(const nitf::ImageSubheader& subheader)
     {
         const auto iCat = subheader.imageCategory();
         return (iCat == "LEG");
     }
 
-    static
-    bool isDed(const nitf::ImageSubheader& subheader)
+    static bool isDed(const nitf::ImageSubheader& subheader)
     {
         const auto iCat = subheader.imageCategory();
         return (iCat == "DED");
     }
 
-    void setDisplayLUT(six::NITFImageInfo&, const nitf::ImageSubheader&); // LUT processing for SIDDs
+    void setDisplayLUT(
+            six::NITFImageInfo&,
+            const nitf::ImageSubheader&);  // LUT processing for SIDDs
 
     // We need this for one of the load overloadings
     // to prevent data from being deleted prematurely
@@ -287,7 +299,6 @@ private:
     // IOControl
     std::shared_ptr<nitf::IOInterface> mInterface;
 };
-
 
 struct NITFReadControlCreator final : public ReadControlCreator
 {
@@ -297,14 +308,12 @@ struct NITFReadControlCreator final : public ReadControlCreator
         newReadControl(retval);
         return retval.release();
     }
-    void newReadControl(std::unique_ptr<six::ReadControl>& result) const override;
+    void newReadControl(
+            std::unique_ptr<six::ReadControl>& result) const override;
 
     bool supports(const std::string& filename) const override;
-
 };
-
 
 }
 
 #endif
-

@@ -33,19 +33,19 @@ six::ReadControl* ReadControlRegistry::newReadControl(
             return creator->newReadControl();
     }
     throw except::NotImplementedException(
-                                          Ctxt(
-                                               "No supported ReadControl for input file"));
+            Ctxt("No supported ReadControl for input file"));
 }
 void ReadControlRegistry::newReadControl(
-    const std::string& filename, std::unique_ptr<six::ReadControl>& result) const
+        const std::string& filename,
+        std::unique_ptr<six::ReadControl>& result) const
 {
     result.reset(newReadControl(filename));
 }
 
-
 // https://stackoverflow.com/a/11711991/8877
 // "C++11 removes the need for manual locking.
-// Concurrent execution shall wait if a static local variable is already being initialized."
+// Concurrent execution shall wait if a static local variable is already being
+// initialized."
 six::ReadControlRegistry& six::ReadControlFactory::getInstance()
 {
     static ReadControlRegistry instance;

@@ -49,6 +49,7 @@ protected:
 class ReadControlRegistry
 {
     std::list<std::unique_ptr<ReadControlCreator>> mCreators;
+
 public:
     ReadControlRegistry() = default;
     virtual ~ReadControlRegistry() = default;
@@ -66,8 +67,9 @@ public:
     }
 
     virtual six::ReadControl* newReadControl(const std::string& filename) const;
-    virtual void newReadControl(const std::string& filename, std::unique_ptr<six::ReadControl>& result) const;
-
+    virtual void newReadControl(
+            const std::string& filename,
+            std::unique_ptr<six::ReadControl>& result) const;
 };
 
 struct ReadControlFactory final

@@ -24,26 +24,25 @@
 #define SIX_six_NITFWriteControl_h_INCLUDED_
 
 #include <stdint.h>
-
-#include <map>
-#include <memory>
-#include <vector>
-#include <complex>
-#include <std/span>
-#include <std/cstddef>
-#include <utility>
-#include <algorithm>
-
-#include <nitf/BufferedWriter.hpp>
 #include <sys/Path.h>
 
-#include "six/Types.h"
-#include "six/Container.h"
-#include "six/WriteControl.h"
-#include "six/NITFImageInfo.h"
+#include <algorithm>
+#include <complex>
+#include <map>
+#include <memory>
+#include <nitf/BufferedWriter.hpp>
+#include <std/cstddef>
+#include <std/span>
+#include <utility>
+#include <vector>
+
 #include "six/Adapters.h"
-#include "six/NITFHeaderCreator.h"
+#include "six/Container.h"
 #include "six/Exports.h"
+#include "six/NITFHeaderCreator.h"
+#include "six/NITFImageInfo.h"
+#include "six/Types.h"
+#include "six/WriteControl.h"
 
 namespace six
 {
@@ -62,34 +61,47 @@ class SIX_SIX_API NITFWriteControl : public WriteControl
 {
     void addLegend(const Legend&, int imageNumber);
 
-    ptrdiff_t AMP8I_PHS8I_cutoff() const; // for eventual use by to_AMP8I_PHS8I());
+    ptrdiff_t AMP8I_PHS8I_cutoff()
+            const;  // for eventual use by to_AMP8I_PHS8I());
 
-    template<typename T>
-    void write_imageData(const T& imageData, const NITFImageInfo&, const Legend* const legend,
-        bool doByteSwap, bool enableJ2K);
-    template<typename T>
+    template <typename T>
+    void write_imageData(const T& imageData,
+                         const NITFImageInfo&,
+                         const Legend* const legend,
+                         bool doByteSwap,
+                         bool enableJ2K);
+    template <typename T>
     void do_save_(const T&, bool doByteSwap, bool enableJ2K);
-    template<typename T>
-    void do_save(const T& imageData, nitf::IOInterface& outputFile, const std::vector<std::string>& schemaPaths);
+    template <typename T>
+    void do_save(const T& imageData,
+                 nitf::IOInterface& outputFile,
+                 const std::vector<std::string>& schemaPaths);
 
-    void save_buffer_list(const BufferList&, nitf::IOInterface& outputFile, const std::vector<std::string>& schemaPaths);
-    void save_buffer_list_to_file(const BufferList& list, const std::string& outputFile, const std::vector<std::string>& schemaPaths)
+    void save_buffer_list(const BufferList&,
+                          nitf::IOInterface& outputFile,
+                          const std::vector<std::string>& schemaPaths);
+    void save_buffer_list_to_file(const BufferList& list,
+                                  const std::string& outputFile,
+                                  const std::vector<std::string>& schemaPaths)
     {
-        const size_t bufferSize = getOptions().getParameter(WriteControl::OPT_BUFFER_SIZE, Parameter(NITFHeaderCreator::DEFAULT_BUFFER_SIZE));
+        const size_t bufferSize = getOptions().getParameter(
+                WriteControl::OPT_BUFFER_SIZE,
+                Parameter(NITFHeaderCreator::DEFAULT_BUFFER_SIZE));
         nitf::BufferedWriter bufferedIO(outputFile, bufferSize);
         save(list, bufferedIO, schemaPaths);
         bufferedIO.close();
     }
 
     bool do_prepareIO(size_t, nitf::IOInterface&);
-    template<typename T>
+    template <typename T>
     bool prepareIO(const T& imageData, nitf::IOInterface& outputFile);
 
 public:
-
     //! Constructor. Must call initialize to use.
     NITFWriteControl(FILE* log = stderr);
-    ~NITFWriteControl() noexcept {}
+    ~NITFWriteControl() noexcept
+    {
+    }
 
     /*!
      * Constructor. Calls initialize.
@@ -97,7 +109,6 @@ public:
      */
     NITFWriteControl(std::shared_ptr<Container>, FILE* log = stderr);
     NITFWriteControl(std::unique_ptr<Data>&&);
-
 
     /*!
      * Constructor. Calls initialize.
@@ -107,11 +118,15 @@ public:
      */
     NITFWriteControl(const six::Options& options,
                      std::shared_ptr<Container> container,
-                     const XMLControlRegistry* xmlRegistry = nullptr, FILE* log=stderr);
-    NITFWriteControl(const six::Options& options, std::shared_ptr<Container> container,
-        const XMLControlRegistry&, FILE* log=stderr);
-    NITFWriteControl(const six::Options& options, std::shared_ptr<Container> container,
-        FILE* log);
+                     const XMLControlRegistry* xmlRegistry = nullptr,
+                     FILE* log = stderr);
+    NITFWriteControl(const six::Options& options,
+                     std::shared_ptr<Container> container,
+                     const XMLControlRegistry&,
+                     FILE* log = stderr);
+    NITFWriteControl(const six::Options& options,
+                     std::shared_ptr<Container> container,
+                     FILE* log);
 
     //! Noncopyable
     NITFWriteControl(const NITFWriteControl&) = delete;
@@ -134,7 +149,8 @@ public:
      * as well.
      * \param xmlRegistry XMLControlRegistry to set
      */
-    virtual void setXMLControlRegistry(const XMLControlRegistry* xmlRegistry) override
+    virtual void setXMLControlRegistry(
+            const XMLControlRegistry* xmlRegistry) override
     {
         setXMLControlRegistryImpl(xmlRegistry);
     }
@@ -146,7 +162,7 @@ public:
     }
 
     //! \return Collection of NITF image info pointers
-    std::vector<std::shared_ptr<NITFImageInfo> > getInfos()
+    std::vector<std::shared_ptr<NITFImageInfo>> getInfos()
     {
         return mNITFHeaderCreator->getInfos();
     }
@@ -174,7 +190,7 @@ public:
     }
 
     //! \return Collection of NITF segment writers
-    std::vector<std::shared_ptr<nitf::SegmentWriter> > getSegmentWriters()
+    std::vector<std::shared_ptr<nitf::SegmentWriter>> getSegmentWriters()
     {
         return mNITFHeaderCreator->getSegmentWriters();
     }
@@ -189,7 +205,8 @@ public:
      * Set the internal NITF header creator
      * \param headerCreator Populated NITF header creator
      */
-    void setNITFHeaderCreator(std::unique_ptr<six::NITFHeaderCreator>&& headerCreator);
+    void setNITFHeaderCreator(
+            std::unique_ptr<six::NITFHeaderCreator>&& headerCreator);
 
     virtual void initialize(const six::Options& options,
                             std::shared_ptr<Container> container);
@@ -202,7 +219,7 @@ public:
      * Set the logger.
      * \param logger The logger.
      */
-    template<typename TLogger>
+    template <typename TLogger>
     void setLogger(TLogger&& logger)
     {
         mNITFHeaderCreator->setLogger(std::forward<TLogger>(logger));
@@ -246,13 +263,18 @@ public:
      *  \param outputFile  Output path to write
      *  \param schemaPaths Directories or files of schema locations
      */
-    virtual void save(const BufferList& list, const std::string& outputFile, const std::vector<std::string>& schemaPaths) override;
-    
-    template<typename T>
+    virtual void save(const BufferList& list,
+                      const std::string& outputFile,
+                      const std::vector<std::string>& schemaPaths) override;
+
+    template <typename T>
     void save_image(std::span<const T> imageData,
-        const std::filesystem::path& outputFile, const std::vector<std::filesystem::path>& schemaPaths)
+                    const std::filesystem::path& outputFile,
+                    const std::vector<std::filesystem::path>& schemaPaths)
     {
-        const size_t bufferSize = getOptions().getParameter(WriteControl::OPT_BUFFER_SIZE, Parameter(NITFHeaderCreator::DEFAULT_BUFFER_SIZE));
+        const size_t bufferSize = getOptions().getParameter(
+                WriteControl::OPT_BUFFER_SIZE,
+                Parameter(NITFHeaderCreator::DEFAULT_BUFFER_SIZE));
         nitf::BufferedWriter bufferedIO(outputFile.string(), bufferSize);
         save_image(imageData, bufferedIO, schemaPaths);
         bufferedIO.close();
@@ -295,17 +317,30 @@ public:
      *  endian file as the supply stream, you should set BYTE_SWAP to
      *  on.
      */
-    virtual void save(const BufferList& list, nitf::IOInterface& outputFile, const std::vector<std::string>& schemaPaths)
+    virtual void save(const BufferList& list,
+                      nitf::IOInterface& outputFile,
+                      const std::vector<std::string>& schemaPaths)
     {
         save_buffer_list(list, outputFile, schemaPaths);
     }
 
-    // Be explicit about the types of images that can be saved; templates are provided below.
-    void save_image(std::span<const six::zfloat>, nitf::IOInterface&, const std::vector<std::filesystem::path>&);
-    void save_image(std::span<const six::zint16_t>, nitf::IOInterface&, const std::vector<std::filesystem::path>&);
-    void save_image(std::span<const AMP8I_PHS8I_t>, nitf::IOInterface&, const std::vector<std::filesystem::path>&);
-    void save_image(std::span<const uint8_t>, nitf::IOInterface&, const std::vector<std::filesystem::path>&);
-    void save_image(std::span<const uint16_t>, nitf::IOInterface&, const std::vector<std::filesystem::path>&);
+    // Be explicit about the types of images that can be saved; templates are
+    // provided below.
+    void save_image(std::span<const six::zfloat>,
+                    nitf::IOInterface&,
+                    const std::vector<std::filesystem::path>&);
+    void save_image(std::span<const six::zint16_t>,
+                    nitf::IOInterface&,
+                    const std::vector<std::filesystem::path>&);
+    void save_image(std::span<const AMP8I_PHS8I_t>,
+                    nitf::IOInterface&,
+                    const std::vector<std::filesystem::path>&);
+    void save_image(std::span<const uint8_t>,
+                    nitf::IOInterface&,
+                    const std::vector<std::filesystem::path>&);
+    void save_image(std::span<const uint16_t>,
+                    nitf::IOInterface&,
+                    const std::vector<std::filesystem::path>&);
 
     void save(const NonConstBufferList& list,
               nitf::IOInterface& outputFile,
@@ -333,8 +368,11 @@ public:
      */
     void setAbstract(const std::string& abstract);
 
-    void addSegmentData(const char* data, size_t size, nitf::Off start,
-            int byteSkip, bool copyData);
+    void addSegmentData(const char* data,
+                        size_t size,
+                        nitf::Off start,
+                        int byteSkip,
+                        bool copyData);
 
     /* !
      *  Add a SegmentWriter for writing an extra DES. Writer must
@@ -510,16 +548,14 @@ private:
      * \param data The data object.
      * \result The DES type identifier.
      */
-    static
-    std::string getDesTypeID(const six::Data& data);
+    static std::string getDesTypeID(const six::Data& data);
 
     /*!
      * Determine if a user-defined sub-header if required.
      * \param data The data object.
      * \result Boolean true if a user-defined sub-header is required.
      */
-    static
-    bool needUserDefinedSubheader(const six::Data& data);
+    static bool needUserDefinedSubheader(const six::Data& data);
 
     /*!
      * Add a user-defined sub-header.
@@ -535,8 +571,8 @@ private:
      * \param numImageSegments The number of image segments.
      * \result Sub-header identifier.
      */
-    static
-    std::string getComplexIID(size_t segmentNum, size_t numImageSegments);
+    static std::string getComplexIID(size_t segmentNum,
+                                     size_t numImageSegments);
 
     /*!
      * Construct detected image sub-header identifier.
@@ -544,8 +580,7 @@ private:
      * \param productNum The product number.
      * \result Sub-header identifier.
      */
-    static
-    std::string getDerivedIID(size_t segmentNum, size_t productNum);
+    static std::string getDerivedIID(size_t segmentNum, size_t productNum);
 
     /*!
      * Construct image sub-header identifier.
@@ -554,38 +589,49 @@ private:
      * \param productNum The product number.
      * \result Sub-header identifier.
      */
-    static
-    std::string getIID(DataType dataType,
-                       size_t segmentNum,
-                       size_t numImageSegments,
-                       size_t productNum);
+    static std::string getIID(DataType dataType,
+                              size_t segmentNum,
+                              size_t numImageSegments,
+                              size_t productNum);
 };
 
 // Help out the compiler with overloads, and keep the class smaller.
-SIX_SIX_API void save(NITFWriteControl&, const six::zfloat*, const std::string&, const std::vector<std::string>&);
+SIX_SIX_API void save(NITFWriteControl&,
+                      const six::zfloat*,
+                      const std::string&,
+                      const std::vector<std::string>&);
 
-template<typename T>
-inline void save(NITFWriteControl& writeControl, 
-    std::span<const T> imageData, const std::string& outputFile, const std::vector<std::filesystem::path>& schemaPaths)
+template <typename T>
+inline void save(NITFWriteControl& writeControl,
+                 std::span<const T> imageData,
+                 const std::string& outputFile,
+                 const std::vector<std::filesystem::path>& schemaPaths)
 {
-    writeControl.save_image(imageData, std::filesystem::path(outputFile), schemaPaths);
+    writeControl.save_image(imageData,
+                            std::filesystem::path(outputFile),
+                            schemaPaths);
 }
-template<typename T>
-inline void save(NITFWriteControl& writeControl, 
-    std::span<const T> imageData, const std::string& outputFile, const std::vector<std::string>& schemaPaths_)
+template <typename T>
+inline void save(NITFWriteControl& writeControl,
+                 std::span<const T> imageData,
+                 const std::string& outputFile,
+                 const std::vector<std::string>& schemaPaths_)
 {
     const auto schemaPaths = sys::convertPaths(schemaPaths_);
     save(writeControl, imageData, outputFile, schemaPaths);
 }
 
-template<typename T, typename TSchemaPath>
-inline void save(NITFWriteControl& writeControl,
-    const std::vector<T>& imageData, // G++ won't convert our home-brew std::span to std::vector
-    const std::string& outputFile, const std::vector<TSchemaPath>& schemaPaths)
+template <typename T, typename TSchemaPath>
+inline void save(
+        NITFWriteControl& writeControl,
+        const std::vector<T>& imageData,  // G++ won't convert our home-brew
+                                          // std::span to std::vector
+        const std::string& outputFile,
+        const std::vector<TSchemaPath>& schemaPaths)
 {
     std::span<const T> imageData_(imageData.data(), imageData.size());
     save(writeControl, imageData_, outputFile, schemaPaths);
 }
 
 }
-#endif // SIX_six_NITFWriteControl_h_INCLUDED_
+#endif  // SIX_six_NITFWriteControl_h_INCLUDED_

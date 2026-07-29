@@ -23,21 +23,22 @@
 #ifndef SIX_six_WriteControl_h_INCLUDED_
 #define SIX_six_WriteControl_h_INCLUDED_
 
-#include <memory>
-#include <std/span>
-#include <vector>
-#include <std/filesystem>
-#include <complex>
-#include <string>
-
-#include "six/Types.h"
-#include "six/Region.h"
-#include "six/Container.h"
-#include "six/Options.h"
-#include "six/XMLControlFactory.h"
-#include "six/Logger.h"
-#include "six/Exports.h"
 #include <import/logging.h>
+
+#include <complex>
+#include <memory>
+#include <std/filesystem>
+#include <std/span>
+#include <string>
+#include <vector>
+
+#include "six/Container.h"
+#include "six/Exports.h"
+#include "six/Logger.h"
+#include "six/Options.h"
+#include "six/Region.h"
+#include "six/Types.h"
+#include "six/XMLControlFactory.h"
 
 namespace six
 {
@@ -80,15 +81,16 @@ struct SIX_SIX_API WriteControl
     static const char OPT_BUFFER_SIZE[];
 
     //!  Constructor.  Null-sets the Container
-    WriteControl() noexcept(false) :
-        mLogger(mLog, mOwnLog, nullptr)
+    WriteControl() noexcept(false) : mLogger(mLog, mOwnLog, nullptr)
     {
         setLogger(nullptr);
         setXMLControlRegistry(nullptr);
     }
 
     //!  Destructor.  Does not release any memory
-    virtual ~WriteControl() noexcept {}
+    virtual ~WriteControl() noexcept
+    {
+    }
 
     WriteControl(const WriteControl&) = delete;
     WriteControl& operator=(const WriteControl&) = delete;
@@ -117,7 +119,8 @@ struct SIX_SIX_API WriteControl
         save(sources, toFile, std::vector<std::string>());
     }
 
-    virtual void save(const SourceList& sources, const std::string& toFile,
+    virtual void save(const SourceList& sources,
+                      const std::string& toFile,
                       const std::vector<std::string>& schemaPaths) = 0;
 
     /*!
@@ -133,7 +136,8 @@ struct SIX_SIX_API WriteControl
     {
         save(sources, toFile, std::vector<std::string>());
     }
-    virtual void save(const BufferList& sources, const std::string& toFile,
+    virtual void save(const BufferList& sources,
+                      const std::string& toFile,
                       const std::vector<std::string>& schemaPaths) = 0;
 
     // For convenience since the compiler can't implicitly convert
@@ -157,7 +161,8 @@ struct SIX_SIX_API WriteControl
     {
         save(source, toFile, std::vector<std::string>());
     }
-    void save(io::InputStream* source, const std::string& toFile,
+    void save(io::InputStream* source,
+              const std::string& toFile,
               const std::vector<std::string>& schemaPaths)
     {
         SourceList sources;
@@ -177,14 +182,16 @@ struct SIX_SIX_API WriteControl
         const void* buffer_ = buffer;
         save(static_cast<const UByte*>(buffer_), toFile);
     }
-    void save(const UByte* buffer, const std::string& toFile,
+    void save(const UByte* buffer,
+              const std::string& toFile,
               const std::vector<std::string>& schemaPaths)
     {
         BufferList sources;
         sources.push_back(buffer);
         save(sources, toFile, schemaPaths);
     }
-    void save(const std::byte* buffer, const std::string& toFile,
+    void save(const std::byte* buffer,
+              const std::string& toFile,
               const std::vector<std::string>& schemaPaths)
     {
         const void* buffer_ = buffer;
@@ -236,7 +243,7 @@ struct SIX_SIX_API WriteControl
     /*!
      * Sets the logger to use internally
      */
-    template<typename TLogger>
+    template <typename TLogger>
     void setLogger(TLogger&& logger)
     {
         mLogger.setLogger(std::forward<TLogger>(logger));
@@ -286,4 +293,4 @@ private:
 };
 
 }
-#endif // SIX_six_WriteControl_h_INCLUDED_
+#endif  // SIX_six_WriteControl_h_INCLUDED_

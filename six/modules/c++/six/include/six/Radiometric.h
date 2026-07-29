@@ -23,10 +23,10 @@
 #ifndef __SIX_RADIOMETRIC_H__
 #define __SIX_RADIOMETRIC_H__
 
-#include "six/Types.h"
+#include "six/Exports.h"
 #include "six/Init.h"
 #include "six/Parameter.h"
-#include "six/Exports.h"
+#include "six/Types.h"
 
 namespace six
 {
@@ -48,7 +48,7 @@ struct SIX_SIX_API NoiseLevel
      *  the SCP pixel location.
      *  Added in 1.0.0
      */
-     std::string noiseType;
+    std::string noiseType;
 
     /*!
      *  Polynomial coefficients that yield
@@ -70,7 +70,6 @@ struct SIX_SIX_API NoiseLevel
     {
         return !(*this == rhs);
     }
-
 };
 
 /*!
@@ -84,7 +83,6 @@ struct SIX_SIX_API NoiseLevel
 struct SIX_SIX_API Radiometric
 {
 public:
-
     static const char NL_ABSOLUTE[];
     static const char NL_RELATIVE[];
 
@@ -141,9 +139,7 @@ public:
     {
         return !(*this == rhs);
     }
-
 };
 
 }
 #endif
-

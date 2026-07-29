@@ -37,7 +37,8 @@ Parameter Options::getParameter(const std::string& option) const
     return p->second;
 }
 
-Parameter Options::getParameter(const std::string& option, Parameter defaultValue) const
+Parameter Options::getParameter(const std::string& option,
+                                Parameter defaultValue) const
 {
     const ParameterIter p = mParameters.find(option);
     if (p == mParameters.end())

@@ -23,37 +23,32 @@
 
 namespace six
 {
-MatchCollect::MatchCollect() :
-    matchIndex(Init::undefined<int>())
+MatchCollect::MatchCollect() : matchIndex(Init::undefined<int>())
 {
 }
 
-MatchType::MatchType() :
-    currentIndex(Init::undefined<int>()),
-    matchCollects(1)
+MatchType::MatchType() : currentIndex(Init::undefined<int>()), matchCollects(1)
 {
 }
 
 bool MatchType::operator==(const MatchType& rhs) const
 {
     return (collectorName == rhs.collectorName &&
-        illuminatorName == rhs.illuminatorName &&
-        matchType == rhs.matchType &&
-        typeID == rhs.typeID &&
-        currentIndex == rhs.currentIndex &&
-        matchCollects == rhs.matchCollects);
+            illuminatorName == rhs.illuminatorName &&
+            matchType == rhs.matchType && typeID == rhs.typeID &&
+            currentIndex == rhs.currentIndex &&
+            matchCollects == rhs.matchCollects);
 }
 
 //! One is maditory
-MatchInformation::MatchInformation() :
-    types(1) //! One is mandatory
+MatchInformation::MatchInformation() : types(1)  //! One is mandatory
 {
 }
 
-std::ostream& operator<< (std::ostream& os, const MatchInformation& m)
+std::ostream& operator<<(std::ostream& os, const MatchInformation& m)
 {
     os << "MatchInformation:: \n"
-        << "  Types:: \n";
+       << "  Types:: \n";
     for (size_t ii = 0; ii < m.types.size(); ++ii)
     {
         os << "  TypeID           : " << m.types[ii].typeID << "\n";
@@ -61,21 +56,28 @@ std::ostream& operator<< (std::ostream& os, const MatchInformation& m)
         {
             os << "  CurrentIndex     : " << m.types[ii].currentIndex << "\n";
         }
-        os << " NumMatchCollections : " << m.types[ii].matchCollects.size() << "\n";
+        os << " NumMatchCollections : " << m.types[ii].matchCollects.size()
+           << "\n";
 
         for (size_t jj = 0; jj < m.types[ii].matchCollects.size(); ++jj)
         {
             os << "  MatchCollect     : \n"
-                << "    CoreName       : " << m.types[ii].matchCollects[jj].coreName << "\n";
-            if (!six::Init::isUndefined(m.types[ii].matchCollects[jj].matchIndex))
+               << "    CoreName       : "
+               << m.types[ii].matchCollects[jj].coreName << "\n";
+            if (!six::Init::isUndefined(
+                        m.types[ii].matchCollects[jj].matchIndex))
             {
-                os << "    MatchIndex     : " << m.types[ii].matchCollects[jj].matchIndex << "\n";
+                os << "    MatchIndex     : "
+                   << m.types[ii].matchCollects[jj].matchIndex << "\n";
             }
-            for (size_t kk = 0; kk < m.types[ii].matchCollects[jj].parameters.size(); ++kk)
+            for (size_t kk = 0;
+                 kk < m.types[ii].matchCollects[jj].parameters.size();
+                 ++kk)
             {
                 os << "    Parameter      : "
-                    << m.types[ii].matchCollects[jj].parameters[kk].getName()
-                    << ": " << m.types[ii].matchCollects[jj].parameters[kk] << "\n";
+                   << m.types[ii].matchCollects[jj].parameters[kk].getName()
+                   << ": " << m.types[ii].matchCollects[jj].parameters[kk]
+                   << "\n";
             }
         }
     }

@@ -24,53 +24,53 @@
 #ifndef SIX_six_SICommonXMLParser10x_h_INCLUDED_
 #define SIX_six_SICommonXMLParser10x_h_INCLUDED_
 
-#include <six/SICommonXMLParser.h>
 #include <six/Exports.h>
+#include <six/SICommonXMLParser.h>
 
 namespace six
 {
 
 struct SIX_SIX_API SICommonXMLParser10x : public SICommonXMLParser
 {
-    SICommonXMLParser10x(const std::string& defaultURI, bool addClassAttributes, const std::string& siCommonURI,
-        logging::Logger* log = nullptr, bool ownLog = false);
-    SICommonXMLParser10x(const std::string& defaultURI, bool addClassAttributes, const std::string& siCommonURI,
-        std::unique_ptr<logging::Logger>&&);
-    SICommonXMLParser10x(const std::string& defaultURI, bool addClassAttributes, const std::string& siCommonURI,
-        logging::Logger&);
+    SICommonXMLParser10x(const std::string& defaultURI,
+                         bool addClassAttributes,
+                         const std::string& siCommonURI,
+                         logging::Logger* log = nullptr,
+                         bool ownLog = false);
+    SICommonXMLParser10x(const std::string& defaultURI,
+                         bool addClassAttributes,
+                         const std::string& siCommonURI,
+                         std::unique_ptr<logging::Logger>&&);
+    SICommonXMLParser10x(const std::string& defaultURI,
+                         bool addClassAttributes,
+                         const std::string& siCommonURI,
+                         logging::Logger&);
     SICommonXMLParser10x(const SICommonXMLParser10x&) = delete;
     SICommonXMLParser10x(SICommonXMLParser10x&&) = delete;
     SICommonXMLParser10x& operator=(const SICommonXMLParser10x&) = delete;
     SICommonXMLParser10x& operator=(SICommonXMLParser10x&&) = delete;
     virtual ~SICommonXMLParser10x() = default;
 
-    XMLElem convertRadiometryToXML(
-        const Radiometric *obj,
-        XMLElem parent = nullptr) const override;
+    XMLElem convertRadiometryToXML(const Radiometric* obj,
+                                   XMLElem parent = nullptr) const override;
 
-    void parseRadiometryFromXML(
-        const xml::lite::Element* radiometricXML,
-        Radiometric *obj) const override;
+    void parseRadiometryFromXML(const xml::lite::Element* radiometricXML,
+                                Radiometric* obj) const override;
 
-    XMLElem convertMatchInformationToXML(
-        const MatchInformation& matchInfo,
-        XMLElem parent) const override;
+    XMLElem convertMatchInformationToXML(const MatchInformation& matchInfo,
+                                         XMLElem parent) const override;
 
-    void parseMatchInformationFromXML(
-        const xml::lite::Element* matchInfoXML,
-        MatchInformation* info) const override;
+    void parseMatchInformationFromXML(const xml::lite::Element* matchInfoXML,
+                                      MatchInformation* info) const override;
 
 protected:
-
-    XMLElem convertCompositeSCPToXML(
-        const ErrorStatistics* errorStatistics,
-        XMLElem parent = nullptr) const override;
+    XMLElem convertCompositeSCPToXML(const ErrorStatistics* errorStatistics,
+                                     XMLElem parent = nullptr) const override;
 
     void parseCompositeSCPFromXML(
-        const xml::lite::Element* errorStatsXML,
-        ErrorStatistics* errorStatistics) const override;
-
+            const xml::lite::Element* errorStatsXML,
+            ErrorStatistics* errorStatistics) const override;
 };
 }
 
-#endif // SIX_six_SICommonXMLParser10x_h_INCLUDED_
+#endif  // SIX_six_SICommonXMLParser10x_h_INCLUDED_

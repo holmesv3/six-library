@@ -24,13 +24,13 @@
 #ifndef SIX_six_XsElement_h_INCLUDED_
 #define SIX_six_XsElement_h_INCLUDED_
 
-#include <std/string>
-#include <ostream>
-#include <utility>
-#include <std/optional>
-
 #include <xml/lite/Element.h>
 #include <xml/lite/QName.h>
+
+#include <ostream>
+#include <std/optional>
+#include <std/string>
+#include <utility>
 
 namespace six
 {
@@ -41,7 +41,8 @@ namespace six
 // struct Foo final
 // { XsElement<std::string> foo {"Foo"}; };
 // ```
-// This is `xs::element` as opposed to `xs:comlexType`, `xs::sequence`, `xs:enumeration`, etc.
+// This is `xs::element` as opposed to `xs:comlexType`, `xs::sequence`,
+// `xs:enumeration`, etc.
 template <typename T>
 class XsElement final
 {
@@ -51,10 +52,21 @@ class XsElement final
 public:
     using value_type = T;
 
-    explicit XsElement(const xml::lite::QName& name) : name_(name) { }
-    explicit XsElement(const std::string& lName) : XsElement(xml::lite::QName(lName)) { }
-    XsElement(const xml::lite::QName& name, const value_type& value) : name_(name), value_(value) { }
-    XsElement(const std::string& lName, const value_type& value) : XsElement(xml::lite::QName(lName), value) { }
+    explicit XsElement(const xml::lite::QName& name) : name_(name)
+    {
+    }
+    explicit XsElement(const std::string& lName) :
+        XsElement(xml::lite::QName(lName))
+    {
+    }
+    XsElement(const xml::lite::QName& name, const value_type& value) :
+        name_(name), value_(value)
+    {
+    }
+    XsElement(const std::string& lName, const value_type& value) :
+        XsElement(xml::lite::QName(lName), value)
+    {
+    }
     XsElement() = default;
     ~XsElement() = default;
     XsElement(const XsElement&) = default;
@@ -92,11 +104,11 @@ public:
     {
         return value_;
     }
-    operator const value_type& () const
+    operator const value_type&() const
     {
         return value();
     }
-    operator value_type& ()
+    operator value_type&()
     {
         return value();
     }
@@ -152,7 +164,8 @@ inline std::ostream& operator<<(std::ostream& os, const XsElement<T>& v)
     return os;
 }
 template <>
-inline std::ostream& operator<<(std::ostream& os, const XsElement<std::u8string>& v)
+inline std::ostream& operator<<(std::ostream& os,
+                                const XsElement<std::u8string>& v)
 {
     os << "\t" << v.tag() << "\t: " << str::to_native(value(v));
     return os;
@@ -168,22 +181,21 @@ inline std::ostream& operator<<(std::ostream& os, const XsElement<std::u8string>
 template <typename T>
 using XsElement_minOccurs0 = XsElement<std::optional<T>>;
 
-
 // A few convenience routines; this avoids the need for XsElement_minOccurs0
 // to be a seperate class.
 namespace details
 {
-    // make it clear that o.value() is a std::optional<>
-    template <typename T>
-    inline auto&& optional(const XsElement_minOccurs0<T>& o)
-    {
-        return o.value();
-    }
-    template <typename T>
-    inline auto&& optional(XsElement_minOccurs0<T>& o)
-    {
-        return o.value();
-    }
+// make it clear that o.value() is a std::optional<>
+template <typename T>
+inline auto&& optional(const XsElement_minOccurs0<T>& o)
+{
+    return o.value();
+}
+template <typename T>
+inline auto&& optional(XsElement_minOccurs0<T>& o)
+{
+    return o.value();
+}
 }
 template <typename T>
 inline bool has_value(const XsElement_minOccurs0<T>& o)
@@ -202,29 +214,34 @@ inline auto&& value(XsElement_minOccurs0<T>& o)
 }
 
 template <typename T, typename U = T>
-inline bool operator==(const XsElement_minOccurs0<T>& lhs, const std::optional<U>& rhs)
+inline bool operator==(const XsElement_minOccurs0<T>& lhs,
+                       const std::optional<U>& rhs)
 {
     return details::optional(lhs) == rhs;
 }
 template <typename T, typename U = T>
-inline bool operator!=(const XsElement_minOccurs0<T>& lhs, const std::optional<U>& rhs)
+inline bool operator!=(const XsElement_minOccurs0<T>& lhs,
+                       const std::optional<U>& rhs)
 {
     return !(lhs == rhs);
 }
 
 template <typename T, typename U = T>
-inline bool operator==(const XsElement_minOccurs0<T>& lhs, const XsElement_minOccurs0<U>& rhs)
+inline bool operator==(const XsElement_minOccurs0<T>& lhs,
+                       const XsElement_minOccurs0<U>& rhs)
 {
     return (lhs.name() == rhs.name()) && (lhs == details::optional(rhs));
 }
 template <typename T, typename U = T>
-inline bool operator!=(const XsElement_minOccurs0<T>& lhs, const XsElement_minOccurs0<U>& rhs)
+inline bool operator!=(const XsElement_minOccurs0<T>& lhs,
+                       const XsElement_minOccurs0<U>& rhs)
 {
     return !(lhs == rhs);
 }
 
 template <typename T>
-inline std::ostream& operator<<(std::ostream& os, const XsElement_minOccurs0<T>& o)
+inline std::ostream& operator<<(std::ostream& os,
+                                const XsElement_minOccurs0<T>& o)
 {
     if (has_value(o))
     {
@@ -238,4 +255,4 @@ inline std::ostream& operator<<(std::ostream& os, const XsElement_minOccurs0<T>&
 }
 
 }
-#endif // SIX_six_XsElement_h_INCLUDED_
+#endif  // SIX_six_XsElement_h_INCLUDED_

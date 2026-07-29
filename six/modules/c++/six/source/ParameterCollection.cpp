@@ -1,7 +1,7 @@
 /* =========================================================================
  * This file is part of six-c++
  * =========================================================================
- * 
+ *
  * (C) Copyright 2004 - 2016, MDA Information Systems LLC
  *
  * six-c++ is free software; you can redistribute it and/or modify
@@ -14,8 +14,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public 
- * License along with this program; If not, 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program; If not,
  * see <http://www.gnu.org/licenses/>.
  *
  */
@@ -26,10 +26,10 @@
 
 namespace six
 {
-size_t
-ParameterCollection::findParameterIndex(const std::string& paramName) const
+size_t ParameterCollection::findParameterIndex(
+        const std::string& paramName) const
 {
-    for(size_t ii = 0; ii < mParams.size(); ++ii)
+    for (size_t ii = 0; ii < mParams.size(); ++ii)
     {
         if (paramName == mParams[ii].getName())
         {
@@ -37,15 +37,14 @@ ParameterCollection::findParameterIndex(const std::string& paramName) const
         }
     }
 
-    throw except::NoSuchKeyException(Ctxt(
-        "No parameter with name \"" + paramName
-        + "\" found in this collection"));
+    throw except::NoSuchKeyException(Ctxt("No parameter with name \"" +
+                                          paramName +
+                                          "\" found in this collection"));
 }
 
-bool
-ParameterCollection::containsParameter(const std::string& paramName) const
+bool ParameterCollection::containsParameter(const std::string& paramName) const
 {
-    for(size_t ii = 0; ii < mParams.size(); ++ii)
+    for (size_t ii = 0; ii < mParams.size(); ++ii)
     {
         if (paramName == mParams[ii].getName())
         {
@@ -56,10 +55,8 @@ ParameterCollection::containsParameter(const std::string& paramName) const
     return false;
 }
 
-bool
-ParameterCollection::operator==(const ParameterCollection& rhs) const
+bool ParameterCollection::operator==(const ParameterCollection& rhs) const
 {
     return mParams == rhs.mParams;
 }
 }
-

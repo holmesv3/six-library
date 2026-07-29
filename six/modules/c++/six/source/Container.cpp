@@ -21,27 +21,26 @@
  */
 #include <six/Container.h>
 
-#include <stdexcept>
 #include <std/memory>
+#include <stdexcept>
 
 namespace six
 {
-Container::Container(DataType dataType) :
-    mDataType(dataType)
+Container::Container(DataType dataType) : mDataType(dataType)
 {
 }
-Container::Container(std::unique_ptr<Data>&& data)
-    : Container(data->getDataType())
+Container::Container(std::unique_ptr<Data>&& data) :
+    Container(data->getDataType())
 {
     addData(std::move(data));
 }
-Container::Container(Data* data)
-    : Container(data->getDataType())
+Container::Container(Data* data) : Container(data->getDataType())
 {
     addData(data);
 }
-Container::Container(std::unique_ptr<Data>&& data, std::unique_ptr<Legend>&& legend)
-    : Container(six::DataType::DERIVED)
+Container::Container(std::unique_ptr<Data>&& data,
+                     std::unique_ptr<Legend>&& legend) :
+    Container(six::DataType::DERIVED)
 {
     addData(std::move(data), std::move(legend));
 }
@@ -67,12 +66,13 @@ void Container::addData(std::unique_ptr<Data>&& data)
     addData(std::move(data), nullLegend());
 }
 
-void Container::addData(std::unique_ptr<Data>&& data, std::unique_ptr<Legend>&& legend)
+void Container::addData(std::unique_ptr<Data>&& data,
+                        std::unique_ptr<Legend>&& legend)
 {
     if (data->getDataType() != DataType::DERIVED)
     {
-        throw except::Exception(Ctxt(
-                "Legends can only be associated with derived data"));
+        throw except::Exception(
+                Ctxt("Legends can only be associated with derived data"));
     }
 
     mem::ScopedCopyablePtr<Legend> copyableLegend(legend.release());
@@ -106,8 +106,8 @@ Data* Container::getData(const std::string& iid, size_t numImages)
     if (!str::startsWith(iid, "SICD") && !str::startsWith(iid, "SIDD") &&
         iid.length() >= 7)
     {
-        throw except::Exception(Ctxt(
-                "This is not a properly formed IID1 field"));
+        throw except::Exception(
+                Ctxt("This is not a properly formed IID1 field"));
     }
 
     //! Index is 1-based except for SICDs with one image segment --

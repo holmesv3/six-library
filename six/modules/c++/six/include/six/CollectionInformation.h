@@ -23,16 +23,16 @@
 #ifndef SIX_six_CollectionInformation_h_INCLUDED_
 #define SIX_six_CollectionInformation_h_INCLUDED_
 
-#include <std/string>
-#include <std/optional>
-
 #include <str/Encoding.h>
 
-#include "six/Types.h"
+#include <std/optional>
+#include <std/string>
+
+#include "six/Exports.h"
 #include "six/Init.h"
 #include "six/Parameter.h"
 #include "six/ParameterCollection.h"
-#include "six/Exports.h"
+#include "six/Types.h"
 
 namespace six
 {
@@ -47,7 +47,6 @@ namespace six
  */
 struct SIX_SIX_API CollectionInformation
 {
-
     /*!
      *  Radar platform identifier.  For bistatic
      *  collections, list the Receive platform
@@ -117,7 +116,8 @@ struct SIX_SIX_API CollectionInformation
     CollectionInformation* clone() const;
 
     virtual std::string getClassificationLevel() const;
-    inline virtual void setClassificationLevel(const std::string& classification)
+    inline virtual void setClassificationLevel(
+            const std::string& classification)
     {
         mClassification = str::u8FromNative(classification);
     }
@@ -126,13 +126,16 @@ struct SIX_SIX_API CollectionInformation
     virtual void setClassificationLevel(const std::u8string& classification);
 
     //! Ostream operators for six::CollectionInformation type (utility only).
-    SIX_SIX_API friend std::ostream& operator<<(std::ostream& os, const six::CollectionInformation& c);
+    SIX_SIX_API friend std::ostream& operator<<(
+            std::ostream& os, const six::CollectionInformation& c);
 
-  bool operator==(const CollectionInformation& rhs) const; // needs to be member-function for SWIG
-  bool operator!=(const CollectionInformation& rhs) const  // needs to be member-function for SWIG
-  {
-    return !(*this == rhs);
-  }
+    bool operator==(const CollectionInformation& rhs)
+            const;  // needs to be member-function for SWIG
+    bool operator!=(const CollectionInformation& rhs)
+            const  // needs to be member-function for SWIG
+    {
+        return !(*this == rhs);
+    }
 
 private:
     /*!
@@ -143,4 +146,4 @@ private:
 
 }
 
-#endif // SIX_six_CollectionInformation_h_INCLUDED_
+#endif  // SIX_six_CollectionInformation_h_INCLUDED_

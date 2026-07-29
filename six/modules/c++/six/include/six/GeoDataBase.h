@@ -23,15 +23,16 @@
 #ifndef __SIX_GEO_DATA_BASE_H__
 #define __SIX_GEO_DATA_BASE_H__
 
-#include "six/Types.h"
-#include "six/Init.h"
+#include <logging/Logger.h>
+#include <mem/ScopedCloneablePtr.h>
+
+#include "scene/ProjectionModel.h"
+#include "six/Exports.h"
 #include "six/GeoInfo.h"
+#include "six/Init.h"
 #include "six/Parameter.h"
 #include "six/ParameterCollection.h"
-#include "six/Exports.h"
-#include "scene/ProjectionModel.h"
-#include <mem/ScopedCloneablePtr.h>
-#include <logging/Logger.h>
+#include "six/Types.h"
 
 namespace six
 {
@@ -53,7 +54,8 @@ struct SIX_SIX_API GeoDataBase
      *  latitude, longitude and height parameters.  All
      *  height values are Height Above Ellipsoid (HAE)
      */
-    EarthModelType earthModel = EarthModelType::WGS84; // force WGS84, since spec does.
+    EarthModelType earthModel =
+            EarthModelType::WGS84;  // force WGS84, since spec does.
 
     /*!
      *  Parameters apply to image corners of the
@@ -74,7 +76,7 @@ struct SIX_SIX_API GeoDataBase
      *  (Optional) Parameters that describe geographic features.
      *  Note that this may be used as a block inside of a block.
      */
-    std::vector<mem::ScopedCopyablePtr<GeoInfo> > geoInfos;
+    std::vector<mem::ScopedCopyablePtr<GeoInfo>> geoInfos;
 
     bool operator==(const GeoDataBase& rhs) const;
     bool operator!=(const GeoDataBase& rhs) const

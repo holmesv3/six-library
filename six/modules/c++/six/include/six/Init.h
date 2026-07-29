@@ -24,17 +24,15 @@
 #define SIX_six_Init_h_INCLUDED_
 
 #include <assert.h>
-
-#include <limits>
-#include <stdexcept>
-
-#include <std/optional>
-
+#include <except/Exception.h>
+#include <import/except.h>
+#include <six/Exports.h>
 #include <six/Parameter.h>
 #include <types/RgAz.h>
-#include <import/except.h>
-#include <except/Exception.h>
-#include <six/Exports.h>
+
+#include <limits>
+#include <std/optional>
+#include <stdexcept>
 
 namespace six
 {
@@ -52,17 +50,20 @@ DECLARE_EXCEPTION(UninitializedValue);
  */
 struct SIX_SIX_API Init final
 {
-    template<typename T> static bool isUndefined(T value)
+    template <typename T>
+    static bool isUndefined(T value)
     {
         return (value == Init::undefined<T>());
     }
 
-    template<typename T> static bool isDefined(T value)
+    template <typename T>
+    static bool isDefined(T value)
     {
         return !isUndefined<T>(value);
     }
 
-    template<typename T> static T undefined()
+    template <typename T>
+    static T undefined()
     {
         // This will handle integer types
         // It won't compile for other types that aren't specialized below
@@ -71,9 +72,12 @@ struct SIX_SIX_API Init final
 };
 
 // This is intentionally undefined in order to generate a linker error
-template<> bool Init::undefined<bool>();
+template <>
+bool Init::undefined<bool>();
 
-#define SIX_Init_undefined_(T) template<> SIX_SIX_API T Init::undefined<T>()
+#define SIX_Init_undefined_(T) \
+    template <>                \
+    SIX_SIX_API T Init::undefined<T>()
 
 SIX_Init_undefined_(std::string);
 SIX_Init_undefined_(float);
@@ -130,16 +134,19 @@ SIX_Init_undefined_(XYZEnum);
 
 #undef SIX_Init_undefined_
 
-template<> SIX_SIX_API bool Init::isUndefined<float>(float);
-template<> SIX_SIX_API bool Init::isUndefined<double>(double);
+template <>
+SIX_SIX_API bool Init::isUndefined<float>(float);
+template <>
+SIX_SIX_API bool Init::isUndefined<double>(double);
 
-// These allow switching between `double` and `std::optional<double>` w/o changing a lot of other code.
-template<typename T>
+// These allow switching between `double` and `std::optional<double>` w/o
+// changing a lot of other code.
+template <typename T>
 inline bool has_value(const T& v)
 {
     return Init::isDefined(v);
 }
-template<typename T>
+template <typename T>
 inline bool has_value(const std::optional<T>& v)
 {
     return v.has_value() && has_value(*v);
@@ -147,17 +154,17 @@ inline bool has_value(const std::optional<T>& v)
 
 namespace details
 {
-    inline void throw_undefined_value()
-    {
-    #if CODA_OSS_cpp17
-        throw std::bad_optional_access();
-    #else
-        coda_oss::details::throw_bad_optional_access();
-    #endif
-    }
+inline void throw_undefined_value()
+{
+#if CODA_OSS_cpp17
+    throw std::bad_optional_access();
+#else
+    coda_oss::details::throw_bad_optional_access();
+#endif
+}
 }
 
-template<typename T>
+template <typename T>
 inline const T& value(const T& v)
 {
     if (!has_value(v))
@@ -166,7 +173,7 @@ inline const T& value(const T& v)
     }
     return v;
 }
-template<typename T>
+template <typename T>
 inline const T& value(const std::optional<T>& v)
 {
     return value(v.value());
@@ -174,4 +181,4 @@ inline const T& value(const std::optional<T>& v)
 
 }
 
-#endif // SIX_six_Init_h_INCLUDED_
+#endif  // SIX_six_Init_h_INCLUDED_

@@ -20,18 +20,16 @@
  *
  */
 #include <assert.h>
+#include <gsl/gsl.h>
+#include <six/CollectionInformation.h>
+#include <six/ParameterCollection.h>
+#include <six/SICommonXMLParser.h>
+#include <six/Utilities.h>
+#include <six/XmlLite.h>
+#include <str/Convert.h>
 
 #include <set>
 #include <string>
-
-#include <str/Convert.h>
-#include <gsl/gsl.h>
-
-#include <six/Utilities.h>
-#include <six/CollectionInformation.h>
-#include <six/SICommonXMLParser.h>
-#include <six/ParameterCollection.h>
-#include <six/XmlLite.h>
 
 namespace
 {
@@ -40,30 +38,48 @@ typedef xml::lite::Element* XMLElem;
 
 namespace six
 {
-    SICommonXMLParser::SICommonXMLParser(const std::string& defaultURI, bool addClassAttributes, const std::string& siCommonURI,
-        logging::Logger* log, bool ownLog) : XMLParser(defaultURI, addClassAttributes, log, ownLog),
-        mSICommonURI(siCommonURI) { }
-    SICommonXMLParser::SICommonXMLParser(const std::string& defaultURI, bool addClassAttributes, const std::string& siCommonURI,
-        std::unique_ptr<logging::Logger>&& log) : XMLParser(defaultURI, addClassAttributes, std::move(log)),
-        mSICommonURI(siCommonURI) { }
-    SICommonXMLParser::SICommonXMLParser(const std::string& defaultURI, bool addClassAttributes, const std::string& siCommonURI,
-        logging::Logger& log) : XMLParser(defaultURI, addClassAttributes, log),
-        mSICommonURI(siCommonURI) { }
+SICommonXMLParser::SICommonXMLParser(const std::string& defaultURI,
+                                     bool addClassAttributes,
+                                     const std::string& siCommonURI,
+                                     logging::Logger* log,
+                                     bool ownLog) :
+    XMLParser(defaultURI, addClassAttributes, log, ownLog),
+    mSICommonURI(siCommonURI)
+{
+}
+SICommonXMLParser::SICommonXMLParser(const std::string& defaultURI,
+                                     bool addClassAttributes,
+                                     const std::string& siCommonURI,
+                                     std::unique_ptr<logging::Logger>&& log) :
+    XMLParser(defaultURI, addClassAttributes, std::move(log)),
+    mSICommonURI(siCommonURI)
+{
+}
+SICommonXMLParser::SICommonXMLParser(const std::string& defaultURI,
+                                     bool addClassAttributes,
+                                     const std::string& siCommonURI,
+                                     logging::Logger& log) :
+    XMLParser(defaultURI, addClassAttributes, log), mSICommonURI(siCommonURI)
+{
+}
 
-void SICommonXMLParser::parseVector2D(const xml::lite::Element* vecXML, Vector2& vec) const
+void SICommonXMLParser::parseVector2D(const xml::lite::Element* vecXML,
+                                      Vector2& vec) const
 {
     parseDouble(getFirstAndOnly(vecXML, "X"), vec[0]);
     parseDouble(getFirstAndOnly(vecXML, "Y"), vec[1]);
 }
 
-void SICommonXMLParser::parseVector3D(const xml::lite::Element* vecXML, Vector3& vec) const
+void SICommonXMLParser::parseVector3D(const xml::lite::Element* vecXML,
+                                      Vector3& vec) const
 {
     parseDouble(getFirstAndOnly(vecXML, "X"), vec[0]);
     parseDouble(getFirstAndOnly(vecXML, "Y"), vec[1]);
     parseDouble(getFirstAndOnly(vecXML, "Z"), vec[2]);
 }
 
-void SICommonXMLParser::parseLatLonAlt(const xml::lite::Element* llaXML, LatLonAlt& lla) const
+void SICommonXMLParser::parseLatLonAlt(const xml::lite::Element* llaXML,
+                                       LatLonAlt& lla) const
 {
     double lat, lon, alt;
 
@@ -76,11 +92,10 @@ void SICommonXMLParser::parseLatLonAlt(const xml::lite::Element* llaXML, LatLonA
     lla.setAlt(alt);
 }
 
-XMLElem SICommonXMLParser::createVector2D(
-        const std::string& name,
-        const std::string& uri,
-        Vector2 p,
-        XMLElem parent) const
+XMLElem SICommonXMLParser::createVector2D(const std::string& name,
+                                          const std::string& uri,
+                                          Vector2 p,
+                                          XMLElem parent) const
 {
     XMLElem e = newElement(name, (uri.empty()) ? getDefaultURI() : uri, parent);
     createDouble("X", getSICommonURI(), p[0], e);
@@ -88,19 +103,17 @@ XMLElem SICommonXMLParser::createVector2D(
     return e;
 }
 
-XMLElem SICommonXMLParser::createVector2D(
-        const std::string& name,
-        Vector2 p,
-        XMLElem parent) const
+XMLElem SICommonXMLParser::createVector2D(const std::string& name,
+                                          Vector2 p,
+                                          XMLElem parent) const
 {
     return createVector2D(name, "", p, parent);
 }
 
-XMLElem SICommonXMLParser::createVector3D(
-        const std::string& name,
-        const std::string& uri,
-        Vector3 p,
-        XMLElem parent) const
+XMLElem SICommonXMLParser::createVector3D(const std::string& name,
+                                          const std::string& uri,
+                                          Vector3 p,
+                                          XMLElem parent) const
 {
     XMLElem e = newElement(name, (uri.empty()) ? getDefaultURI() : uri, parent);
     createDouble("X", getSICommonURI(), p[0], e);
@@ -109,16 +122,17 @@ XMLElem SICommonXMLParser::createVector3D(
     return e;
 }
 
-XMLElem SICommonXMLParser::createVector3D(
-        const std::string& name,
-        Vector3 p,
-        XMLElem parent) const
+XMLElem SICommonXMLParser::createVector3D(const std::string& name,
+                                          Vector3 p,
+                                          XMLElem parent) const
 {
     return createVector3D(name, "", p, parent);
 }
 
 XMLElem SICommonXMLParser::createPoly1D(const std::string& name,
-        const std::string& uri, const Poly1D& poly1D, XMLElem parent) const
+                                        const std::string& uri,
+                                        const Poly1D& poly1D,
+                                        XMLElem parent) const
 {
     const size_t order = poly1D.order();
     XMLElem poly1DXML = newElement(name, uri, parent);
@@ -126,20 +140,22 @@ XMLElem SICommonXMLParser::createPoly1D(const std::string& name,
 
     for (size_t ii = 0; ii <= order; ++ii)
     {
-        XMLElem coefXML = createDouble("Coef", getSICommonURI(), poly1D[ii],
-                                       poly1DXML);
+        XMLElem coefXML =
+                createDouble("Coef", getSICommonURI(), poly1D[ii], poly1DXML);
         setAttribute(coefXML, "exponent1", ii);
     }
     return poly1DXML;
 }
 
 XMLElem SICommonXMLParser::createPoly1D(const std::string& name,
-        const Poly1D& poly1D, XMLElem parent) const
+                                        const Poly1D& poly1D,
+                                        XMLElem parent) const
 {
     return createPoly1D(name, getDefaultURI(), poly1D, parent);
 }
 
-void SICommonXMLParser::parsePolyXYZ(const xml::lite::Element* polyXML, PolyXYZ& polyXYZ) const
+void SICommonXMLParser::parsePolyXYZ(const xml::lite::Element* polyXML,
+                                     PolyXYZ& polyXYZ) const
 {
     XMLElem xXML = getFirstAndOnly(polyXML, "X");
     XMLElem yXML = getFirstAndOnly(polyXML, "Y");
@@ -179,18 +195,19 @@ void SICommonXMLParser::parsePoly(const xml::lite::Element* polyXML,
     {
         // Check the order attr, and use that index
         const size_t orderIdx = str::toType<size_t>(
-            coeffsXML[ii]->getAttributes().getValue("exponent1"));
+                coeffsXML[ii]->getAttributes().getValue("exponent1"));
         if (orderIdx > polyXYZ.order())
         {
-            throw except::Exception(Ctxt(
-                    "Order " + std::to_string(orderIdx) + " is out of bounds"));
+            throw except::Exception(Ctxt("Order " + std::to_string(orderIdx) +
+                                         " is out of bounds"));
         }
         parseDouble(coeffsXML[ii], polyXYZ[orderIdx][xyzIdx]);
     }
 }
 
 XMLElem SICommonXMLParser::createPolyXYZ(const std::string& name,
-        const PolyXYZ& polyXYZ, XMLElem parent) const
+                                         const PolyXYZ& polyXYZ,
+                                         XMLElem parent) const
 {
     const size_t order = polyXYZ.order();
     XMLElem polyXML = newElement(name, getDefaultURI(), parent);
@@ -236,17 +253,17 @@ XMLElem SICommonXMLParser::convertGeoInfoToXML(const GeoInfo& geoInfo,
     else if (numLatLons >= 2)
     {
         XMLElem linePolyXML = newElement(numLatLons == 2 ? "Line" : "Polygon",
-                                         uri, geoInfoXML);
+                                         uri,
+                                         geoInfoXML);
 
         setAttribute(linePolyXML, "size", numLatLons);
 
         for (size_t ii = 0; ii < numLatLons; ++ii)
         {
-            XMLElem v = createLatLon(
-                    numLatLons == 2 ? "Endpoint" : "Vertex",
-                    uri,
-                    geoInfo.geometryLatLon[ii],
-                    linePolyXML);
+            XMLElem v = createLatLon(numLatLons == 2 ? "Endpoint" : "Vertex",
+                                     uri,
+                                     geoInfo.geometryLatLon[ii],
+                                     linePolyXML);
 
             setAttribute(v, "index", ii + 1);
         }
@@ -265,26 +282,28 @@ XMLElem SICommonXMLParser::convertGeoInfoToXML(const GeoInfo& geoInfo,
     return geoInfoXML;
 }
 
-void SICommonXMLParser::parseGeoInfoFromXML(const xml::lite::Element* geoInfoXML, GeoInfo* geoInfo) const
+void SICommonXMLParser::parseGeoInfoFromXML(
+        const xml::lite::Element* geoInfoXML, GeoInfo* geoInfo) const
 {
     assert(geoInfoXML != nullptr);
 
-    std::vector < XMLElem > geoInfosXML;
+    std::vector<XMLElem> geoInfosXML;
     geoInfoXML->getElementsByTagName("GeoInfo", geoInfosXML);
     geoInfo->name = geoInfoXML->getAttributes().getValue("name");
 
-    //optional
+    // optional
     size_t idx(geoInfo->geoInfos.size());
     geoInfo->geoInfos.resize(idx + geoInfosXML.size());
 
-    for (std::vector<XMLElem>::const_iterator it = geoInfosXML.begin(); it
-        != geoInfosXML.end(); ++it, ++idx)
+    for (std::vector<XMLElem>::const_iterator it = geoInfosXML.begin();
+         it != geoInfosXML.end();
+         ++it, ++idx)
     {
         geoInfo->geoInfos[idx].reset(new GeoInfo());
         parseGeoInfoFromXML(*it, geoInfo->geoInfos[idx].get());
     }
 
-    //optional
+    // optional
     parseParameters(geoInfoXML, "Desc", geoInfo->desc);
 
     XMLElem tmpElem = getOptional(geoInfoXML, "Point");
@@ -311,18 +330,18 @@ void SICommonXMLParser::parseGeoInfoFromXML(const xml::lite::Element* geoInfoXML
 }
 
 XMLElem SICommonXMLParser::createEarthModelType(const std::string& name,
-    const EarthModelType& value,
-    XMLElem parent) const
+                                                const EarthModelType& value,
+                                                XMLElem parent) const
 {
     return createSixString(name, value, parent);
 }
 void SICommonXMLParser::parseEarthModelType(const xml::lite::Element& element,
-    EarthModelType& value) const
+                                            EarthModelType& value) const
 {
     value = six::toType<EarthModelType>(element.getCharacterData());
 }
 void SICommonXMLParser::parseEarthModelType(const xml::lite::Element* element,
-    EarthModelType& value) const
+                                            EarthModelType& value) const
 {
     parseEarthModelType(*element, value);
 }
@@ -350,40 +369,50 @@ XMLElem SICommonXMLParser::createLatLonFootprint(const std::string& name,
     return footprint;
 }
 
-void SICommonXMLParser::parsePoly1D(const xml::lite::Element* polyXML, Poly1D& poly1D) const
+void SICommonXMLParser::parsePoly1D(const xml::lite::Element* polyXML,
+                                    Poly1D& poly1D) const
 {
-    const auto order1 = str::toType<int>(polyXML->getAttributes().getValue("order1"));
+    const auto order1 =
+            str::toType<int>(polyXML->getAttributes().getValue("order1"));
     Poly1D p1D(gsl::narrow<size_t>(order1));
 
-    std::vector < XMLElem > coeffsXML;
+    std::vector<XMLElem> coeffsXML;
     polyXML->getElementsByTagName("Coef", coeffsXML);
 
     for (auto element : coeffsXML)
     {
-        const auto exp1 = str::toType<int>(element->getAttributes().getValue("exponent1"));
+        const auto exp1 = str::toType<int>(
+                element->getAttributes().getValue("exponent1"));
         parseDouble(element, p1D[gsl::narrow<size_t>(exp1)]);
     }
     poly1D = p1D;
 }
 
-void SICommonXMLParser::parsePoly2D(const xml::lite::Element* polyXML, Poly2D& poly2D) const
+void SICommonXMLParser::parsePoly2D(const xml::lite::Element* polyXML,
+                                    Poly2D& poly2D) const
 {
-    const auto order1 = str::toType<int>(polyXML->getAttributes().getValue("order1"));
-    const auto order2 = str::toType<int>(polyXML->getAttributes().getValue("order2"));
+    const auto order1 =
+            str::toType<int>(polyXML->getAttributes().getValue("order1"));
+    const auto order2 =
+            str::toType<int>(polyXML->getAttributes().getValue("order2"));
     Poly2D p2D(gsl::narrow<size_t>(order1), gsl::narrow<size_t>(order2));
 
-    std::vector < XMLElem > coeffsXML;
+    std::vector<XMLElem> coeffsXML;
     polyXML->getElementsByTagName("Coef", coeffsXML);
 
     for (auto element : coeffsXML)
     {
-        const auto exp1 = str::toType<int>(element->getAttributes().getValue("exponent1"));
-        const auto exp2 = str::toType<int>(element->getAttributes().getValue("exponent2"));
+        const auto exp1 = str::toType<int>(
+                element->getAttributes().getValue("exponent1"));
+        const auto exp2 = str::toType<int>(
+                element->getAttributes().getValue("exponent2"));
         parseDouble(element, p2D[gsl::narrow<size_t>(exp1)][exp2]);
     }
     poly2D = p2D;
 }
-bool SICommonXMLParser::parseOptionalPoly2D(const xml::lite::Element* parent, const std::string& tag, Poly2D& value) const
+bool SICommonXMLParser::parseOptionalPoly2D(const xml::lite::Element* parent,
+                                            const std::string& tag,
+                                            Poly2D& value) const
 {
     if (const xml::lite::Element* const element = getOptional(parent, tag))
     {
@@ -393,9 +422,10 @@ bool SICommonXMLParser::parseOptionalPoly2D(const xml::lite::Element* parent, co
     return false;
 }
 
-
 XMLElem SICommonXMLParser::createPoly2D(const std::string& name,
-        const std::string& uri, const Poly2D& poly2D, XMLElem parent) const
+                                        const std::string& uri,
+                                        const Poly2D& poly2D,
+                                        XMLElem parent) const
 {
     xml::lite::AttributeNode node;
     XMLElem poly2DXML = newElement(name, uri, parent);
@@ -406,8 +436,10 @@ XMLElem SICommonXMLParser::createPoly2D(const std::string& name,
     {
         for (size_t jj = 0; jj <= poly2D.orderY(); jj++)
         {
-            XMLElem coefXML = createDouble("Coef", getSICommonURI(),
-                                           poly2D[ii][jj], poly2DXML);
+            XMLElem coefXML = createDouble("Coef",
+                                           getSICommonURI(),
+                                           poly2D[ii][jj],
+                                           poly2DXML);
             setAttribute(coefXML, "exponent1", ii);
             setAttribute(coefXML, "exponent2", jj);
         }
@@ -417,14 +449,15 @@ XMLElem SICommonXMLParser::createPoly2D(const std::string& name,
 }
 
 XMLElem SICommonXMLParser::createPoly2D(const std::string& name,
-        const Poly2D& poly2D, XMLElem parent) const
+                                        const Poly2D& poly2D,
+                                        XMLElem parent) const
 {
     return createPoly2D(name, getDefaultURI(), poly2D, parent);
 }
 
-
 XMLElem SICommonXMLParser::createComplex(const std::string& name,
-        six::zdouble c, XMLElem parent) const
+                                         six::zdouble c,
+                                         XMLElem parent) const
 {
     XMLElem e = newElement(name, getDefaultURI(), parent);
     createDouble("Real", getSICommonURI(), c.real(), e);
@@ -432,10 +465,12 @@ XMLElem SICommonXMLParser::createComplex(const std::string& name,
     return e;
 }
 
-XMLElem SICommonXMLParser::createRowCol(
-        const std::string& name, const std::string& uri,
-        const std::string& rowName, const std::string& colName,
-        const RowColInt& value, XMLElem parent) const
+XMLElem SICommonXMLParser::createRowCol(const std::string& name,
+                                        const std::string& uri,
+                                        const std::string& rowName,
+                                        const std::string& colName,
+                                        const RowColInt& value,
+                                        XMLElem parent) const
 {
     XMLElem e = newElement(name, (uri.empty()) ? getDefaultURI() : uri, parent);
     createInt(rowName, getSICommonURI(), value.row, e);
@@ -444,16 +479,20 @@ XMLElem SICommonXMLParser::createRowCol(
 }
 
 XMLElem SICommonXMLParser::createRowCol(const std::string& name,
-        const std::string& rowName, const std::string& colName,
-        const RowColInt& value, XMLElem parent) const
+                                        const std::string& rowName,
+                                        const std::string& colName,
+                                        const RowColInt& value,
+                                        XMLElem parent) const
 {
     return createRowCol(name, "", rowName, colName, value, parent);
 }
 
-XMLElem SICommonXMLParser::createRowCol(
-        const std::string& name, const std::string& uri,
-        const std::string& rowName, const std::string& colName,
-        const RowColDouble& value, XMLElem parent) const
+XMLElem SICommonXMLParser::createRowCol(const std::string& name,
+                                        const std::string& uri,
+                                        const std::string& rowName,
+                                        const std::string& colName,
+                                        const RowColDouble& value,
+                                        XMLElem parent) const
 {
     XMLElem e = newElement(name, (uri.empty()) ? getDefaultURI() : uri, parent);
     createDouble(rowName, getSICommonURI(), value.row, e);
@@ -462,40 +501,47 @@ XMLElem SICommonXMLParser::createRowCol(
 }
 
 XMLElem SICommonXMLParser::createRowCol(const std::string& name,
-        const std::string& rowName, const std::string& colName,
-        const RowColDouble& value, XMLElem parent) const
+                                        const std::string& rowName,
+                                        const std::string& colName,
+                                        const RowColDouble& value,
+                                        XMLElem parent) const
 {
     return createRowCol(name, "", rowName, colName, value, parent);
 }
 
-XMLElem SICommonXMLParser::createRowCol(
-        const std::string& name, const std::string& uri,
-        const RowColInt& value, XMLElem parent) const
+XMLElem SICommonXMLParser::createRowCol(const std::string& name,
+                                        const std::string& uri,
+                                        const RowColInt& value,
+                                        XMLElem parent) const
 {
     return createRowCol(name, uri, "Row", "Col", value, parent);
 }
 
 XMLElem SICommonXMLParser::createRowCol(const std::string& name,
-        const RowColInt& value, XMLElem parent) const
+                                        const RowColInt& value,
+                                        XMLElem parent) const
 {
     return createRowCol(name, "", value, parent);
 }
 
-XMLElem SICommonXMLParser::createRowCol(
-        const std::string& name, const std::string& uri,
-        const RowColDouble& value, XMLElem parent) const
+XMLElem SICommonXMLParser::createRowCol(const std::string& name,
+                                        const std::string& uri,
+                                        const RowColDouble& value,
+                                        XMLElem parent) const
 {
     return createRowCol(name, uri, "Row", "Col", value, parent);
 }
 
 XMLElem SICommonXMLParser::createRowCol(const std::string& name,
-        const RowColDouble& value, XMLElem parent) const
+                                        const RowColDouble& value,
+                                        XMLElem parent) const
 {
     return createRowCol(name, "", value, parent);
 }
 
 XMLElem SICommonXMLParser::createRowCol(const std::string& name,
-        const RowColLatLon& value, XMLElem parent) const
+                                        const RowColLatLon& value,
+                                        XMLElem parent) const
 {
     XMLElem e = newElement(name, getDefaultURI(), parent);
     createLatLon("Row", value.row, e);
@@ -504,7 +550,8 @@ XMLElem SICommonXMLParser::createRowCol(const std::string& name,
 }
 
 XMLElem SICommonXMLParser::createRangeAzimuth(const std::string& name,
-        const types::RgAz<double>& value, XMLElem parent) const
+                                              const types::RgAz<double>& value,
+                                              XMLElem parent) const
 {
     XMLElem e = newElement(name, getDefaultURI(), parent);
     createDouble("Range", getSICommonURI(), value.rg, e);
@@ -512,11 +559,10 @@ XMLElem SICommonXMLParser::createRangeAzimuth(const std::string& name,
     return e;
 }
 
-XMLElem SICommonXMLParser::createLatLon(
-        const std::string& name,
-        const std::string& uri,
-        const LatLon& value,
-        XMLElem parent) const
+XMLElem SICommonXMLParser::createLatLon(const std::string& name,
+                                        const std::string& uri,
+                                        const LatLon& value,
+                                        XMLElem parent) const
 {
     XMLElem e = newElement(name, uri, parent);
     createDouble("Lat", getSICommonURI(), value.getLat(), e);
@@ -525,36 +571,39 @@ XMLElem SICommonXMLParser::createLatLon(
     return e;
 }
 
-XMLElem SICommonXMLParser::createLatLon(
-        const std::string& name,
-        const LatLon& value,
-        XMLElem parent) const
+XMLElem SICommonXMLParser::createLatLon(const std::string& name,
+                                        const LatLon& value,
+                                        XMLElem parent) const
 {
     return createLatLon(name, getDefaultURI(), value, parent);
 }
 
 XMLElem SICommonXMLParser::createLatLonAlt(const std::string& name,
-        const LatLonAlt& value, XMLElem parent) const
+                                           const LatLonAlt& value,
+                                           XMLElem parent) const
 {
     XMLElem e = createLatLon(name, value, parent);
     createDouble("HAE", getSICommonURI(), value.getAlt(), e);
     return e;
 }
 
-void SICommonXMLParser::parseParameter(const xml::lite::Element* element, Parameter& p) const
+void SICommonXMLParser::parseParameter(const xml::lite::Element* element,
+                                       Parameter& p) const
 {
     p.setName(element->getAttributes().getValue("name"));
     p.setValue(element->getCharacterData());
 }
 
 void SICommonXMLParser::parseParameters(const xml::lite::Element* paramXML,
-        const std::string& paramName, ParameterCollection& props) const
+                                        const std::string& paramName,
+                                        ParameterCollection& props) const
 {
-    std::vector < XMLElem > elemXML;
+    std::vector<XMLElem> elemXML;
     paramXML->getElementsByTagName(paramName, elemXML);
 
-    for (std::vector<XMLElem>::iterator it = elemXML.begin(); it
-            != elemXML.end(); ++it)
+    for (std::vector<XMLElem>::iterator it = elemXML.begin();
+         it != elemXML.end();
+         ++it)
     {
         Parameter p;
         parseParameter(*it, p);
@@ -563,7 +612,9 @@ void SICommonXMLParser::parseParameters(const xml::lite::Element* paramXML,
 }
 
 XMLElem SICommonXMLParser::createParameter(const std::string& name,
-        const std::string& uri, const Parameter& value, XMLElem parent) const
+                                           const std::string& uri,
+                                           const Parameter& value,
+                                           XMLElem parent) const
 {
     XMLElem element = createString(name, uri, value.str(), parent);
     setAttribute(element, "name", value.getName());
@@ -571,47 +622,60 @@ XMLElem SICommonXMLParser::createParameter(const std::string& name,
 }
 
 XMLElem SICommonXMLParser::createParameter(const std::string& name,
-        const Parameter& value, XMLElem parent) const
+                                           const Parameter& value,
+                                           XMLElem parent) const
 {
     return createParameter(name, getDefaultURI(), value, parent);
 }
 
 void SICommonXMLParser::addParameters(const std::string& name,
-        const std::string& uri, const ParameterCollection& props,
-        XMLElem parent) const
+                                      const std::string& uri,
+                                      const ParameterCollection& props,
+                                      XMLElem parent) const
 {
-    for (six::ParameterCollection::ConstParameterCollectionIteratorT it = props.begin(); it
-            != props.end(); ++it)
+    for (six::ParameterCollection::ConstParameterCollectionIteratorT it =
+                 props.begin();
+         it != props.end();
+         ++it)
     {
         createParameter(name, uri, *it, parent);
     }
 }
 
 void SICommonXMLParser::addParameters(const std::string& name,
-        const ParameterCollection& props, XMLElem parent) const
+                                      const ParameterCollection& props,
+                                      XMLElem parent) const
 {
     addParameters(name, getDefaultURI(), props, parent);
 }
 
 void SICommonXMLParser::addDecorrType(const std::string& name,
-        const std::string& uri, DecorrType decorrType, XMLElem parent) const
+                                      const std::string& uri,
+                                      DecorrType decorrType,
+                                      XMLElem parent) const
 {
-    //only adds it if it needs to
+    // only adds it if it needs to
     if (Init::isDefined(decorrType))
     {
-        if (!Init::isUndefined<double>(decorrType.corrCoefZero)
-            && !Init::isUndefined<double>(decorrType.decorrRate))
+        if (!Init::isUndefined<double>(decorrType.corrCoefZero) &&
+            !Init::isUndefined<double>(decorrType.decorrRate))
         {
             XMLElem decorrXML = newElement(name, uri, parent);
-            createDouble("CorrCoefZero", uri, decorrType.corrCoefZero, decorrXML);
+            createDouble("CorrCoefZero",
+                         uri,
+                         decorrType.corrCoefZero,
+                         decorrXML);
             createDouble("DecorrRate", uri, decorrType.decorrRate, decorrXML);
         }
     }
 }
-void SICommonXMLParser::addDecorrType(const std::string& name,
-    const std::string& uri, const std::optional<DecorrType>& decorrType, XMLElem parent) const
+void SICommonXMLParser::addDecorrType(
+        const std::string& name,
+        const std::string& uri,
+        const std::optional<DecorrType>& decorrType,
+        XMLElem parent) const
 {
-    //only adds it if it needs to
+    // only adds it if it needs to
     if (decorrType.has_value())
     {
         addDecorrType(name, uri, *decorrType, parent);
@@ -626,8 +690,10 @@ void SICommonXMLParser::parseDecorrType(const xml::lite::Element* decorrXML,
     parseDouble(getFirstAndOnly(decorrXML, "DecorrRate"),
                 decorrType.decorrRate);
 }
-void SICommonXMLParser::parseOptionalDecorrType(const xml::lite::Element* parent, const std::string& tag,
-    DecorrType& decorrType) const
+void SICommonXMLParser::parseOptionalDecorrType(
+        const xml::lite::Element* parent,
+        const std::string& tag,
+        DecorrType& decorrType) const
 {
     const xml::lite::Element* const decorrXML = getOptional(parent, tag);
     if (decorrXML)
@@ -635,8 +701,10 @@ void SICommonXMLParser::parseOptionalDecorrType(const xml::lite::Element* parent
         parseDecorrType(decorrXML, decorrType);
     }
 }
-void SICommonXMLParser::parseOptionalDecorrType(const xml::lite::Element* parent, const std::string& tag,
-    std::optional<DecorrType>& decorrType) const
+void SICommonXMLParser::parseOptionalDecorrType(
+        const xml::lite::Element* parent,
+        const std::string& tag,
+        std::optional<DecorrType>& decorrType) const
 {
     const xml::lite::Element* const decorrXML = getOptional(parent, tag);
     if (decorrXML)
@@ -647,7 +715,8 @@ void SICommonXMLParser::parseOptionalDecorrType(const xml::lite::Element* parent
     }
 }
 
-void SICommonXMLParser::parseLatLon(const xml::lite::Element& parent, LatLon& ll) const
+void SICommonXMLParser::parseLatLon(const xml::lite::Element& parent,
+                                    LatLon& ll) const
 {
     double lat, lon;
 
@@ -657,39 +726,42 @@ void SICommonXMLParser::parseLatLon(const xml::lite::Element& parent, LatLon& ll
     ll.setLat(lat);
     ll.setLon(lon);
 }
-void SICommonXMLParser::parseLatLon(const xml::lite::Element* parent, LatLon& ll) const
+void SICommonXMLParser::parseLatLon(const xml::lite::Element* parent,
+                                    LatLon& ll) const
 {
     parseLatLon(*parent, ll);
 }
 
 void SICommonXMLParser::parseLatLons(const xml::lite::Element* pointsXML,
                                      const std::string& pointName,
-        std::vector<LatLon>& llVec) const
+                                     std::vector<LatLon>& llVec) const
 {
-    std::vector < XMLElem > latLonsXML;
+    std::vector<XMLElem> latLonsXML;
     pointsXML->getElementsByTagName(pointName, latLonsXML);
 
     std::vector<LatLon> tmpll;
     std::vector<size_t> tmpIndxs;
     std::set<size_t> tmpSet;
-    for (std::vector<XMLElem>::iterator it = latLonsXML.begin(); it
-            != latLonsXML.end(); ++it)
+    for (std::vector<XMLElem>::iterator it = latLonsXML.begin();
+         it != latLonsXML.end();
+         ++it)
     {
         LatLon ll;
         parseLatLon(*it, ll);
 
         //! Temporarily store the indices and LatLons in vector, so
         //  validation can be performed
-        size_t index =  str::toType<size_t>((*it)->attribute("index"));
+        size_t index = str::toType<size_t>((*it)->attribute("index"));
         tmpll.push_back(ll);
         tmpIndxs.push_back(index);
 
         //! Verify there were no duplicates
         if (tmpSet.insert(index).second == false)
         {
-            throw except::Exception(Ctxt("Duplicate 'index' found in ["
-                + pointsXML->getParent()->getLocalName() + "->"
-                + pointsXML->getLocalName() + "]"));
+            throw except::Exception(
+                    Ctxt("Duplicate 'index' found in [" +
+                         pointsXML->getParent()->getLocalName() + "->" +
+                         pointsXML->getLocalName() + "]"));
         }
     }
 
@@ -698,16 +770,17 @@ void SICommonXMLParser::parseLatLons(const xml::lite::Element* pointsXML,
     {
         if (*tmpSet.begin() != 1)
         {
-            throw except::Exception(Ctxt("Index of 0 found in ["
-                    + pointsXML->getParent()->getLocalName() + "->"
-                    + pointsXML->getLocalName() + "]"));
+            throw except::Exception(
+                    Ctxt("Index of 0 found in [" +
+                         pointsXML->getParent()->getLocalName() + "->" +
+                         pointsXML->getLocalName() + "]"));
         }
         else if (*tmpSet.rbegin() != (latLonsXML.size()))
         {
-            throw except::Exception(Ctxt(
-                    "Invalid out-of-bounds 'index' in ["
-                    + pointsXML->getParent()->getLocalName() + "->"
-                    + pointsXML->getLocalName() + "]"));
+            throw except::Exception(
+                    Ctxt("Invalid out-of-bounds 'index' in [" +
+                         pointsXML->getParent()->getLocalName() + "->" +
+                         pointsXML->getLocalName() + "]"));
         }
     }
 
@@ -716,7 +789,7 @@ void SICommonXMLParser::parseLatLons(const xml::lite::Element* pointsXML,
     for (size_t ii = 0; ii < tmpIndxs.size(); ++ii)
     {
         // indices are 1-based
-        llVec[tmpIndxs[ii]-1] = tmpll[ii];
+        llVec[tmpIndxs[ii] - 1] = tmpll[ii];
     }
 }
 
@@ -727,11 +800,10 @@ void SICommonXMLParser::parseRangeAzimuth(const xml::lite::Element* parent,
     parseDouble(getFirstAndOnly(parent, "Azimuth"), value.az);
 }
 
-void SICommonXMLParser::parseRowColDouble(
-    const xml::lite::Element* parent,
-        const std::string& rowName,
-        const std::string& colName,
-        RowColDouble& rc) const
+void SICommonXMLParser::parseRowColDouble(const xml::lite::Element* parent,
+                                          const std::string& rowName,
+                                          const std::string& colName,
+                                          RowColDouble& rc) const
 {
     parseDouble(getFirstAndOnly(parent, rowName), rc.row);
     parseDouble(getFirstAndOnly(parent, colName), rc.col);
@@ -750,11 +822,10 @@ void SICommonXMLParser::parseRowColDouble(const xml::lite::Element* parent,
     parseRowColDouble(parent, "Row", "Col", rc);
 }
 
-void SICommonXMLParser::parseRowColInt(
-        const xml::lite::Element* parent,
-        const std::string& rowName,
-        const std::string& colName,
-        RowColInt& rc) const
+void SICommonXMLParser::parseRowColInt(const xml::lite::Element* parent,
+                                       const std::string& rowName,
+                                       const std::string& colName,
+                                       RowColInt& rc) const
 {
     parseInt(getFirstAndOnly(parent, rowName), rc.row);
     parseInt(getFirstAndOnly(parent, colName), rc.col);
@@ -766,35 +837,36 @@ void SICommonXMLParser::parseRowColInt(const xml::lite::Element* parent,
     parseRowColInt(parent, "Row", "Col", rc);
 }
 
-void SICommonXMLParser::parseRowColInts(
-        const xml::lite::Element* pointsXML,
-        const std::string& pointName,
-        std::vector<RowColInt>& rcVec) const
+void SICommonXMLParser::parseRowColInts(const xml::lite::Element* pointsXML,
+                                        const std::string& pointName,
+                                        std::vector<RowColInt>& rcVec) const
 {
-    std::vector < XMLElem > rowColXML;
+    std::vector<XMLElem> rowColXML;
     pointsXML->getElementsByTagName(pointName, rowColXML);
 
     std::vector<RowColInt> tmprc;
     std::vector<size_t> tmpIndxs;
     std::set<size_t> tmpSet;
-    for (std::vector<XMLElem>::iterator it = rowColXML.begin(); it
-            != rowColXML.end(); ++it)
+    for (std::vector<XMLElem>::iterator it = rowColXML.begin();
+         it != rowColXML.end();
+         ++it)
     {
         RowColInt rc;
         parseRowColInt(*it, rc);
 
         //! Temporarily store the indices and rowCol in vector, so
         //  validation can be performed
-        size_t index =  str::toType<size_t>((*it)->attribute("index"));
+        size_t index = str::toType<size_t>((*it)->attribute("index"));
         tmprc.push_back(rc);
         tmpIndxs.push_back(index);
 
         //! Verify there were no duplicates
         if (tmpSet.insert(index).second == false)
         {
-            throw except::Exception(Ctxt("Duplicate 'index' found in ["
-                + pointsXML->getParent()->getLocalName() + "->"
-                + pointsXML->getLocalName() + "]"));
+            throw except::Exception(
+                    Ctxt("Duplicate 'index' found in [" +
+                         pointsXML->getParent()->getLocalName() + "->" +
+                         pointsXML->getLocalName() + "]"));
         }
     }
 
@@ -803,16 +875,17 @@ void SICommonXMLParser::parseRowColInts(
     {
         if (*tmpSet.begin() != 1)
         {
-            throw except::Exception(Ctxt("Index of 0 found in ["
-                    + pointsXML->getParent()->getLocalName() + "->"
-                    + pointsXML->getLocalName() + "]"));
+            throw except::Exception(
+                    Ctxt("Index of 0 found in [" +
+                         pointsXML->getParent()->getLocalName() + "->" +
+                         pointsXML->getLocalName() + "]"));
         }
         else if (*tmpSet.rbegin() != (rowColXML.size()))
         {
-            throw except::Exception(Ctxt(
-                    "Invalid out-of-bounds 'index' in ["
-                    + pointsXML->getParent()->getLocalName() + "->"
-                    + pointsXML->getLocalName() + "]"));
+            throw except::Exception(
+                    Ctxt("Invalid out-of-bounds 'index' in [" +
+                         pointsXML->getParent()->getLocalName() + "->" +
+                         pointsXML->getLocalName() + "]"));
         }
     }
 
@@ -821,17 +894,19 @@ void SICommonXMLParser::parseRowColInts(
     for (size_t ii = 0; ii < tmpIndxs.size(); ++ii)
     {
         // indices are 1-based
-        rcVec[tmpIndxs[ii]-1] = tmprc[ii];
+        rcVec[tmpIndxs[ii] - 1] = tmprc[ii];
     }
 }
 
-XMLElem SICommonXMLParser::createFromElement(const six::XsElement<double>& elem, xml::lite::Element& parent) const
+XMLElem SICommonXMLParser::createFromElement(const six::XsElement<double>& elem,
+                                             xml::lite::Element& parent) const
 {
     return createDouble(elem.tag(), getSICommonURI(), elem.value(), &parent);
 }
 
-template<typename T>
-XMLElem SICommonXMLParser::newFromElement(const XsElement_minOccurs0<T>& elem, xml::lite::Element& parent) const
+template <typename T>
+XMLElem SICommonXMLParser::newFromElement(const XsElement_minOccurs0<T>& elem,
+                                          xml::lite::Element& parent) const
 {
     if (!has_value(elem))
     {
@@ -841,11 +916,10 @@ XMLElem SICommonXMLParser::newFromElement(const XsElement_minOccurs0<T>& elem, x
 }
 
 XMLElem SICommonXMLParser::convertErrorStatisticsToXML(
-    const ErrorStatistics* errorStatistics,
-    XMLElem parent) const
+        const ErrorStatistics* errorStatistics, XMLElem parent) const
 {
-    XMLElem errorStatsXML = newElement("ErrorStatistics", getDefaultURI(),
-                                       parent);
+    XMLElem errorStatsXML =
+            newElement("ErrorStatistics", getDefaultURI(), parent);
 
     //! version specific implementation
     convertCompositeSCPToXML(errorStatistics, errorStatsXML);
@@ -853,9 +927,8 @@ XMLElem SICommonXMLParser::convertErrorStatisticsToXML(
     const Components* const components = errorStatistics->components.get();
     if (components)
     {
-        XMLElem componentsXML = newElement("Components",
-                                           getSICommonURI(),
-                                           errorStatsXML);
+        XMLElem componentsXML =
+                newElement("Components", getSICommonURI(), errorStatsXML);
 
         const PosVelError* const posVelError = components->posVelError.get();
         const RadarSensor* const radarSensor = components->radarSensor.get();
@@ -864,11 +937,13 @@ XMLElem SICommonXMLParser::convertErrorStatisticsToXML(
 
         if (posVelError)
         {
-            XMLElem posVelErrXML = newElement("PosVelErr",
-                                              getSICommonURI(),
-                                              componentsXML);
+            XMLElem posVelErrXML =
+                    newElement("PosVelErr", getSICommonURI(), componentsXML);
 
-            createSixString("Frame", getSICommonURI(), posVelError->frame, posVelErrXML);
+            createSixString("Frame",
+                            getSICommonURI(),
+                            posVelError->frame,
+                            posVelErrXML);
             createDouble("P1", getSICommonURI(), posVelError->p1, posVelErrXML);
             createDouble("P2", getSICommonURI(), posVelError->p2, posVelErrXML);
             createDouble("P3", getSICommonURI(), posVelError->p3, posVelErrXML);
@@ -879,9 +954,8 @@ XMLElem SICommonXMLParser::convertErrorStatisticsToXML(
             const CorrCoefs* const coefs = posVelError->corrCoefs.get();
             if (coefs)
             {
-                XMLElem coefsXML = newElement("CorrCoefs",
-                                              getSICommonURI(),
-                                              posVelErrXML);
+                XMLElem coefsXML =
+                        newElement("CorrCoefs", getSICommonURI(), posVelErrXML);
 
                 createDouble("P1P2", getSICommonURI(), coefs->p1p2, coefsXML);
                 createDouble("P1P3", getSICommonURI(), coefs->p1p3, coefsXML);
@@ -900,73 +974,101 @@ XMLElem SICommonXMLParser::convertErrorStatisticsToXML(
                 createDouble("V2V3", getSICommonURI(), coefs->v2v3, coefsXML);
             }
 
-            addDecorrType("PositionDecorr", getSICommonURI(),
-                          posVelError->positionDecorr, posVelErrXML);
+            addDecorrType("PositionDecorr",
+                          getSICommonURI(),
+                          posVelError->positionDecorr,
+                          posVelErrXML);
         }
         if (radarSensor)
         {
-            XMLElem radarSensorXML = newElement("RadarSensor", getSICommonURI(),
-                                                componentsXML);
+            XMLElem radarSensorXML =
+                    newElement("RadarSensor", getSICommonURI(), componentsXML);
 
-            createDouble("RangeBias", getSICommonURI(), radarSensor->rangeBias,
+            createDouble("RangeBias",
+                         getSICommonURI(),
+                         radarSensor->rangeBias,
                          radarSensorXML);
 
-            createOptionalDouble("ClockFreqSF", getSICommonURI(),
-                            radarSensor->clockFreqSF, radarSensorXML);
-            if(!Init::isUndefined(radarSensor->transmitFreqSF))
+            createOptionalDouble("ClockFreqSF",
+                                 getSICommonURI(),
+                                 radarSensor->clockFreqSF,
+                                 radarSensorXML);
+            if (!Init::isUndefined(radarSensor->transmitFreqSF))
             {
-                createOptionalDouble("TransmitFreqSF", getSICommonURI(),
-                                radarSensor->transmitFreqSF, radarSensorXML);
+                createOptionalDouble("TransmitFreqSF",
+                                     getSICommonURI(),
+                                     radarSensor->transmitFreqSF,
+                                     radarSensorXML);
             }
 
-            addDecorrType("RangeBiasDecorr", getSICommonURI(),
-                          radarSensor->rangeBiasDecorr, radarSensorXML);
+            addDecorrType("RangeBiasDecorr",
+                          getSICommonURI(),
+                          radarSensor->rangeBiasDecorr,
+                          radarSensorXML);
         }
         if (tropoError)
         {
-            XMLElem tropoErrXML = newElement("TropoError",
-                                             getSICommonURI(),
-                                             componentsXML);
+            XMLElem tropoErrXML =
+                    newElement("TropoError", getSICommonURI(), componentsXML);
 
-            createOptionalDouble("TropoRangeVertical", getSICommonURI(),
-                            tropoError->tropoRangeVertical, tropoErrXML);
-            createOptionalDouble("TropoRangeSlant", getSICommonURI(),
-                            tropoError->tropoRangeSlant, tropoErrXML);
+            createOptionalDouble("TropoRangeVertical",
+                                 getSICommonURI(),
+                                 tropoError->tropoRangeVertical,
+                                 tropoErrXML);
+            createOptionalDouble("TropoRangeSlant",
+                                 getSICommonURI(),
+                                 tropoError->tropoRangeSlant,
+                                 tropoErrXML);
 
-            addDecorrType("TropoRangeDecorr", getSICommonURI(),
-                          tropoError->tropoRangeDecorr, tropoErrXML);
+            addDecorrType("TropoRangeDecorr",
+                          getSICommonURI(),
+                          tropoError->tropoRangeDecorr,
+                          tropoErrXML);
         }
         if (ionoError)
         {
-            XMLElem ionoErrXML = newElement("IonoError",
-                                            getSICommonURI(),
-                                            componentsXML);
+            XMLElem ionoErrXML =
+                    newElement("IonoError", getSICommonURI(), componentsXML);
 
-            createOptionalDouble("IonoRangeVertical", getSICommonURI(),
-                            ionoError->ionoRangeVertical, ionoErrXML);
-            createOptionalDouble("IonoRangeRateVertical", getSICommonURI(),
-                            ionoError->ionoRangeRateVertical, ionoErrXML);
+            createOptionalDouble("IonoRangeVertical",
+                                 getSICommonURI(),
+                                 ionoError->ionoRangeVertical,
+                                 ionoErrXML);
+            createOptionalDouble("IonoRangeRateVertical",
+                                 getSICommonURI(),
+                                 ionoError->ionoRangeRateVertical,
+                                 ionoErrXML);
 
-            createDouble("IonoRgRgRateCC", getSICommonURI(),
-                         ionoError->ionoRgRgRateCC, ionoErrXML);
+            createDouble("IonoRgRgRateCC",
+                         getSICommonURI(),
+                         ionoError->ionoRgRgRateCC,
+                         ionoErrXML);
 
-            addDecorrType("IonoRangeVertDecorr", getSICommonURI(),
-                          ionoError->ionoRangeVertDecorr, ionoErrXML);
+            addDecorrType("IonoRangeVertDecorr",
+                          getSICommonURI(),
+                          ionoError->ionoRangeVertDecorr,
+                          ionoErrXML);
         }
     }
 
-    if (auto unmodeledXML = newFromElement(errorStatistics->unmodeled, *errorStatsXML))
+    if (auto unmodeledXML =
+                newFromElement(errorStatistics->unmodeled, *errorStatsXML))
     {
         const auto& unmodeled = value(errorStatistics->unmodeled);
         createFromElement(unmodeled.Xrow, *unmodeledXML);
         createFromElement(unmodeled.Ycol, *unmodeledXML);
         createFromElement(unmodeled.XrowYcol, *unmodeledXML);
 
-        if (auto unmodeledDecorrXML = newFromElement(unmodeled.unmodeledDecorr, *unmodeledXML))
+        if (auto unmodeledDecorrXML =
+                    newFromElement(unmodeled.unmodeledDecorr, *unmodeledXML))
         {
-            const auto new_Xrow_Ycol = [&](const XsElement<Unmodeled::Decorr::Xrow_Ycol>& elem)
+            const auto new_Xrow_Ycol =
+                    [&](const XsElement<Unmodeled::Decorr::Xrow_Ycol>& elem)
             {
-                if (auto pXML = newElement(&elem, elem.tag(), getSICommonURI(), unmodeledDecorrXML))
+                if (auto pXML = newElement(&elem,
+                                           elem.tag(),
+                                           getSICommonURI(),
+                                           unmodeledDecorrXML))
                 {
                     createFromElement(value(elem).corrCoefZero, *pXML);
                     createFromElement(value(elem).decorrRate, *pXML);
@@ -981,18 +1083,20 @@ XMLElem SICommonXMLParser::convertErrorStatisticsToXML(
 
     if (!errorStatistics->additionalParameters.empty())
     {
-        XMLElem paramsXML = newElement("AdditionalParms",
-                                       getSICommonURI(),
-                                       errorStatsXML);
-        addParameters("Parameter", getSICommonURI(),
-                      errorStatistics->additionalParameters, paramsXML);
+        XMLElem paramsXML =
+                newElement("AdditionalParms", getSICommonURI(), errorStatsXML);
+        addParameters("Parameter",
+                      getSICommonURI(),
+                      errorStatistics->additionalParameters,
+                      paramsXML);
     }
 
     return errorStatsXML;
 }
 
-inline static XMLElem getOptionalUnmodeledDecorr(const xml::lite::Element& parent,
-    XsElement_minOccurs0<Unmodeled::Decorr>& unmodeledDecorr)
+inline static XMLElem getOptionalUnmodeledDecorr(
+        const xml::lite::Element& parent,
+        XsElement_minOccurs0<Unmodeled::Decorr>& unmodeledDecorr)
 {
     auto retval = XmlLite::getOptional(parent, unmodeledDecorr.tag());
     if (retval != nullptr)
@@ -1007,7 +1111,7 @@ void SICommonXMLParser::parseErrorStatisticsFromXML(
         ErrorStatistics& errorStatistics) const
 {
     XMLElem tmpElem = nullptr;
-    //optional
+    // optional
 
     //! version specific CompositeSCP parsing
     parseCompositeSCPFromXML(&errorStatsXML, &errorStatistics);
@@ -1020,39 +1124,41 @@ void SICommonXMLParser::parseErrorStatisticsFromXML(
     tmpElem = getOptional(errorStatsXML, "Components");
     if (tmpElem)
     {
-        //optional
+        // optional
         errorStatistics.components.reset(new Components());
 
         posVelErrXML = getOptional(tmpElem, "PosVelErr");
         if (posVelErrXML)
         {
-            //optional
+            // optional
             errorStatistics.components->posVelError.reset(new PosVelError());
         }
 
         radarSensorXML = getOptional(tmpElem, "RadarSensor");
         if (radarSensorXML)
         {
-            //optional
+            // optional
             errorStatistics.components->radarSensor.reset(new RadarSensor());
         }
 
         tropoErrorXML = getOptional(tmpElem, "TropoError");
         if (tropoErrorXML)
         {
-            //optional
+            // optional
             errorStatistics.components->tropoError.reset(new TropoError());
         }
 
         ionoErrorXML = getOptional(tmpElem, "IonoError");
         if (ionoErrorXML)
         {
-            //optional
+            // optional
             errorStatistics.components->ionoError.reset(new IonoError());
         }
     }
 
-    if (const auto pUnmodeledXML = getOptional_reset(errorStatsXML, (errorStatistics).unmodeled)) // SIDD 3.0
+    if (const auto pUnmodeledXML =
+                getOptional_reset(errorStatsXML,
+                                  (errorStatistics).unmodeled))  // SIDD 3.0
     {
         auto&& unmodeledXML = *pUnmodeledXML;
 
@@ -1060,14 +1166,19 @@ void SICommonXMLParser::parseErrorStatisticsFromXML(
         six::getFirstAndOnly(parser(), unmodeledXML, unmodeled.Xrow);
         six::getFirstAndOnly(parser(), unmodeledXML, unmodeled.Ycol);
         six::getFirstAndOnly(parser(), unmodeledXML, unmodeled.XrowYcol);
-       
-        if (auto pUnmodeledDecorrXML = getOptionalUnmodeledDecorr(unmodeledXML, unmodeled.unmodeledDecorr))
+
+        if (auto pUnmodeledDecorrXML =
+                    getOptionalUnmodeledDecorr(unmodeledXML,
+                                               unmodeled.unmodeledDecorr))
         {
-            const auto getFirstAndOnly_Xrow_Ycol = [&](XsElement<Unmodeled::Decorr::Xrow_Ycol>& rc)
+            const auto getFirstAndOnly_Xrow_Ycol =
+                    [&](XsElement<Unmodeled::Decorr::Xrow_Ycol>& rc)
             {
                 if (auto pXML = getFirstAndOnly(pUnmodeledDecorrXML, rc.tag()))
                 {
-                    six::getFirstAndOnly(parser(), *pXML, value(rc).corrCoefZero);
+                    six::getFirstAndOnly(parser(),
+                                         *pXML,
+                                         value(rc).corrCoefZero);
                     six::getFirstAndOnly(parser(), *pXML, value(rc).decorrRate);
                 }
             };
@@ -1080,9 +1191,8 @@ void SICommonXMLParser::parseErrorStatisticsFromXML(
 
     if (posVelErrXML != nullptr)
     {
-        errorStatistics.components->posVelError->frame
-                = six::toType<FrameType>(getFirstAndOnly(
-                        posVelErrXML, "Frame")->getCharacterData());
+        errorStatistics.components->posVelError->frame = six::toType<FrameType>(
+                getFirstAndOnly(posVelErrXML, "Frame")->getCharacterData());
         parseDouble(getFirstAndOnly(posVelErrXML, "P1"),
                     errorStatistics.components->posVelError->p1);
         parseDouble(getFirstAndOnly(posVelErrXML, "P2"),
@@ -1099,43 +1209,60 @@ void SICommonXMLParser::parseErrorStatisticsFromXML(
         tmpElem = getOptional(posVelErrXML, "CorrCoefs");
         if (tmpElem)
         {
-            //optional
+            // optional
             errorStatistics.components->posVelError->corrCoefs.reset(
-                new CorrCoefs());
-            parseDouble(getFirstAndOnly(tmpElem, "P1P2"),
-                        errorStatistics.components->posVelError->corrCoefs->p1p2);
-            parseDouble(getFirstAndOnly(tmpElem, "P1P3"),
-                        errorStatistics.components->posVelError->corrCoefs->p1p3);
-            parseDouble(getFirstAndOnly(tmpElem, "P1V1"),
-                        errorStatistics.components->posVelError->corrCoefs->p1v1);
-            parseDouble(getFirstAndOnly(tmpElem, "P1V2"),
-                        errorStatistics.components->posVelError->corrCoefs->p1v2);
-            parseDouble(getFirstAndOnly(tmpElem, "P1V3"),
-                        errorStatistics.components->posVelError->corrCoefs->p1v3);
-            parseDouble(getFirstAndOnly(tmpElem, "P2P3"),
-                        errorStatistics.components->posVelError->corrCoefs->p2p3);
-            parseDouble(getFirstAndOnly(tmpElem, "P2V1"),
-                        errorStatistics.components->posVelError->corrCoefs->p2v1);
-            parseDouble(getFirstAndOnly(tmpElem, "P2V2"),
-                        errorStatistics.components->posVelError->corrCoefs->p2v2);
-            parseDouble(getFirstAndOnly(tmpElem, "P2V3"),
-                        errorStatistics.components->posVelError->corrCoefs->p2v3);
-            parseDouble(getFirstAndOnly(tmpElem, "P3V1"),
-                        errorStatistics.components->posVelError->corrCoefs->p3v1);
-            parseDouble(getFirstAndOnly(tmpElem, "P3V2"),
-                        errorStatistics.components->posVelError->corrCoefs->p3v2);
-            parseDouble(getFirstAndOnly(tmpElem, "P3V3"),
-                        errorStatistics.components->posVelError->corrCoefs->p3v3);
-            parseDouble(getFirstAndOnly(tmpElem, "V1V2"),
-                        errorStatistics.components->posVelError->corrCoefs->v1v2);
-            parseDouble(getFirstAndOnly(tmpElem, "V1V3"),
-                        errorStatistics.components->posVelError->corrCoefs->v1v3);
-            parseDouble(getFirstAndOnly(tmpElem, "V2V3"),
-                        errorStatistics.components->posVelError->corrCoefs->v2v3);
+                    new CorrCoefs());
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P1P2"),
+                    errorStatistics.components->posVelError->corrCoefs->p1p2);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P1P3"),
+                    errorStatistics.components->posVelError->corrCoefs->p1p3);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P1V1"),
+                    errorStatistics.components->posVelError->corrCoefs->p1v1);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P1V2"),
+                    errorStatistics.components->posVelError->corrCoefs->p1v2);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P1V3"),
+                    errorStatistics.components->posVelError->corrCoefs->p1v3);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P2P3"),
+                    errorStatistics.components->posVelError->corrCoefs->p2p3);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P2V1"),
+                    errorStatistics.components->posVelError->corrCoefs->p2v1);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P2V2"),
+                    errorStatistics.components->posVelError->corrCoefs->p2v2);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P2V3"),
+                    errorStatistics.components->posVelError->corrCoefs->p2v3);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P3V1"),
+                    errorStatistics.components->posVelError->corrCoefs->p3v1);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P3V2"),
+                    errorStatistics.components->posVelError->corrCoefs->p3v2);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "P3V3"),
+                    errorStatistics.components->posVelError->corrCoefs->p3v3);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "V1V2"),
+                    errorStatistics.components->posVelError->corrCoefs->v1v2);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "V1V3"),
+                    errorStatistics.components->posVelError->corrCoefs->v1v3);
+            parseDouble(
+                    getFirstAndOnly(tmpElem, "V2V3"),
+                    errorStatistics.components->posVelError->corrCoefs->v2v3);
         }
 
-        parseOptionalDecorrType(posVelErrXML, "PositionDecorr",
-            errorStatistics.components->posVelError->positionDecorr);
+        parseOptionalDecorrType(
+                posVelErrXML,
+                "PositionDecorr",
+                errorStatistics.components->posVelError->positionDecorr);
     }
 
     if (radarSensorXML != nullptr)
@@ -1143,58 +1270,78 @@ void SICommonXMLParser::parseErrorStatisticsFromXML(
         parseDouble(getFirstAndOnly(radarSensorXML, "RangeBias"),
                     errorStatistics.components->radarSensor->rangeBias);
 
-        parseOptionalDouble(radarSensorXML, "ClockFreqSF",
-            errorStatistics.components->radarSensor->clockFreqSF);
+        parseOptionalDouble(
+                radarSensorXML,
+                "ClockFreqSF",
+                errorStatistics.components->radarSensor->clockFreqSF);
 
-        parseOptionalDouble(radarSensorXML, "TransmitFreqSF",
-            errorStatistics.components->radarSensor->transmitFreqSF);
+        parseOptionalDouble(
+                radarSensorXML,
+                "TransmitFreqSF",
+                errorStatistics.components->radarSensor->transmitFreqSF);
 
-        parseOptionalDecorrType(radarSensorXML, "RangeBiasDecorr",
-            errorStatistics.components->radarSensor->rangeBiasDecorr);
+        parseOptionalDecorrType(
+                radarSensorXML,
+                "RangeBiasDecorr",
+                errorStatistics.components->radarSensor->rangeBiasDecorr);
     }
 
     if (tropoErrorXML != nullptr)
     {
-        parseOptionalDouble(tropoErrorXML, "TropoRangeVertical",
-            errorStatistics.components->tropoError ->tropoRangeVertical);
-        parseOptionalDouble(tropoErrorXML, "TropoRangeSlant",
-            errorStatistics.components->tropoError->tropoRangeSlant);
+        parseOptionalDouble(
+                tropoErrorXML,
+                "TropoRangeVertical",
+                errorStatistics.components->tropoError->tropoRangeVertical);
+        parseOptionalDouble(
+                tropoErrorXML,
+                "TropoRangeSlant",
+                errorStatistics.components->tropoError->tropoRangeSlant);
 
-        parseOptionalDecorrType(tropoErrorXML, "TropoRangeDecorr",
-            errorStatistics.components->tropoError->tropoRangeDecorr);
+        parseOptionalDecorrType(
+                tropoErrorXML,
+                "TropoRangeDecorr",
+                errorStatistics.components->tropoError->tropoRangeDecorr);
     }
 
     if (ionoErrorXML != nullptr)
     {
-        parseOptionalDouble(ionoErrorXML, "IonoRangeVertical",
-            errorStatistics.components->ionoError->ionoRangeVertical);
-        parseOptionalDouble(ionoErrorXML, "IonoRangeRateVertical",
-            errorStatistics.components->ionoError ->ionoRangeRateVertical);
+        parseOptionalDouble(
+                ionoErrorXML,
+                "IonoRangeVertical",
+                errorStatistics.components->ionoError->ionoRangeVertical);
+        parseOptionalDouble(
+                ionoErrorXML,
+                "IonoRangeRateVertical",
+                errorStatistics.components->ionoError->ionoRangeRateVertical);
 
         parseDouble(getFirstAndOnly(ionoErrorXML, "IonoRgRgRateCC"),
                     errorStatistics.components->ionoError->ionoRgRgRateCC);
 
-        parseOptionalDecorrType(ionoErrorXML, "IonoRangeVertDecorr",
-            errorStatistics.components->ionoError->ionoRangeVertDecorr);
+        parseOptionalDecorrType(
+                ionoErrorXML,
+                "IonoRangeVertDecorr",
+                errorStatistics.components->ionoError->ionoRangeVertDecorr);
     }
 
     tmpElem = getOptional(errorStatsXML, "AdditionalParms");
     if (tmpElem)
     {
-        //optional
-        parseParameters(tmpElem, "Parameter", errorStatistics.additionalParameters);
+        // optional
+        parseParameters(tmpElem,
+                        "Parameter",
+                        errorStatistics.additionalParameters);
     }
 }
 void SICommonXMLParser::parseErrorStatisticsFromXML(
-    const xml::lite::Element* errorStatsXML,
-    ErrorStatistics* errorStatistics) const
+        const xml::lite::Element* errorStatsXML,
+        ErrorStatistics* errorStatistics) const
 {
     parseErrorStatisticsFromXML(*errorStatsXML, *errorStatistics);
 }
 
 void SICommonXMLParser::parseFootprint(const xml::lite::Element& footprint,
                                        const std::string& cornerName,
-                                       LatLonCorners &corners) const
+                                       LatLonCorners& corners) const
 {
     std::vector<XMLElem> vertices;
     footprint.getElementsByTagName(cornerName, vertices);
@@ -1207,7 +1354,7 @@ void SICommonXMLParser::parseFootprint(const xml::lite::Element& footprint,
         // Check the index attr to know which corner it is
         // This is 1-based
         const size_t idx =
-            str::toType<size_t>(vertex->getAttributes().getValue("index"));
+                str::toType<size_t>(vertex->getAttributes().getValue("index"));
         indices.insert(idx);
 
         parseLatLon(vertices[ii], corners.getCorner(idx - 1));
@@ -1220,8 +1367,8 @@ void SICommonXMLParser::parseFootprint(const xml::lite::Element& footprint,
     }
 }
 void SICommonXMLParser::parseFootprint(const xml::lite::Element* footprint,
-    const std::string& cornerName,
-    LatLonCorners& corners) const
+                                       const std::string& cornerName,
+                                       LatLonCorners& corners) const
 {
     parseFootprint(*footprint, cornerName, corners);
 }
@@ -1241,7 +1388,7 @@ void SICommonXMLParser::parseFootprint(const xml::lite::Element* footprint,
         // Check the index attr to know which corner it is
         // This is 1-based
         const size_t idx =
-            str::toType<size_t>(vertex->getAttributes().getValue("index"));
+                str::toType<size_t>(vertex->getAttributes().getValue("index"));
         indices.insert(idx);
 
         parseLatLonAlt(vertices[ii], corners.getCorner(idx - 1));
@@ -1255,8 +1402,8 @@ void SICommonXMLParser::parseFootprint(const xml::lite::Element* footprint,
 }
 
 void SICommonXMLParser::parseCollectionInformationFromXML(
-    const xml::lite::Element* collectionInfoXML,
-    CollectionInformation *collInfo) const
+        const xml::lite::Element* collectionInfoXML,
+        CollectionInformation* collInfo) const
 {
     assert(collectionInfoXML != nullptr);
 
@@ -1278,15 +1425,14 @@ void SICommonXMLParser::parseCollectionInformationFromXML(
     element = getOptional(collectionInfoXML, "CollectType");
     if (element)
     {
-        collInfo->collectType
-                = six::toType<six::CollectType>(element->getCharacterData());
+        collInfo->collectType =
+                six::toType<six::CollectType>(element->getCharacterData());
     }
 
     XMLElem radarModeXML = getFirstAndOnly(collectionInfoXML, "RadarMode");
 
-    collInfo->radarMode
-            = six::toType<RadarModeType>(getFirstAndOnly(radarModeXML,
-                                         "ModeType")->getCharacterData());
+    collInfo->radarMode = six::toType<RadarModeType>(
+            getFirstAndOnly(radarModeXML, "ModeType")->getCharacterData());
 
     element = getOptional(radarModeXML, "ModeID");
     if (element)
@@ -1294,7 +1440,8 @@ void SICommonXMLParser::parseCollectionInformationFromXML(
         parseString(element, collInfo->radarModeID);
     }
 
-    const XMLElem classificationXML = getFirstAndOnly(collectionInfoXML, "Classification");
+    const XMLElem classificationXML =
+            getFirstAndOnly(collectionInfoXML, "Classification");
     // For "new" XML processing (storing the encoding) we'll have a UTF-8 value.
     // This is important as it could be French "NON CLASSIFI� / UNCLASSIFIED"
     std::u8string classification_u8;
@@ -1309,25 +1456,25 @@ void SICommonXMLParser::parseCollectionInformationFromXML(
         collInfo->setClassificationLevel(classification);
     }
 
-    std::vector < XMLElem > countryCodeXML;
+    std::vector<XMLElem> countryCodeXML;
     collectionInfoXML->getElementsByTagName("CountryCode", countryCodeXML);
 
-    //optional
-    for (std::vector<XMLElem>::const_iterator it = countryCodeXML.begin(); it
-            != countryCodeXML.end(); ++it)
+    // optional
+    for (std::vector<XMLElem>::const_iterator it = countryCodeXML.begin();
+         it != countryCodeXML.end();
+         ++it)
     {
         std::string cc;
         parseString(*it, cc);
         collInfo->countryCodes.push_back(cc);
     }
 
-    //optional
+    // optional
     parseParameters(collectionInfoXML, "Parameter", collInfo->parameters);
 }
 
 XMLElem SICommonXMLParser::convertCollectionInformationToXML(
-    const CollectionInformation *collInfo,
-    XMLElem parent) const
+        const CollectionInformation* collInfo, XMLElem parent) const
 {
     assert(collInfo != nullptr);
 
@@ -1338,13 +1485,18 @@ XMLElem SICommonXMLParser::convertCollectionInformationToXML(
     createString("CollectorName", si, collInfo->collectorName, collInfoXML);
     if (!collInfo->illuminatorName.empty())
     {
-        createString("IlluminatorName", si, collInfo->illuminatorName,
+        createString("IlluminatorName",
+                     si,
+                     collInfo->illuminatorName,
                      collInfoXML);
     }
     createString("CoreName", si, collInfo->coreName, collInfoXML);
     if (!Init::isUndefined(collInfo->collectType))
     {
-        createString("CollectType", si, collInfo->collectType.toString(), collInfoXML);
+        createString("CollectType",
+                     si,
+                     collInfo->collectType.toString(),
+                     collInfoXML);
     }
 
     XMLElem radarModeXML = newElement("RadarMode", si, collInfoXML);
@@ -1354,12 +1506,15 @@ XMLElem SICommonXMLParser::convertCollectionInformationToXML(
         createString("ModeID", si, collInfo->radarModeID, radarModeXML);
     }
 
-    createString("Classification", si, collInfo->getClassificationLevel(),
+    createString("Classification",
+                 si,
+                 collInfo->getClassificationLevel(),
                  collInfoXML);
 
     for (std::vector<std::string>::const_iterator it =
-            collInfo->countryCodes.begin(); it != collInfo->countryCodes.end();
-            ++it)
+                 collInfo->countryCodes.begin();
+         it != collInfo->countryCodes.end();
+         ++it)
     {
         createString("CountryCode", si, *it, collInfoXML);
     }
@@ -1367,4 +1522,3 @@ XMLElem SICommonXMLParser::convertCollectionInformationToXML(
     return collInfoXML;
 }
 }
-

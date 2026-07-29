@@ -24,13 +24,13 @@
 #ifndef __SIX_GEO_INFO_H__
 #define __SIX_GEO_INFO_H__
 
+#include <mem/ScopedCopyablePtr.h>
+#include <six/Exports.h>
+#include <six/ParameterCollection.h>
+#include <six/Types.h>
+
 #include <string>
 #include <vector>
-
-#include <six/Types.h>
-#include <six/ParameterCollection.h>
-#include <six/Exports.h>
-#include <mem/ScopedCopyablePtr.h>
 
 namespace six
 {
@@ -57,7 +57,7 @@ struct SIX_SIX_API GeoInfo
     std::string name;
 
     //! (Optional) sub-nodes
-    std::vector<mem::ScopedCopyablePtr<GeoInfo> > geoInfos;
+    std::vector<mem::ScopedCopyablePtr<GeoInfo>> geoInfos;
 
     //! (Optional) description of geographic feature
     ParameterCollection desc;
@@ -72,7 +72,7 @@ struct SIX_SIX_API GeoInfo
     bool operator==(const GeoInfo& rhs) const
     {
         return (name == rhs.name && geoInfos == rhs.geoInfos &&
-            desc == rhs.desc && geometryLatLon == rhs.geometryLatLon);
+                desc == rhs.desc && geometryLatLon == rhs.geometryLatLon);
     }
     bool operator!=(const GeoInfo& rhs) const
     {
@@ -81,7 +81,7 @@ struct SIX_SIX_API GeoInfo
 };
 
 //! Ostream operator
-SIX_SIX_API std::ostream& operator<< (std::ostream& os, const GeoInfo& g);
+SIX_SIX_API std::ostream& operator<<(std::ostream& os, const GeoInfo& g);
 }
 
 #endif
